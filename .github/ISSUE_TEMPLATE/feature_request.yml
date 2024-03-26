@@ -1,0 +1,29 @@
+name: Feature Request
+title: "[FR]: "
+description: Suggest an idea for this project
+labels: ["enhancement", "needs review"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for finding the time to propose a new feature!
+        We really appreciate that.
+
+  - type: textarea
+    attributes:
+      label: Please describe the problem
+      description: A clear and concise description of what the problem is. [...]
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Please describe the solution you'd like
+      description: A clear and concise description of what you want to happen. [...]
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Additional context
+      description: Add any other context. [...]

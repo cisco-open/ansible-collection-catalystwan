@@ -1,0 +1,50 @@
+# Copyright 2024 Cisco Systems, Inc. and its affiliates
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+---
+
+# This should not debug passwords and sensitive data
+- name: Assert that required variables are provided
+  ansible.builtin.assert:
+    that:
+      - required_var
+      - required_var is defined
+      - required_var != None
+      - required_var != "None"
+      - required_var != ""
+      - required_var | length > 0
+    fail_msg: "Selected role is missing following variables: {{ required_var }}"
+    quiet: true
+  loop:
+    - "{{ vmanage_instances }}"
+    - "{{ vbond_instances }}"
+    - "{{ organization_name }}"
+    - "{{ vbond_instances[0].transport_public_ip }}"
+  loop_control:
+    loop_var: required_var
+
+# Has to be enhanced to check one field at once
+- name: Sensitive data assertion `pnp_username` and `pnp_password`
+  ansible.builtin.assert:
+    that:
+      - required_var
+      - required_var is defined
+      - required_var != None
+      - required_var != "None"
+      - required_var != ""
+      - required_var | length > 0
+    fail_msg: "Required variables: `pnp_username` and `pnp_password` variables are missing"
+    quiet: true
+  loop:
+    - "{{ pnp_username }}"
+    - "{{ pnp_password }}"
+  loop_control:
+    loop_var: required_var
+  no_log: true
+  register: pnp_vars
+  ignore_errors: true  # ignore because we cannot log any message withing this task, instead we fail in next one
+
+- name: Assert that required `pnp_username` and `pnp_password` variables are provided
+  ansible.builtin.fail:
+    msg: "Required variables: `pnp_username` and `pnp_password` variables are missing"
+  when: pnp_vars is defined and (pnp_vars.failed|default(False))

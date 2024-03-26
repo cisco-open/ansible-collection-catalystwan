@@ -1,0 +1,203 @@
+# Copyright 2024 Cisco Systems, Inc. and its affiliates
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+---
+
+# Helper playbooks to test modules and flows while developing them
+# It assumes that controllers are <20.13 version and Edge are <17.13 version
+# This playbook should be reused for CI/CD integration. For this, only vars should be adjusted.
+
+
+# Tested operations:
+
+# --- Local image upload --- #
+# Upload viptela-20.13.1-x86_64.tar.gz
+
+# --- vSmart upgrade operations --- #
+# 1. Install viptela-20.13.1-x86_64.tar.gz - with reboot
+# 2. Verify that activated version appears as current version and old version in available files
+# 3. Set default software operation
+# 4. Verify that default version set correctly
+# 5. Try to downgrade by activating lower version
+# 6. Verify that installed version appears as current version
+
+# --- Post test operations - vSmart upgrade to higher version --- #
+# Activate software 20.13.1 on all vSmart devices
+
+
+- name: Testing playbook to verify cisco.catalystwan.software_repository module operations
+  hosts: localhost
+  gather_facts: false
+  vars_files:
+    - configuration_file_dev_vars.yml
+  vars:
+    viptela_software_path: null  # "/example-path/viptela-20.13.1-x86_64.tar.gz"
+    higher_software_version: "20.13.1"
+    lower_software_version: "20.12.2"
+  tasks:
+    - name: "Provide software images for testing - local"
+      block:
+        # --- Local image upload --- #
+        - name: "Get provdied paths stat information"
+          ansible.builtin.stat:
+            path: "{{ item }}"
+          register: stat_result
+          loop:
+            - "{{ viptela_software_path }}"
+
+        - name: "Check if all paths exist"
+          ansible.builtin.assert:
+            that:
+              - item.stat.exists
+          loop: "{{ stat_result.results }}"
+
+        - name: "Upload images to Manager from local system: {{ viptela_software_path }}"
+          cisco.catalystwan.software_repository:
+            software:
+              image_local_path: "{{ viptela_software_path }}"
+            manager_authentication:
+              url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+              username: "{{ (vmanage_instances | first).admin_username }}"
+              password: "{{ (vmanage_instances | first).admin_password }}"
+
+
+    # --- vSmart upgrade operations --- #
+
+
+    - name: "[TEST] 1 Install software operation on vSmart, image_version: {{ higher_software_version }}"
+      cisco.catalystwan.software_upgrade:
+        state: "present"  # present with reboot: true -> ACTIVATE in vManage
+        reboot: true
+        image_version: "{{ higher_software_version }}"
+        # image_path: "{{ viptela_software_path }}" # FIXME test also with path
+        wait_for_completed: true
+        wait_timeout_seconds: 3600
+        filters:
+          personality: "vsmart"
+        manager_authentication:
+          url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+          username: "{{ (vmanage_instances | first).admin_username }}"
+          password: "{{ (vmanage_instances | first).admin_password }}"
+
+    - name: "Get details of software installed on control components - filter vSmart"
+      cisco.catalystwan.software_upgrade_info:
+        device_type: "controller"
+        filters:
+          personality: "vsmart"
+        manager_authentication:
+          url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+          username: "{{ (vmanage_instances | first).admin_username }}"
+          password: "{{ (vmanage_instances | first).admin_password }}"
+      register: software_info
+
+    - name: "[TEST] 2. Verify that activated version appears as current version and old version in available files"
+      ansible.builtin.assert:
+        that:
+          - "'{{ higher_software_version }}' in {{ item }}.current_partition"
+          - "not '{{ higher_software_version }}' in {{ item }}.available_versions"
+          - "not '{{ higher_software_version }}' in {{ item }}.default_version"
+          - "'{{ lower_software_version }}' in {{ item }}.available_versions"
+        fail_msg: "{{ item | to_nice_yaml }}"
+        success_msg: "{{ item | to_nice_yaml }}"
+      loop: "{{ software_info.installed_devices }}"
+
+
+    - name: "[TEST] 3. Set default software operation on vSmart, version: {{ higher_software_version }}"
+      cisco.catalystwan.software_upgrade:
+        state: "default"
+        image_version: "current"
+        filters:
+          personality: "vsmart"
+        manager_authentication:
+          url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+          username: "{{ (vmanage_instances | first).admin_username }}"
+          password: "{{ (vmanage_instances | first).admin_password }}"
+
+    - name: "Get details of software installed on control components - filter vSmart"
+      cisco.catalystwan.software_upgrade_info:
+        device_type: "controller"
+        filters:
+          personality: "vsmart"
+        manager_authentication:
+          url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+          username: "{{ (vmanage_instances | first).admin_username }}"
+          password: "{{ (vmanage_instances | first).admin_password }}"
+      register: software_info
+
+    - name: "[TEST] 4. Verify that default version set correctly as version: {{ higher_software_version }}"
+      ansible.builtin.assert:
+        that:
+          - "'{{ higher_software_version }}' in {{ item }}.default_version"
+        fail_msg: "{{ item | to_nice_yaml }}"
+        success_msg: "{{ item | to_nice_yaml }}"
+      loop: "{{ software_info.installed_devices }}"
+
+    - name: "[TEST] 5. Try to downgrade by activating lower version"
+      cisco.catalystwan.software_upgrade:
+        state: "active"
+        image_version: "{{ lower_software_version }}"
+        filters:
+          personality: "vsmart"
+        manager_authentication:
+          url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+          username: "{{ (vmanage_instances | first).admin_username }}"
+          password: "{{ (vmanage_instances | first).admin_password }}"
+
+    - name: "Get details of software installed on control components - filter vSmart"
+      cisco.catalystwan.software_upgrade_info:
+        device_type: "controller"
+        filters:
+          personality: "vsmart"
+        manager_authentication:
+          url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+          username: "{{ (vmanage_instances | first).admin_username }}"
+          password: "{{ (vmanage_instances | first).admin_password }}"
+      register: software_info
+
+    - name: "[TEST] 6. Verify that installed version appears as current version: {{ lower_software_version }}"
+      ansible.builtin.assert:
+        that:
+          - "'{{ lower_software_version }}' in {{ item }}.current_partition"
+        fail_msg: "software_info: {{ software_info }}"
+        success_msg: "software_info: {{ software_info }}"
+      loop: "{{ software_info.installed_devices }}"
+
+
+    # --- Post test operations - vSmart upgrade to higher version --- #
+
+
+    - name: "Prepare for cEdge - Install software operation on vSmart, version: {{ higher_software_version }}"
+      cisco.catalystwan.software_upgrade:
+        state: "present"  # present with reboot: true -> ACTIVATE in vManage
+        reboot: true
+        image_version: "{{ higher_software_version }}"
+        # image_path: "{{ viptela_software_path }}" # FIXME test also with path
+        wait_for_completed: true
+        wait_timeout_seconds: 3600
+        filters:
+          personality: "vsmart"
+        manager_authentication:
+          url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+          username: "{{ (vmanage_instances | first).admin_username }}"
+          password: "{{ (vmanage_instances | first).admin_password }}"
+
+    - name: "Get details of software installed on control components - filter vSmart"
+      cisco.catalystwan.software_upgrade_info:
+        device_type: "controller"
+        filters:
+          personality: "vsmart"
+        manager_authentication:
+          url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+          username: "{{ (vmanage_instances | first).admin_username }}"
+          password: "{{ (vmanage_instances | first).admin_password }}"
+      register: software_info
+
+    - name: "Verify that activated version appears as current version and old version in available files"
+      ansible.builtin.assert:
+        that:
+          - "'{{ higher_software_version }}' in {{ item }}.current_partition"
+          - "not '{{ higher_software_version }}' in {{ item }}.available_versions"
+          - "'{{ lower_software_version }}' in {{ item }}.available_versions"
+        fail_msg: "{{ item | to_nice_yaml }}"
+        success_msg: "{{ item | to_nice_yaml }}"
+      loop: "{{ software_info.installed_devices }}"

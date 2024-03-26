@@ -1,0 +1,82 @@
+# Copyright 2024 Cisco Systems, Inc. and its affiliates
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+---
+
+- name: Verify required variables for selected role
+  ansible.builtin.include_tasks: variables_assertion.yml
+
+- name: Generate CSR for vManage
+  cisco.catalystwan.devices_certificates:
+    generate_csr: true
+    device_ip: "{{ vmanage_instances[0].system_ip }}"
+    manager_authentication:
+      url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+      username: "{{ (vmanage_instances | first).admin_username }}"
+      password: "{{ (vmanage_instances | first).admin_password }}"
+
+- name: Add vSmart device
+  cisco.catalystwan.devices_controllers:
+    device_ip: "{{ vsmart_instances[0].transport_public_ip }}"
+    username: "{{ vsmart_instances[0].admin_username }}"
+    password: "{{ vsmart_instances[0].admin_password }}"
+    hostname: "{{ vsmart_instances[0].hostname }}"
+    personality: "vsmart"
+    state: present
+    manager_authentication:
+      url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+      username: "{{ (vmanage_instances | first).admin_username }}"
+      password: "{{ (vmanage_instances | first).admin_password }}"
+  register: devices_result
+
+- name: Add vBond device
+  cisco.catalystwan.devices_controllers:
+    device_ip: "{{ vbond_instances[0].transport_public_ip }}"
+    username: "{{ vbond_instances[0].admin_username }}"
+    password: "{{ vbond_instances[0].admin_password }}"
+    hostname: "{{ vbond_instances[0].hostname }}"
+    personality: "vbond"
+    state: present  # state present means that device was added and certificated was installed
+    # Consider using loop to check certificates check
+    # Currently we cannot implement wait because of the mixed ips in vmanage itself
+    manager_authentication:
+      url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+      username: "{{ (vmanage_instances | first).admin_username }}"
+      password: "{{ (vmanage_instances | first).admin_password }}"
+  register: devices_result
+
+- name: Wait until all controller devices are discoverable via system ip
+  cisco.catalystwan.devices_info:
+    device_category: controllers
+    filters:
+      device_ip: "{{ device_item.system_ip }}"
+    manager_authentication:
+      url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+      username: "{{ (vmanage_instances | first).admin_username }}"
+      password: "{{ (vmanage_instances | first).admin_password }}"
+  register: device_details_info
+  loop: "{{ vsmart_instances + vbond_instances + vmanage_instances }}"
+  loop_control:
+    loop_var: device_item
+    label: "hostname: {{ device_item.hostname }}, device_ip: {{ device_item.system_ip }}"
+  retries: 20
+  delay: 10
+  until: device_details_info.devices | length | int == 1
+
+- name: Wait until cert_install_status == "Installed" on all controllers
+  cisco.catalystwan.devices_info:
+    device_category: controllers
+    filters:
+      device_ip: "{{ device_item.system_ip }}"
+    manager_authentication:
+      url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+      username: "{{ (vmanage_instances | first).admin_username }}"
+      password: "{{ (vmanage_instances | first).admin_password }}"
+  register: device_details_info
+  loop: "{{ vsmart_instances + vbond_instances + vmanage_instances }}"
+  loop_control:
+    loop_var: device_item
+    label: "hostname: {{ device_item.hostname }}, device_ip: {{ device_item.system_ip }}"
+  retries: 20
+  delay: 10
+  until: device_details_info.devices[0].cert_install_status == "Installed"

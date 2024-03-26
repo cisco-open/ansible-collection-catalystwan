@@ -1,0 +1,78 @@
+# Copyright 2024 Cisco Systems, Inc. and its affiliates
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+---
+
+- name: Verify required variables for selected role
+  ansible.builtin.include_tasks: variables_assertion.yml
+
+- name: Get list of Edge devices
+  cisco.catalystwan.devices_info:
+    device_category: vedges
+    manager_authentication:
+      url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+      username: "{{ (vmanage_instances | first).admin_username }}"
+      password: "{{ (vmanage_instances | first).admin_password }}"
+  register: edge_devices
+
+# We do PnP sync with validity set to valid, task obsolete, kept only as reference
+# - name: Change Edge devices validity to Valid
+#   cisco.catalystwan.devices_certificates:
+#     change_vedge_list_validity:
+#       chasis_number: "{{ item.chasis_number }}"
+#       validity: "valid"
+#     manager_authentication:
+#       url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+#       username: "{{ (vmanage_instances | first).admin_username }}"
+#       password: "{{ (vmanage_instances | first).admin_password }}"
+#   loop: "{{ edge_devices.devices }}"
+#   loop_control:
+#     label: "Device chasis number: {{ item.chasis_number }}"
+
+- name: Send to controllers to sync the WAN Edge list on all controllers
+  cisco.catalystwan.devices_certificates:
+    send_to_controllers: true
+    manager_authentication:
+      url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+      username: "{{ (vmanage_instances | first).admin_username }}"
+      password: "{{ (vmanage_instances | first).admin_password }}"
+
+
+- name: Wait until edge devices are reachable and OTP phase is over
+  cisco.catalystwan.devices_info:
+    device_category: vedges
+    filters:
+      chasis_number: "{{ device_item.chasis_number }}"
+    manager_authentication:
+      url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+      username: "{{ (vmanage_instances | first).admin_username }}"
+      password: "{{ (vmanage_instances | first).admin_password }}"
+  register: edge_device_details
+  loop: "{{ edge_devices.devices }}"
+  loop_control:
+    loop_var: device_item
+    label: "Device chasis number: {{ device_item.chasis_number }}"
+  retries: 20
+  delay: 10
+  until:
+    - edge_device_details.devices[0].device_state == "READY"
+
+- name: Wait until cert_install_status == "Installed" and reachability == "reachable" on all edge devices
+  cisco.catalystwan.devices_info:
+    device_category: vedges
+    filters:
+      chasis_number: "{{ device_item.chasis_number }}"
+    manager_authentication:
+      url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+      username: "{{ (vmanage_instances | first).admin_username }}"
+      password: "{{ (vmanage_instances | first).admin_password }}"
+  register: edge_device_details
+  loop: "{{ edge_devices.devices }}"
+  loop_control:
+    loop_var: device_item
+    label: "Device chasis number: {{ device_item.chasis_number }}"
+  retries: 20
+  delay: 10
+  until:
+    - edge_device_details.devices[0].cert_install_status == "Installed"
+    - edge_device_details.devices[0].reachability == "reachable"

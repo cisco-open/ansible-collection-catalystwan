@@ -1,0 +1,32 @@
+# Copyright 2024 Cisco Systems, Inc. and its affiliates
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+---
+
+# This playbook uses example role for remote upgrades.
+# It assumes that controllers are <20.13 version and Edge are <17.13 version.
+# It configures Remote Server, uploads images, then perform installation, activation and default version set.
+# Doesn't include cEdge software upgrades - known bug with cEdge with Remote Images
+# Vars provided in this playbook are dev_vars
+
+# For Remote Images that don't report its version in repository, we have to provide:
+# - controller_software_version_to_activate
+
+- name: Software upgrades with Remote Server
+  hosts: localhost
+  gather_facts: false
+  vars_files:
+    - dev_vars.yml
+  vars:
+    remote_server_name: "{{ remote_server_name }}"
+    remote_server_url: "{{ remote_server_url }}"
+    remote_server_user: "{{ remote_server_user }}"
+    remote_server_password: "{{ remote_server_password }}"
+    remote_server_image_location_prefix: "{{ remote_server_image_location_prefix }}"
+    vmanage_remote_software_filename: "{{ vmanage_remote_software_filename }}"
+    viptela_remote_software_filename: "{{ viptela_remote_software_filename }}"
+    cedge_remote_software_filename: "{{ cedge_remote_software_filename }}"
+    controller_software_version_to_activate: "{{ controller_software_version_to_activate }}"
+    remove_available_software_from_device: false
+  roles:
+    - cisco.catalystwan.software_upgrades_remote

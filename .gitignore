@@ -1,0 +1,16 @@
+poetry.lock
+.vscode*
+.dev_dir/playground.yml
+.dev_dir/dev_vars.yml
+.dev_dir/ansible_catalystwan_module.log
+.dev_dir/ansible_catalystwan.log
+.dev_dir/vmngclient.log
+.dev_dir/alarms.log
+.dev_dir/catalystwan.log
+.dev_dir/serialFile.viptela
+ansible.log
+vmngclient.log
+playbooks/tests/configuration_file_dev_vars.yml
+playbooks/tests/ansible_catalystwan.log
+playbooks/tests/ansible_catalystwan_module.log
+playbooks/tests/catalystwan.log

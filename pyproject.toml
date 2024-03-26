@@ -1,0 +1,31 @@
+[tool.poetry]
+name = "cisco-catalystwan"
+version = "0.1.0"
+description = "Ansible modules using vManage-client."
+authors = ["acichon <acichon@cisco.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.9.0"
+ansible-core = "^2.13"
+ansible = "^6.7.0"
+catalystwan = "v0.31.0"
+tenacity = "^8.2.3"
+ansible-lint = { version = "^6.9.0", markers = "platform_system != 'Windows'" }
+
+[tool.poetry.group.dev.dependencies]
+flake8 = "^5.0.4"
+black = "^23.11.0"
+pre-commit = "^3.6.2"
+ansible-lint = { version = "^6.9.0", markers = "platform_system != 'Windows'" }
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 120
+
+[tool.isort]
+profile = "black"
+line_length = 120

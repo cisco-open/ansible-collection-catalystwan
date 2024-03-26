@@ -1,0 +1,44 @@
+# Copyright 2024 Cisco Systems, Inc. and its affiliates
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+---
+
+# Helper playbooks to test modules and flows while developing them
+
+
+# Tested operations:
+# 1. Retrieve all alarms
+# 2. Retrieve only critical alarms
+# 3. Retrieve only critical alarms
+
+- name: Testing playbook to verify cisco.catalystwan.alarms module operations
+  hosts: localhost
+  gather_facts: false
+  vars_files:
+    - configuration_file_dev_vars.yml
+  tasks:
+    - name: 1. Retrieve all alarms
+      cisco.catalystwan.alarms:
+        from_time: 16
+        manager_authentication:
+          url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+          username: "{{ (vmanage_instances | first).admin_username }}"
+          password: "{{ (vmanage_instances | first).admin_password }}"
+
+    # Example of using the module to retrieve only critical alarms
+    - name: 2. Retrieve only critical alarms
+      cisco.catalystwan.alarms:
+        only_critical: true
+        manager_authentication:
+          url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+          username: "{{ (vmanage_instances | first).admin_username }}"
+          password: "{{ (vmanage_instances | first).admin_password }}"
+
+    # Example of using the module to retrieve alarms and store to file
+    - name: 3. Retrieve only critical alarms and store them to the file
+      cisco.catalystwan.alarms:
+        log_file: "/tmp/alarms.log"
+        manager_authentication:
+          url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+          username: "{{ (vmanage_instances | first).admin_username }}"
+          password: "{{ (vmanage_instances | first).admin_password }}"

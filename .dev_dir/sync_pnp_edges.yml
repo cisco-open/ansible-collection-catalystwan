@@ -1,0 +1,11 @@
+# Copyright 2024 Cisco Systems, Inc. and its affiliates
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+---
+
+- name: Sync edge devices from PnP portal, and generate bootstrap cfg for their deployment
+  hosts: localhost
+  vars_files:
+    - dev_vars.yml
+  roles:
+    - cisco.catalystwan.sync_pnp_edges
