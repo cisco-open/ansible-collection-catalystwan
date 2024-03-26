@@ -1,0 +1,48 @@
+# Copyright 2024 Cisco Systems, Inc. and its affiliates
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+---
+
+# Helper playbooks to test modules and flows while developing them
+
+# Tested operations:
+# 1. Retrieve all users from vManage
+# 2. Create a new user in vManage
+# 3. Delete a user from vManage
+
+
+- name: Testing playbook to verify cisco.catalystwan.users module operations
+  hosts: localhost
+  gather_facts: false
+  vars_files:
+    - configuration_file_dev_vars.yml
+  tasks:
+    - name: 1. Retrieve all users from vManage
+      cisco.catalystwan.users:
+        get_all: true
+        manager_authentication:
+          url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+          username: "{{ (vmanage_instances | first).admin_username }}"
+          password: "{{ (vmanage_instances | first).admin_password }}"
+
+    - name: 2. Create a new user in vManage
+      cisco.catalystwan.users:
+        mode: create
+        username: 'johndoe'
+        password: 'securepassword'
+        description: 'John Doe user'
+        group:
+          - 'admin'
+        manager_authentication:
+          url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+          username: "{{ (vmanage_instances | first).admin_username }}"
+          password: "{{ (vmanage_instances | first).admin_password }}"
+
+    - name: 3. Delete a user from vManage
+      cisco.catalystwan.users:
+        mode: delete
+        username: 'johndoe'
+        manager_authentication:
+          url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+          username: "{{ (vmanage_instances | first).admin_username }}"
+          password: "{{ (vmanage_instances | first).admin_password }}"

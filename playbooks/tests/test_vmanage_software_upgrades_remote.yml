@@ -1,0 +1,271 @@
+# Copyright 2024 Cisco Systems, Inc. and its affiliates
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+---
+
+# Helper playbooks to test modules and flows while developing them
+# It assumes that controllers are <20.13 version and Edge are <17.13 version
+# This playbook should be reused for CI/CD integration. For this, only vars should be adjusted.
+# Does not support cluster yet.
+
+
+# Tested operations:
+
+# --- Remote image upload --- #
+# Upload vmanage-20.13.1-x86_64.tar.gz
+
+
+# --- vManage upgrade operations --- #
+# 1. Install vmanage-20.13.1 - without restart
+# 2. Verify that installed version appears in Available Versions
+# 3. Delete installed software on vManage
+# 4. Verify that deleted version not available on device
+# 5. Activate 20.13.1
+# 6. Verify that activated version appears as current version
+# 7. Set default software operation as 20.13.1
+# 8. Verify that default version set correctly
+# 9. Delete old software
+# 10. Verify that old version not available on device
+
+
+# --- TEST 20.14 --- #
+#
+# In order to test upgrade to 20.14 (from 20.13), use these variables in vars:
+# remote_software_filename: "vmanage-20.14.0.05-x86_64.tar.gz"
+# higher_software_version: "20.14.0.05"
+
+- name: Testing playbook to verify cisco.catalystwan.software_repository module operations
+  hosts: localhost
+  gather_facts: false
+  vars_files:
+    - configuration_file_dev_vars.yml
+  vars:
+    remote_software_filename: "vmanage-20.13.1-x86_64.tar.gz"
+    higher_software_version: "20.13.1"
+    lower_software_version: "20.12.2"
+  tasks:
+    - name: "Provide software images for testing - remote"
+      block:
+        - name: "Configure aws-software-repo Remote Server"
+          cisco.catalystwan.software_repository:
+            remote_server:
+              state: present
+              name: "{{ remote_server_name }}"
+              url: "{{ remote_server_url }}"
+              protocol: SCP
+              port: 22
+              vpn: 512
+              user: "{{ remote_server_user }}"
+              password: "{{ remote_server_password }}"
+              image_location_prefix: "{{ remote_server_image_location_prefix }}"
+            manager_authentication:
+              url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+              username: "{{ (vmanage_instances | first).admin_username }}"
+              password: "{{ (vmanage_instances | first).admin_password }}"
+          failed_when: false
+          changed_when: false
+
+        - name: "Get list of all Remote Server repositories on Manager"
+          cisco.catalystwan.software_repository_info:
+            category: "remote_servers"
+            manager_authentication:
+              url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+              username: "{{ (vmanage_instances | first).admin_username }}"
+              password: "{{ (vmanage_instances | first).admin_password }}"
+          register: all_remote_servers
+
+        - name: "Debug all_remote_servers - expect one, and verify port is == 22"
+          ansible.builtin.assert:
+            that:
+              - all_remote_servers.remote_servers | length == 1
+              - ( all_remote_servers.remote_servers | first ).remote_server_name == remote_server_name
+              - ( all_remote_servers.remote_servers | first ).remote_server_port == 22
+
+        - name: "Upload image to Manager from Remote Server, image: {{ remote_software_filename }}"
+          cisco.catalystwan.software_repository:
+            software:
+              filename: "{{ remote_software_filename }}"
+              remote_server_name: "{{ remote_server_name }}"
+            manager_authentication:
+              url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+              username: "{{ (vmanage_instances | first).admin_username }}"
+              password: "{{ (vmanage_instances | first).admin_password }}"
+
+
+    # --- vManage upgrade operations --- #
+
+
+    - name: "[TEST] 1. Install software operation on vManage, remote_software_filename: {{ remote_software_filename }}"
+      cisco.catalystwan.software_upgrade:
+        state: "present"
+        reboot: false
+        remote_server_name: "{{ remote_server_name }}"
+        remote_image_filename: "{{ remote_server_image_location_prefix }}{{ remote_software_filename }}"
+        downgrade_check: false
+        wait_for_completed: true
+        wait_timeout_seconds: 3600
+        filters:
+          personality: "vmanage"
+        manager_authentication:
+          url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+          username: "{{ (vmanage_instances | first).admin_username }}"
+          password: "{{ (vmanage_instances | first).admin_password }}"
+
+    - name: "Get details of software installed on control components - filter vManage"
+      cisco.catalystwan.software_upgrade_info:
+        device_type: "vmanage"
+        filters:
+          personality: "vmanage"
+        manager_authentication:
+          url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+          username: "{{ (vmanage_instances | first).admin_username }}"
+          password: "{{ (vmanage_instances | first).admin_password }}"
+      register: software_info
+
+    - name: "[TEST] 2. Verify that installed version appears in Available Versions as: {{ higher_software_version }}"
+      ansible.builtin.assert:
+        that:
+          - "'{{ higher_software_version }}' in {{ software_info.installed_devices | first }}.available_versions"
+          - "not '{{ higher_software_version }}' in {{ software_info.installed_devices | first }}.current_partition"
+          - "not '{{ higher_software_version }}' in {{ software_info.installed_devices | first }}.default_version"
+        fail_msg: "{{ software_info.installed_devices | first | to_nice_yaml }}"
+        success_msg: "{{ software_info.installed_devices | first | to_nice_yaml }}"
+
+
+    - name: "[TEST] 3. Delete installed software on vManage, version: {{ higher_software_version }}"
+      cisco.catalystwan.software_upgrade:
+        state: "absent"
+        image_version: "{{ higher_software_version }}"
+        filters:
+          personality: "vmanage"
+        manager_authentication:
+          url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+          username: "{{ (vmanage_instances | first).admin_username }}"
+          password: "{{ (vmanage_instances | first).admin_password }}"
+
+    - name: "Get details of software info - filter vManage"
+      cisco.catalystwan.software_upgrade_info:
+        device_type: "vmanage"
+        filters:
+          personality: "vmanage"
+        manager_authentication:
+          url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+          username: "{{ (vmanage_instances | first).admin_username }}"
+          password: "{{ (vmanage_instances | first).admin_password }}"
+      register: software_info
+
+    - name: "[TEST] 4. Verify that deleted version not available on device, version: {{ higher_software_version }}"
+      ansible.builtin.assert:
+        that:
+          - "not '{{ higher_software_version }}' in {{ software_info.installed_devices | first }}.available_versions"
+        fail_msg: "{{ software_info.installed_devices | first | to_nice_yaml }}"
+        success_msg: "{{ software_info.installed_devices | first | to_nice_yaml }}"
+
+
+    - name: "Prepare for next tests - Install software operation on vManage, remote_software_filename: {{ remote_software_filename }}"
+      cisco.catalystwan.software_upgrade:
+        state: "present"
+        reboot: false
+        remote_server_name: "{{ remote_server_name }}"
+        remote_image_filename: "{{ remote_server_image_location_prefix }}{{ remote_software_filename }}"
+        downgrade_check: false
+        wait_for_completed: true
+        wait_timeout_seconds: 3600
+        filters:
+          personality: "vmanage"
+        manager_authentication:
+          url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+          username: "{{ (vmanage_instances | first).admin_username }}"
+          password: "{{ (vmanage_instances | first).admin_password }}"
+
+
+    - name: "[TEST] 5. Activate software (include reboot) on vManage with version: {{ higher_software_version }}"
+      cisco.catalystwan.software_upgrade:
+        state: "active"
+        image_version: "{{ higher_software_version }}"
+        filters:
+          personality: "vmanage"
+        manager_authentication:
+          url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+          username: "{{ (vmanage_instances | first).admin_username }}"
+          password: "{{ (vmanage_instances | first).admin_password }}"
+
+    - name: "Get details of software installed - filter vManage"
+      cisco.catalystwan.software_upgrade_info:
+        device_type: "vmanage"
+        filters:
+          personality: "vmanage"
+        manager_authentication:
+          url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+          username: "{{ (vmanage_instances | first).admin_username }}"
+          password: "{{ (vmanage_instances | first).admin_password }}"
+      register: software_info
+
+    - name: "[TEST] 6. Verify that activated version appears as current version: {{ higher_software_version }}"
+      ansible.builtin.assert:
+        that:
+          - "'{{ higher_software_version }}' in {{ software_info.installed_devices | first }}.current_partition"
+          - "not '{{ higher_software_version }}' in {{ software_info.installed_devices | first }}.available_versions"
+          - "not '{{ higher_software_version }}' in {{ software_info.installed_devices | first }}.default_version"
+        fail_msg: "{{ software_info.installed_devices | first | to_nice_yaml }}"
+        success_msg: "{{ software_info.installed_devices | first | to_nice_yaml }}"
+
+
+    - name: "[TEST] 7. Set default software operation on vManage, version: {{ higher_software_version }}"
+      cisco.catalystwan.software_upgrade:
+        state: "default"
+        image_version: "current"
+        filters:
+          personality: "vmanage"
+        manager_authentication:
+          url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+          username: "{{ (vmanage_instances | first).admin_username }}"
+          password: "{{ (vmanage_instances | first).admin_password }}"
+
+    - name: "Get details of software info - filter vManage"
+      cisco.catalystwan.software_upgrade_info:
+        device_type: "vmanage"
+        filters:
+          personality: "vmanage"
+        manager_authentication:
+          url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+          username: "{{ (vmanage_instances | first).admin_username }}"
+          password: "{{ (vmanage_instances | first).admin_password }}"
+      register: software_info
+
+    - name: "[TEST] 8. Verify that default version set correctly as version: {{ higher_software_version }}"
+      ansible.builtin.assert:
+        that:
+          - "'{{ higher_software_version }}' in {{ software_info.installed_devices | first }}.default_version"
+        fail_msg: "{{ software_info.installed_devices | first | to_nice_yaml }}"
+        success_msg: "{{ software_info.installed_devices | first | to_nice_yaml }}"
+
+
+    - name: "[TEST] 9. Delete old software on vManage, version: {{ lower_software_version }}"
+      cisco.catalystwan.software_upgrade:
+        state: "absent"
+        image_version: "{{ lower_software_version }}"
+        filters:
+          personality: "vmanage"
+        manager_authentication:
+          url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+          username: "{{ (vmanage_instances | first).admin_username }}"
+          password: "{{ (vmanage_instances | first).admin_password }}"
+
+    - name: "Get details of software info - filter vManage"
+      cisco.catalystwan.software_upgrade_info:
+        device_type: "vmanage"
+        filters:
+          personality: "vmanage"
+        manager_authentication:
+          url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+          username: "{{ (vmanage_instances | first).admin_username }}"
+          password: "{{ (vmanage_instances | first).admin_password }}"
+      register: software_info
+
+    - name: "[TEST] 10. Verify that old version not available on device, version: {{ lower_software_version }}"
+      ansible.builtin.assert:
+        that:
+          - "not '{{ lower_software_version }}' in {{ software_info.installed_devices | first }}.available_versions"
+        fail_msg: "{{ software_info.installed_devices | first | to_nice_yaml }}"
+        success_msg: "{{ software_info.installed_devices | first | to_nice_yaml }}"

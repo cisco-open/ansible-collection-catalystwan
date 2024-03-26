@@ -1,0 +1,305 @@
+# Copyright 2024 Cisco Systems, Inc. and its affiliates
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+---
+
+# Helper playbooks to test modules and flows while developing them
+# This playbook should be reused for CI/CD integration. For this, only vars should be adjusted.
+
+
+# Tested operations:
+
+# --- Remote Server operations --- #
+# 1. Add Remote Server
+# 2. Re-add Remote Server
+# 3. Update Remote server (port) - because we detect server existence by name
+# 4. Get list of all "remote_servers"
+# 5. Verify that list contains only one element and server port is 99
+# 6. Remove Remote Server
+
+# --- Software from Remote Server operations --- #
+# 7. Add Remote Server
+# 8. Upload image to Manager from Remote Server
+# 9. Try re-upload the same image
+# 10. Filter specific image from all software images on Manager
+# 11. Assert that filtered image match uploaded one from Remote Server
+# 12. Remove specific image from Manager
+
+# --- Unsafe Remote Server operations --- #
+# 13. Upload image to Manager from Remote Server
+# 14. Catch failure when trying to update Remote Server when image is used
+# 15. Catch failure when trying to remove Remote Server when image is used
+# 16. Remove specific image from Manager
+# 17. Remove Remote Server
+
+
+- name: Testing playbook to verify cisco.catalystwan.software_repository module operations
+  hosts: localhost
+  gather_facts: false
+  vars_files:
+    - configuration_file_dev_vars.yml
+  vars:
+    remote_software_filename: "c8000v-universalk9.17.13.01a.SPA.bin"
+  tasks:
+    # # --- Remote Server operations --- #
+    - name: "[TEST] 1. Configure aws-software-repo Remote Server"
+      cisco.catalystwan.software_repository:
+        remote_server:
+          state: present
+          name: "{{ remote_server_name }}"
+          url: "{{ remote_server_url }}"
+          protocol: FTP
+          port: 21
+          vpn: 512
+          user: "{{ remote_server_user }}"
+          password: "{{ remote_server_password }}"
+          image_location_prefix: "{{ remote_server_image_location_prefix }}"
+        manager_authentication:
+          url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+          username: "{{ (vmanage_instances | first).admin_username }}"
+          password: "{{ (vmanage_instances | first).admin_password }}"
+
+    - name: "[TEST] 2. Try to re-add aws-software-repo Remote Server. Expect changed=true"
+      cisco.catalystwan.software_repository:
+        remote_server:
+          state: present
+          name: "{{ remote_server_name }}"
+          url: "{{ remote_server_url }}"
+          protocol: FTP
+          port: 21
+          vpn: 512
+          user: "{{ remote_server_user }}"
+          password: "{{ remote_server_password }}"
+          image_location_prefix: "{{ remote_server_image_location_prefix }}"
+        manager_authentication:
+          url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+          username: "{{ (vmanage_instances | first).admin_username }}"
+          password: "{{ (vmanage_instances | first).admin_password }}"
+
+    - name: "[TEST] 3. Update aws-software-repo Remote Server"
+      cisco.catalystwan.software_repository:
+        remote_server:
+          state: present
+          name: "{{ remote_server_name }}"
+          url: "{{ remote_server_url }}"
+          protocol: FTP
+          port: 99
+          vpn: 512
+          user: "{{ remote_server_user }}"
+          password: "{{ remote_server_password }}"
+          image_location_prefix: "{{ remote_server_image_location_prefix }}"
+        manager_authentication:
+          url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+          username: "{{ (vmanage_instances | first).admin_username }}"
+          password: "{{ (vmanage_instances | first).admin_password }}"
+
+    - name: "[TEST] 4. Get list of all Remote Server repositories on Manager"
+      cisco.catalystwan.software_repository_info:
+        category: "remote_servers"
+        manager_authentication:
+          url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+          username: "{{ (vmanage_instances | first).admin_username }}"
+          password: "{{ (vmanage_instances | first).admin_password }}"
+      register: all_remote_servers
+
+    - name: "[TEST] 5. Debug all_remote_servers - expect one, and verify port is == 99"
+      ansible.builtin.assert:
+        that:
+          - all_remote_servers.remote_servers | length == 1
+          - ( all_remote_servers.remote_servers | first ).remote_server_name == remote_server_name
+          - ( all_remote_servers.remote_servers | first ).remote_server_port == 99
+
+    - name: "[TEST] 6. Try to remove aws-software-repo Remote Server filtered from previous tasks"
+      cisco.catalystwan.software_repository:
+        remote_server:
+          state: absent
+          id: "{{ (all_remote_servers.remote_servers | first).remote_server_id }}"
+        manager_authentication:
+          url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+          username: "{{ (vmanage_instances | first).admin_username }}"
+          password: "{{ (vmanage_instances | first).admin_password }}"
+
+
+    # --- Software from Remote Server operations --- #
+
+
+    - name: "[TEST] 7. Configure aws-software-repo Remote Server"
+      cisco.catalystwan.software_repository:
+        remote_server:
+          state: present
+          name: "{{ remote_server_name }}"
+          url: "{{ remote_server_url }}"
+          protocol: FTP
+          port: 21
+          vpn: 512
+          user: "{{ remote_server_user }}"
+          password: "{{ remote_server_password }}"
+          image_location_prefix: "{{ remote_server_image_location_prefix }}"
+        manager_authentication:
+          url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+          username: "{{ (vmanage_instances | first).admin_username }}"
+          password: "{{ (vmanage_instances | first).admin_password }}"
+
+    - name: "[TEST] 8. Upload c8000v image to Manager from Remote Server"
+      cisco.catalystwan.software_repository:
+        software:
+          filename: "{{ remote_software_filename }}"
+          remote_server_name: "{{ remote_server_name }}"
+        manager_authentication:
+          url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+          username: "{{ (vmanage_instances | first).admin_username }}"
+          password: "{{ (vmanage_instances | first).admin_password }}"
+      register: upload_response
+
+    - name: "[TEST] 8. Verify that previous task has changed=true value"
+      ansible.builtin.assert:
+        that:
+          - "{{ upload_response.changed }}"
+
+    - name: "[TEST] 9. Try to re-upload c8000v image to Manager from Remote Server"
+      cisco.catalystwan.software_repository:
+        software:
+          filename: "{{ remote_software_filename }}"
+          remote_server_name: "{{ remote_server_name }}"
+        manager_authentication:
+          url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+          username: "{{ (vmanage_instances | first).admin_username }}"
+          password: "{{ (vmanage_instances | first).admin_password }}"
+      register: reupload_response
+
+    - name: "[TEST] 9. Verify that previous task has changed=false value, because it is re-upload"
+      ansible.builtin.assert:
+        that:
+          - "{{ not reupload_response.changed }}"
+
+    - name: "[TEST] 10. Filter list of all software images on Manager to fetch: {{ remote_software_filename }}"
+      cisco.catalystwan.software_repository_info:
+        category: "software_images"
+        filters:
+          version_type: aws-software-repo
+        manager_authentication:
+          url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+          username: "{{ (vmanage_instances | first).admin_username }}"
+          password: "{{ (vmanage_instances | first).admin_password }}"
+      register: software_images_info
+
+    - name: "[TEST] 11. Assert that required image present and version_type == remote_server_name for image: {{ remote_software_filename }}"
+      ansible.builtin.assert:
+        that:
+          - software_images_info.software_images | length == 1
+          - ( software_images_info.software_images | first ).version_type == remote_server_name
+          - remote_software_filename in ( software_images_info.software_images | first ).available_files
+
+    - name: "[TEST] 12. Remove image that comes from Remote Server, image: {{ remote_software_filename }}"
+      cisco.catalystwan.software_repository:
+        software:
+          state: "absent"
+          software_id: "{{ (software_images_info.software_images | first).version_id }}"
+        manager_authentication:
+          url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+          username: "{{ (vmanage_instances | first).admin_username }}"
+          password: "{{ (vmanage_instances | first).admin_password }}"
+
+
+    # --- Unsafe Remote Server operations --- #
+
+
+    - name: "[TEST] 13. Upload c8000v image to Manager from Remote Server"
+      cisco.catalystwan.software_repository:
+        software:
+          filename: "{{ remote_software_filename }}"
+          remote_server_name: "{{ remote_server_name }}"
+        manager_authentication:
+          url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+          username: "{{ (vmanage_instances | first).admin_username }}"
+          password: "{{ (vmanage_instances | first).admin_password }}"
+      register: upload_response
+
+    - name: "[TEST] 14. Update aws-software-repo Remote Server, expect failed=true"
+      cisco.catalystwan.software_repository:
+        remote_server:
+          state: present
+          name: "{{ remote_server_name }}"
+          url: "{{ remote_server_url }}"
+          protocol: FTP
+          port: 99
+          vpn: 512
+          user: "{{ remote_server_user }}"
+          password: "{{ remote_server_password }}"
+          image_location_prefix: "{{ remote_server_image_location_prefix }}"
+        manager_authentication:
+          url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+          username: "{{ (vmanage_instances | first).admin_username }}"
+          password: "{{ (vmanage_instances | first).admin_password }}"
+      register: update_operation
+      ignore_errors: true
+
+    - name: "[TEST] 14. Verify that previous task has failed=true value"
+      ansible.builtin.assert:
+        that:
+          - "{{ update_operation.failed }}"
+        fail_msg: "update_operation msg: {{ update_operation.msg }}"
+        success_msg: "update_operation msg: {{ update_operation.msg }}"
+
+    - name: "[TEST] Get list of all Remote Server repositories on Manager"
+      cisco.catalystwan.software_repository_info:
+        category: "remote_servers"
+        manager_authentication:
+          url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+          username: "{{ (vmanage_instances | first).admin_username }}"
+          password: "{{ (vmanage_instances | first).admin_password }}"
+      register: all_remote_servers
+
+    - name: "[TEST] 15. Try to remove aws-software-repo Remote Server, expect failed=true"
+      cisco.catalystwan.software_repository:
+        remote_server:
+          state: absent
+          id: "{{ (all_remote_servers.remote_servers | first).remote_server_id }}"
+        manager_authentication:
+          url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+          username: "{{ (vmanage_instances | first).admin_username }}"
+          password: "{{ (vmanage_instances | first).admin_password }}"
+      register: remove_operation
+      ignore_errors: true
+
+    - name: "[TEST] 15. Verify that previous task has failed=true value"
+      ansible.builtin.assert:
+        that:
+          - "{{ remove_operation.failed }}"
+        fail_msg: "remove_operation msg: {{ remove_operation.msg }}"
+        success_msg: "remove_operation msg: {{ remove_operation.msg }}"
+
+
+    # --- Cleanup --- #
+
+
+    - name: "[TEST] Filter list of all software images on Manager to fetch: {{ remote_software_filename }}"
+      cisco.catalystwan.software_repository_info:
+        category: "software_images"
+        filters:
+          version_type: aws-software-repo
+        manager_authentication:
+          url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+          username: "{{ (vmanage_instances | first).admin_username }}"
+          password: "{{ (vmanage_instances | first).admin_password }}"
+      register: software_images_info
+
+    - name: "[TEST] 16. Remove image that comes from Remote Server, image: {{ remote_software_filename }}"
+      cisco.catalystwan.software_repository:
+        software:
+          state: "absent"
+          software_id: "{{ (software_images_info.software_images | first).version_id }}"
+        manager_authentication:
+          url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+          username: "{{ (vmanage_instances | first).admin_username }}"
+          password: "{{ (vmanage_instances | first).admin_password }}"
+
+    - name: "[TEST] 17. Remove aws-software-repo Remote Server"
+      cisco.catalystwan.software_repository:
+        remote_server:
+          state: absent
+          id: "{{ (all_remote_servers.remote_servers | first).remote_server_id }}"
+        manager_authentication:
+          url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+          username: "{{ (vmanage_instances | first).admin_username }}"
+          password: "{{ (vmanage_instances | first).admin_password }}"

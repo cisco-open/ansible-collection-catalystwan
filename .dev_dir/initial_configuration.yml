@@ -1,0 +1,12 @@
+# Copyright 2024 Cisco Systems, Inc. and its affiliates
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+---
+
+- name: Verify server API readiness and set initial settings like org and validator
+  hosts: localhost
+  vars_files:
+    - dev_vars.yml
+  roles:
+    - cisco.catalystwan.api_ready
+    - cisco.catalystwan.administration_settings

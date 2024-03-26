@@ -1,0 +1,95 @@
+# Copyright 2024 Cisco Systems, Inc. and its affiliates
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+---
+
+# Helper playbooks to test modules and flows while developing them
+
+# Tested operations: All possible health checks
+
+
+- name: Testing playbook to verify cisco.catalystwan.health_checks module operations
+  hosts: localhost
+  gather_facts: false
+  vars_files:
+    - configuration_file_dev_vars.yml
+  tasks:
+    - name: "Health check: control connections - verifies if all have state up"
+      cisco.catalystwan.health_checks:
+        check_type: control_connections
+        manager_authentication:
+          url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+          username: "{{ (vmanage_instances | first).admin_username }}"
+          password: "{{ (vmanage_instances | first).admin_password }}"
+
+    - name: "Health check: orchestrator connections - verifies if all have state up"
+      cisco.catalystwan.health_checks:
+        check_type: orchestrator_connections
+        manager_authentication:
+          url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+          username: "{{ (vmanage_instances | first).admin_username }}"
+          password: "{{ (vmanage_instances | first).admin_password }}"
+
+    - name: |
+        "Health check: system status with health metrics - vmanage:
+        - cpu_state == normal
+        - mem_state == normal
+        - mem_usaage <= 90
+        - device_status == normal
+        - device_reachablitiy = reachable
+      cisco.catalystwan.health_checks:
+        check_type: device_system_status
+        filters:
+          personality: "vmanage"
+        manager_authentication:
+          url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+          username: "{{ (vmanage_instances | first).admin_username }}"
+          password: "{{ (vmanage_instances | first).admin_password }}"
+
+    - name: |
+        "Health check: system status with health metrics - vsmart:
+        - cpu_state == normal
+        - mem_state == normal
+        - mem_usaage <= 90
+        - device_status == normal
+        - device_reachablitiy = reachable
+      cisco.catalystwan.health_checks:
+        check_type: device_system_status
+        filters:
+          personality: "vsmart"
+        manager_authentication:
+          url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+          username: "{{ (vmanage_instances | first).admin_username }}"
+          password: "{{ (vmanage_instances | first).admin_password }}"
+
+    - name: |
+        "Health check: system status with health metrics - vbond:
+        - cpu_state == normal
+        - mem_state == normal
+        - mem_usaage <= 90
+        - device_status == normal
+        - device_reachablitiy = reachable
+      cisco.catalystwan.health_checks:
+        check_type: device_system_status
+        filters:
+          personality: "vbond"
+        manager_authentication:
+          url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+          username: "{{ (vmanage_instances | first).admin_username }}"
+          password: "{{ (vmanage_instances | first).admin_password }}"
+
+    - name: "Health check: BFD sessions - verifies if all have state up"
+      cisco.catalystwan.health_checks:
+        check_type: bfd
+        manager_authentication:
+          url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+          username: "{{ (vmanage_instances | first).admin_username }}"
+          password: "{{ (vmanage_instances | first).admin_password }}"
+
+    - name: "Health check: OMP sessions - verifies if all have state up"
+      cisco.catalystwan.health_checks:
+        check_type: omp
+        manager_authentication:
+          url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+          username: "{{ (vmanage_instances | first).admin_username }}"
+          password: "{{ (vmanage_instances | first).admin_password }}"

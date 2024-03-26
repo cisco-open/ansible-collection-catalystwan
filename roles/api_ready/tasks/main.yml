@@ -1,0 +1,22 @@
+# Copyright 2024 Cisco Systems, Inc. and its affiliates
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+---
+
+- name: Verify required variables for selected role
+  ansible.builtin.include_tasks: variables_assertion.yml
+
+- name: |
+    Check that API server is ready - verify "isServerReady" response with "/dataservice/client/server/ready" endpoint.
+    Parameters:    retries: {{ retry_value_manager_api_ready }}    delay: {{ delay_value_manager_api_ready }}
+  ansible.builtin.uri:
+    url: "https://{{ (vmanage_instances | first).mgmt_public_ip }}/dataservice/client/server/ready"
+    method: "GET"
+    validate_certs: false
+    return_content: true
+  register: manager_response
+  retries: "{{ retry_value_manager_api_ready }}"
+  delay: "{{ delay_value_manager_api_ready }}"
+  until:
+    - manager_response.json is defined
+    - manager_response.json.isServerReady | bool == true

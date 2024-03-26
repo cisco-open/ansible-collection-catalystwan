@@ -1,0 +1,63 @@
+# Copyright 2024 Cisco Systems, Inc. and its affiliates
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+---
+
+# Helper playbooks to test modules and flows while developing them
+
+
+# Tested operations:
+
+# 1. Change all Edge devices validity to Valid
+# 2. Send to controllers to sync the WAN Edge list on all controllers
+
+- name: Testing playbook to verify cisco.catalystwan.devices_certificates module operations
+  hosts: localhost
+  gather_facts: false
+  vars_files:
+    - configuration_file_dev_vars.yml
+  tasks:
+    - name: Get list of Edge devices
+      cisco.catalystwan.devices_info:
+        device_category: vedges
+        manager_authentication:
+          url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+          username: "{{ (vmanage_instances | first).admin_username }}"
+          password: "{{ (vmanage_instances | first).admin_password }}"
+      register: edge_devices
+
+    - name: 1. Change all Edge devices validity to Valid
+      cisco.catalystwan.devices_certificates:
+        change_vedge_list_validity:
+          chasis_number: "{{ item.chasis_number }}"
+          validity: "valid"
+        manager_authentication:
+          url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+          username: "{{ (vmanage_instances | first).admin_username }}"
+          password: "{{ (vmanage_instances | first).admin_password }}"
+      loop: "{{ edge_devices.devices }}"
+      loop_control:
+        label: "Device chasis number: {{ item.chasis_number }}"
+      when: edge_devices.devices | length > 0
+
+    - name: 2. Send to controllers to sync the WAN Edge list on all controllers
+      cisco.catalystwan.devices_certificates:
+        send_to_controllers: true
+        manager_authentication:
+          url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+          username: "{{ (vmanage_instances | first).admin_username }}"
+          password: "{{ (vmanage_instances | first).admin_password }}"
+
+    # - name: 3. Change Edge devices validity to Invalid before carrying out delete operation
+    #   cisco.catalystwan.devices_certificates:
+    #     change_vedge_list_validity:
+    #       chasis_number: "{{ device_item.chasis_number }}"
+    #       validity: "invalid"
+    #     manager_authentication:
+    #       url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+    #       username: "{{ (vmanage_instances | first).admin_username }}"
+    #       password: "{{ (vmanage_instances | first).admin_password }}"
+    #   register: devices_result
+    #   loop: "{{ devices_result.devices }}"
+    #   loop_control:
+    #     loop_var: device_item

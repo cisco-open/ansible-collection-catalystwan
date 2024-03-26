@@ -1,0 +1,136 @@
+# Copyright 2024 Cisco Systems, Inc. and its affiliates
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+---
+
+# Helper playbooks to test modules and flows while developing them
+# This playbook should be reused for CI/CD integration. For this, only vars should be adjusted.
+
+
+# Tested operations:
+
+# --- Local image upload --- #
+# 1. Upload viptela-20.13.1-x86_64.tar.gz
+# 2. Verify that previous task has changed=true value and expected response present
+# 3. Re-Upload viptela-20.13.1-x86_64.tar.gz
+# 4. Verify that previous task has changed=false value and expected msg present
+# 5. Try to Upload non existing image
+# 6. Verify that previous task has changed=false value and expected msg present
+# 7. Try to filter specific image by its name splitted from path
+# 8. Assert that required image present and version_type == vmanage
+# 9. Remove viptela-20.13.1-x86_64.tar.gz image from repository
+# 10. Assert that remove image action has changed=true
+
+- name: Testing playbook to verify cisco.catalystwan.software_repository module operations
+  hosts: localhost
+  gather_facts: false
+  vars_files:
+    - configuration_file_dev_vars.yml
+  vars:
+    viptela_software_path: null  # "/example-path/viptela-20.13.1-x86_64.tar.gz"
+    software_filename_without_full_path: "{{ viptela_software_path.split('/')[-1] }}"
+    non_existing_software_path: "/Du/p/99.tar.gz"
+  tasks:
+    # --- Local image upload --- #
+    - name: "Get provdied paths stat info"
+      ansible.builtin.stat:
+        path: "{{ viptela_software_path }}"
+      register: stat_result
+
+    - name: "Check if all paths exist"
+      ansible.builtin.assert:
+        that:
+          - stat_result.stat.exists
+
+    - name: "[TEST] 1. Upload image to Manager from local system, path: {{ viptela_software_path }}"
+      cisco.catalystwan.software_repository:
+        software:
+          image_local_path: "{{ viptela_software_path }}"
+        manager_authentication:
+          url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+          username: "{{ (vmanage_instances | first).admin_username }}"
+          password: "{{ (vmanage_instances | first).admin_password }}"
+      register: upload_action
+
+    - name: "[TEST] 2. Verify that previous task has changed=true value and expected response present"
+      ansible.builtin.assert:
+        that:
+          - upload_action.changed
+        fail_msg: "upload_action response: {{ upload_action.response }}"
+        success_msg: "upload_action response: {{ upload_action.response }}"
+
+    - name: "[TEST] 3. Re-Upload image to Manager from local system, expect changed=false, path: {{ viptela_software_path }}"
+      cisco.catalystwan.software_repository:
+        software:
+          image_local_path: "{{ viptela_software_path }}"
+        manager_authentication:
+          url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+          username: "{{ (vmanage_instances | first).admin_username }}"
+          password: "{{ (vmanage_instances | first).admin_password }}"
+      register: reupload_action
+
+    - name: "[TEST] 4. Verify that previous task has changed=false value and expected msg present"
+      ansible.builtin.assert:
+        that:
+          - not reupload_action.changed
+          - '"already present in repository available files repository" in reupload_action.msg'
+        fail_msg: "reupload_action msg: {{ reupload_action.msg }}"
+        success_msg: "reupload_action msg: {{ reupload_action.msg }}"
+
+
+    - name: "[TEST] 5. Upload non existing image to Manager from local system,  expect failed=true, path: {{ non_existing_software_path }}"
+      cisco.catalystwan.software_repository:
+        software:
+          image_local_path: "{{ non_existing_software_path }}"
+        manager_authentication:
+          url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+          username: "{{ (vmanage_instances | first).admin_username }}"
+          password: "{{ (vmanage_instances | first).admin_password }}"
+      register: upload_non_existing
+      ignore_errors: true
+
+    - name: "[TEST] 6. Verify that previous task has failed=true value"
+      ansible.builtin.assert:
+        that:
+          - upload_non_existing.failed
+          - '"Cannot find file with provided path" in upload_non_existing.msg'
+        fail_msg: "upload_non_existing msg: {{ upload_non_existing.msg }}"
+        success_msg: "upload_non_existing msg: {{ upload_non_existing.msg }}"
+
+
+    - name: "[TEST] 7. Filter list of all software images on Manager to fetch: {{ viptela_software_path }}"
+      cisco.catalystwan.software_repository_info:
+        category: "software_images"
+        filters:
+          available_files: "{{ software_filename_without_full_path }}"
+        manager_authentication:
+          url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+          username: "{{ (vmanage_instances | first).admin_username }}"
+          password: "{{ (vmanage_instances | first).admin_password }}"
+      register: software_images_info
+
+    - name: "[TEST] 8. Assert that required image present and version_type == vmanage for image: {{ remote_software_filename }}"
+      ansible.builtin.assert:
+        that:
+          - software_images_info.software_images | length == 1
+          - ( software_images_info.software_images | first ).version_type == "vmanage"
+          - software_filename_without_full_path in ( software_images_info.software_images | first ).available_files
+
+
+    - name: "[TEST] 9. Remove image that comes from Remote Server, image: {{ remote_software_filename }}"
+      cisco.catalystwan.software_repository:
+        software:
+          state: "absent"
+          software_id: "{{ (software_images_info.software_images | first).version_id }}"
+        manager_authentication:
+          url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+          username: "{{ (vmanage_instances | first).admin_username }}"
+          password: "{{ (vmanage_instances | first).admin_password }}"
+      register: remove_local_image
+
+    - name: "[TEST] 10. Assert that remove image action has changed=true"
+      ansible.builtin.assert:
+        that:
+          - remove_local_image.changed
+        fail_msg: "remove_local_image response: {{ remove_local_image.response }}"
+        success_msg: "remove_local_image response: {{ remove_local_image.response }}"

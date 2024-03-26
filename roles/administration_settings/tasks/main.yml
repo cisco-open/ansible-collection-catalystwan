@@ -1,0 +1,38 @@
+# Copyright 2024 Cisco Systems, Inc. and its affiliates
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+---
+
+- name: Inform user that PnP Portal sync requires certain manual input
+  ansible.builtin.pause:
+    prompt: |-
+
+      Please verify that your PnP Portal Controller Profile is up to date with vbond and organization name.
+
+      vBond_transport_public_ip:
+          {{ vbond_transport_public_ip }}
+      organization_name:
+          {{ organization_name }}
+
+      Press any key to continue, press `Ctrl + C` and `Shift + A` to abort
+  register: user_response
+
+- name: Verify required variables for selected role
+  ansible.builtin.include_tasks: variables_assertion.yml
+
+- name: Set initial configuration via administration settings
+  cisco.catalystwan.administration_settings:
+    validator:
+      domain_ip: "{{ vbond_instances[0].transport_public_ip }}"
+      port: 12346
+    organization: "{{ organization_name }}"
+    certificates:
+      retrieve_interval: 2
+    pnp_connect_sync: "on"
+    smart_account_credentials:  # GET the info about how Shivram's config failed because of the missing PnP controller profile
+      username: "{{ pnp_username }}"
+      password: "{{ pnp_password }}"
+    manager_authentication:
+      url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+      username: "{{ (vmanage_instances | first).admin_username }}"
+      password: "{{ (vmanage_instances | first).admin_password }}"

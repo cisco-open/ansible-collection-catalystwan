@@ -1,0 +1,31 @@
+# Copyright 2024 Cisco Systems, Inc. and its affiliates
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+---
+
+- name: Verify required variables for selected role
+  ansible.builtin.include_tasks: variables_assertion.yml
+
+- name: Gather information about all controllers
+  cisco.catalystwan.devices_info:
+    device_category: controllers
+    manager_authentication:
+      url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+      username: "{{ (vmanage_instances | first).admin_username }}"
+      password: "{{ (vmanage_instances | first).admin_password }}"
+  register: devices_details_info
+
+- name: Remove all discoverable controllers
+  cisco.catalystwan.devices_controllers:
+    device_ip: "{{ device_controller.system_ip }}"
+    state: invalidated
+    personality: "{{ device_controller.personality }}"
+    manager_authentication:
+      url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+      username: "{{ (vmanage_instances | first).admin_username }}"
+      password: "{{ (vmanage_instances | first).admin_password }}"
+  loop: "{{ devices_details_info.devices }}"
+  loop_control:
+    loop_var: device_controller
+    label: "Controller personality: {{ device_controller.personality }} - system_ip: {{ device_controller.system_ip }}"
+  when: devices_details_info.devices | length | int > 0

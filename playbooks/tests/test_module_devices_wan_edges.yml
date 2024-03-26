@@ -1,0 +1,45 @@
+# Copyright 2024 Cisco Systems, Inc. and its affiliates
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+---
+
+# Helper playbooks to test modules and flows while developing them
+
+
+# Tested operations:
+
+# 1. Upload WAN Edge List
+# 2. Sync devices with Smart Account only if user didn't provide WAN Edge list path
+
+
+- name: Testing playbook to verify cisco.catalystwan.devices_wan_edges module operations
+  hosts: localhost
+  gather_facts: false
+  vars_files:
+    - configuration_file_dev_vars.yml
+  vars:
+    pnp_username: xxxxx
+    pnp_password: xxxxx
+  tasks:
+    # serial viptela file will work only for dev/engineering images
+    - name: 1. Upload WAN Edge List
+      cisco.catalystwan.devices_wan_edges:
+        wan_edge_list: "{{ wan_edge_list_path }}"
+        state: present
+        manager_authentication:
+          url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+          username: "{{ (vmanage_instances | first).admin_username }}"
+          password: "{{ (vmanage_instances | first).admin_password }}"
+      when: wan_edge_list_path is defined
+
+    - name: 2. Sync devices with Smart Account only if user didn't provide WAN Edge list path
+      cisco.catalystwan.devices_wan_edges:
+        state: present
+        sync_devices_from_smart_account: true
+        username: "{{ pnp_username }}"
+        password: "{{ pnp_password }}"
+        manager_authentication:
+          url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+          username: "{{ (vmanage_instances | first).admin_username }}"
+          password: "{{ (vmanage_instances | first).admin_password }}"
+      when: wan_edge_list_path is not defined

@@ -1,0 +1,7 @@
+# Copyright 2024 Cisco Systems, Inc. and its affiliates
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+---
+
+retry_value_manager_api_ready: 150
+delay_value_manager_api_ready: 10

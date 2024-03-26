@@ -1,0 +1,80 @@
+# Copyright 2024 Cisco Systems, Inc. and its affiliates
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+---
+
+- name: Verify required variables for selected role
+  ansible.builtin.include_tasks: variables_assertion.yml
+
+- name: Inform user that in case of PnP portal sync, devices have to be defined in PnP
+  ansible.builtin.pause:
+    prompt: |-
+
+      Please verify that your PnP Portal Devices list is not empty.
+
+      Press any key to continue, press `Ctrl + C` and `Shift + A` to abort
+  register: user_response
+
+
+# serial viptela file will work only for dev/engineering images
+- name: Upload WAN Edge List
+  cisco.catalystwan.devices_wan_edges:
+    wan_edge_list: "{{ wan_edge_list_path }}"
+    state: present
+    manager_authentication:
+      url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+      username: "{{ (vmanage_instances | first).admin_username }}"
+      password: "{{ (vmanage_instances | first).admin_password }}"
+  when: wan_edge_list_path is defined
+
+- name: Sync devices with Smart Account only if user didn't provide WAN Edge list path
+  cisco.catalystwan.devices_wan_edges:
+    state: present
+    sync_devices_from_smart_account: true
+    username: "{{ pnp_username }}"
+    password: "{{ pnp_password }}"
+    manager_authentication:
+      url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+      username: "{{ (vmanage_instances | first).admin_username }}"
+      password: "{{ (vmanage_instances | first).admin_password }}"
+  when: wan_edge_list_path is not defined
+
+- name: Generate bootstrap configuration for all devices
+  cisco.catalystwan.devices_wan_edges:
+    generate_bootstrap_configuration: true
+    manager_authentication:
+      url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+      username: "{{ (vmanage_instances | first).admin_username }}"
+      password: "{{ (vmanage_instances | first).admin_password }}"
+  register: all_bootstrap_cfg
+
+- name: Initialize empty dictionary for generated_data_edge_instances
+  ansible.builtin.set_fact:
+    generated_data_edge_instances:
+      edge_instances: []
+
+- name: Generate entries for generated_data_edge_instances.edge_instances
+  ansible.builtin.set_fact:
+    generated_data_edge_instances:
+      edge_instances: "{{ generated_data_edge_instances.edge_instances + [new_entry] }}"
+  vars:
+    new_entry:
+      hostname: "{{ organization_name }}-cedge-{{ index + 1 }}"
+      otp: "{{ instance.otp }}"
+      uuid: "{{ instance.uuid }}"
+      vbond: "{{ instance.vbond }}"
+      system_ip: "192.168.10{{ index + 1 }}.1"
+      site_id: "{{ 1000 + index + 1 }}"
+  loop: "{{ all_bootstrap_cfg.bootstrap_configuration }}"
+  loop_control:
+    index_var: index
+    loop_var: instance
+
+- name: "Generate file to store edge deployment configuration, path: {{ deployment_edges_config }}"
+  ansible.builtin.blockinfile:
+    create: true
+    state: present
+    mode: "0644"
+    insertafter: EOF
+    dest: "{{ deployment_edges_config }}"
+    content: "{{ generated_data_edge_instances | to_nice_yaml(indent=2) }}"
