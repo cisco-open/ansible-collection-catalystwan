@@ -20,19 +20,23 @@
 - name: Verify required variables for selected role
   ansible.builtin.include_tasks: variables_assertion.yml
 
-- name: Set initial configuration via administration settings
+- name: Set initial configuration via administration settings - loop through all vManage devices
   cisco.catalystwan.administration_settings:
     validator:
-      domain_ip: "{{ vbond_instances[0].transport_public_ip }}"
-      port: 12346
+      domain_ip: "{{ vbond_transport_public_ip }}"
+      port: 12346  # should be customizable
     organization: "{{ organization_name }}"
     certificates:
-      retrieve_interval: 2
+      retrieve_interval: "2"
     pnp_connect_sync: "on"
     smart_account_credentials:  # GET the info about how Shivram's config failed because of the missing PnP controller profile
       username: "{{ pnp_username }}"
       password: "{{ pnp_password }}"
     manager_authentication:
-      url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
-      username: "{{ (vmanage_instances | first).admin_username }}"
-      password: "{{ (vmanage_instances | first).admin_password }}"
+      url: "{{ device_item.mgmt_public_ip }}"
+      username: "{{ device_item.admin_username }}"
+      password: "{{ device_item.admin_password }}"
+  loop: "{{ vmanage_instances }}"
+  loop_control:
+    loop_var: device_item
+    label: "hostname: {{ device_item.hostname }}, device_ip: {{ device_item.system_ip }}"

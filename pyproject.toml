@@ -9,7 +9,7 @@ readme = "README.md"
 python = "^3.9.0"
 ansible-core = "^2.13"
 ansible = "^6.7.0"
-catalystwan = "v0.31.0"
+catalystwan = "v0.33.3"
 tenacity = "^8.2.3"
 ansible-lint = { version = "^6.9.0", markers = "platform_system != 'Windows'" }
 
