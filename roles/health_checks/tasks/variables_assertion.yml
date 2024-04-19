@@ -16,7 +16,5 @@
     quiet: true
   loop:
     - "{{ vmanage_instances }}"
-    - "{{ vbond_instances }}"
-    - "{{ vsmart_instances }}"
   loop_control:
     loop_var: required_var

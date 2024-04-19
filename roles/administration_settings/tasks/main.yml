@@ -24,7 +24,7 @@
   cisco.catalystwan.administration_settings:
     validator:
       domain_ip: "{{ vbond_transport_public_ip }}"
-      port: 12346  # should be customizable
+      port: "12346"  # should be customizable
     organization: "{{ organization_name }}"
     certificates:
       retrieve_interval: "2"

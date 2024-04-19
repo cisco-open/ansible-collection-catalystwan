@@ -113,33 +113,46 @@ def control_connections_have_state_up(
 ):
     EXCECTED_STATE = "up"
     control_connections_health = []
+    result.response[f"{HealthCheckTypes.CONTROL_CONNECTIONS.value}"] = {}
 
     devices_list = [dev for dev in devices if dev.personality != Personality.VBOND]
 
     for dev in devices_list:
+        # if device not reachable report problem but move with other devices to have all reported
+        if dev.reachability != "reachable":
+            control_connections_health.append(False)
+            result.health_summary.append(
+                    f'Device {dev.personality}: {dev.uuid} - not reachable. Cannot verify control connections state.',
+                )
+            continue
+
         connections = module.get_response_safely(
             module.session.api.device_state.get_device_control_connections_info, device_id=dev.system_ip
         )
-        module.logger.info(f"get_device_control_connections_info data: {[asdict(con) for con in connections]}")
+        module.logger.debug(f"control connections for {dev.uuid}: {[asdict(con) for con in connections]}")
+        result.response[f"{HealthCheckTypes.CONTROL_CONNECTIONS.value}"][dev.uuid] = [asdict(connection) for connection in connections]
+
         for connection in connections:
-            result.response[f"{dev.uuid}"] = asdict(connection)
             if connection.state == EXCECTED_STATE:
                 control_connections_health.append(True)
                 result.health_summary.append(
-                    f'Control connections state "{EXCECTED_STATE}" for {dev.personality} {dev.uuid}',
+                    f'Control connection state "{EXCECTED_STATE}" for {dev.personality} {dev.uuid}. '
+                    f'peer-type: {connection.peerType}, system-ip: {connection.systemIp}'
                 )
             else:
                 control_connections_health.append(False)
                 result.health_summary.append(
-                    f'Wrong state "{connection.state}" for {dev.uuid}'
-                    f" for control connection with {connection.peerType} {connection.systemIp}."
+                    f'Wrong state "{connection.state}" for {dev.personality} {dev.uuid}. '
+                    f"peer-type: {connection.peerType}, system-ip: {connection.systemIp}"
                 )
+
     if not control_connections_health:
         result.msg = "No Control connections present!"
         module.fail_json(**result.model_dump(mode="json"))
 
     if not all(control_connections_health):
-        result.msg = f"Not all health checks passed. health_summary: {result.health_summary}"
+        result.msg = "Not all health checks for control connections passed. " \
+                    "See result.health_summary for list of all control connections state."
         module.fail_json(**result.model_dump(mode="json"))
 
     result.msg = "All required health checks have been completed successfully"
@@ -151,32 +164,45 @@ def orchestrator_connections_have_state_up(
 ):
     EXCECTED_STATE = "up"
     orchestrator_connections_health = []
+    result.response[f"{HealthCheckTypes.ORCHERSTRATOR_CONNECTIONS.value}"] = {}
+
     vbonds = [dev for dev in devices if dev.personality == Personality.VBOND]
     for dev in vbonds:
+        # if device not reachable report problem but move with other devices to have all reported
+        if dev.reachability != "reachable":
+            orchestrator_connections_health.append(False)
+            result.health_summary.append(
+                    f'Device {dev.personality}: {dev.uuid} - not reachable. Cannot verify orchestrator connections state.',
+                )
+            continue
+
         connections = module.get_response_safely(
             module.session.api.device_state.get_device_orchestrator_connections_info, device_id=dev.system_ip
         )
-        module.logger.info(f"get_device_orchestrator_connections_info data: {[asdict(con) for con in connections]}")
+        module.logger.debug(f"orchestrator connections for {dev.uuid}: {[asdict(con) for con in connections]}")
+        result.response[f"{HealthCheckTypes.ORCHERSTRATOR_CONNECTIONS.value}"][dev.uuid] = [asdict(connection) for connection in connections]
 
         for connection in connections:
-            result.response[f"{dev.uuid}"] = asdict(connection)
             if connection.state == EXCECTED_STATE:
                 orchestrator_connections_health.append(True)
                 result.health_summary.append(
-                    f'Orchestrator connections state "{EXCECTED_STATE}" for {dev.personality} {dev.uuid}',
+                    f'Orchestrator connection state "{EXCECTED_STATE}" for {dev.personality} {dev.uuid}. '
+                    f'peer-type: {connection.peerType}, system-ip: {connection.systemIp}'
                 )
             else:
                 orchestrator_connections_health.append(False)
                 result.health_summary.append(
-                    f'Wrong state "{connection.state}" for {dev.uuid}'
-                    f" for orchestrator connection with {connection.peerType} {connection.systemIp}."
+                    f'Wrong state "{connection.state}" for {dev.personality} {dev.uuid}. '
+                    f"peer-type: {connection.peerType}, system-ip: {connection.systemIp}"
                 )
+
     if not orchestrator_connections_health:
         result.msg = "No Orchestractor connections present!"
         module.fail_json(**result.model_dump(mode="json"))
 
     if not all(orchestrator_connections_health):
-        result.msg = f"Not all health checks passed. health_summary: {result.health_summary}"
+        result.msg = "Not all health checks for orchestrator connections passed. " \
+                    "See result.health_summary for list of all orchestrator connections state."
         module.fail_json(**result.model_dump(mode="json"))
 
     result.msg = "All required health checks have been completed successfully"
@@ -193,8 +219,16 @@ def system_status_is_healthy(
     DEVICE_REACHABILITY = "reachable"
 
     system_status_is_healthy = []
+    result.response[f"{HealthCheckTypes.DEVICE_SYSTEM_STATUS.value}"] = {}
 
     for dev in devices:
+        # if devbice not reachable report problem but move with other devices to have all reported
+        if dev.reachability != "reachable":
+            system_status_is_healthy.append(False)
+            result.health_summary.append(
+                    f'Device {dev.personality}: {dev.uuid} - not reachable. Cannot verify system status health.',
+                )
+            continue
         system_status = module.get_response_safely(
             module.session.api.device_state.get_system_status, device_id=dev.system_ip
         )
@@ -202,8 +236,8 @@ def system_status_is_healthy(
             module.session.api.devices.get(rediscover=True)
             system_status = module.session.api.device_state.get_system_status(dev.system_ip)
 
-        module.logger.info(f"get_system_status data: {asdict(system_status)}")
-        result.response[f"{dev.uuid}"] = asdict(system_status)
+        module.logger.info(f"System status for {dev.uuid}: {asdict(system_status)}")
+        result.response[f"{HealthCheckTypes.DEVICE_SYSTEM_STATUS.value}"][dev.uuid] = asdict(system_status)
 
         if isinstance(system_status.cpu_state, str) and system_status.cpu_state == CPU_STATE:
             system_status_is_healthy.append(True)
@@ -260,7 +294,8 @@ def system_status_is_healthy(
         module.fail_json(**result.model_dump(mode="json"))
 
     if not all(system_status_is_healthy):
-        result.msg = f"Not all health checks passed. health_summary: {result.health_summary}"
+        result.msg = "Not all health checks for system status passed. " \
+                    "See result.health_summary for list of all system statuses."
         module.fail_json(**result.model_dump(mode="json"))
 
     result.msg = "All required health checks have been completed successfully"
@@ -272,30 +307,44 @@ def bfd_sessions_health(
 ):
     EXCECTED_STATE = "up"
     bfd_sessions_health = []
+    result.response[f"{HealthCheckTypes.BFD.value}"] = {}
 
     for dev in devices:
+        # if devbice not reachable report problem but move with other devices to have all reported
+        if dev.reachability != "reachable":
+            bfd_sessions_health.append(False)
+            result.health_summary.append(
+                    f'Device {dev.personality}: {dev.uuid} - not reachable. Cannot verify BFD sessions state.',
+                )
+            continue
+
         bfd_sessions = module.get_response_safely(
             module.session.api.device_state.get_bfd_sessions, device_id=dev.system_ip
         )
-        module.logger.info(f"get_bfd_sessions data: {[asdict(ses) for ses in bfd_sessions]}")
+        module.logger.info(f"BFD sessions for {dev.uuid}: {[asdict(ses) for ses in bfd_sessions]}")
+        result.response[f"{HealthCheckTypes.BFD.value}"][dev.uuid] = [asdict(bfd_session) for bfd_session in bfd_sessions]
 
         for bfd_session in bfd_sessions:
-            result.response[f"{dev.uuid}"] = asdict(bfd_session)
             if bfd_session.state == EXCECTED_STATE:
                 bfd_sessions_health.append(True)
                 result.health_summary.append(
-                    f'BFD sessions state "{EXCECTED_STATE}" for {dev.personality} {dev.uuid}',
+                    f'BFD sessions state "{EXCECTED_STATE}" for {dev.personality} {dev.uuid} '
+                    f'dst-ip: {bfd_session.destinationPublicIp}, src-ip: {bfd_session.sourceIp}'
                 )
             else:
                 bfd_sessions_health.append(False)
-                result.health_summary.append(f'Wrong state "{bfd_session.state}" for {dev.uuid}')
+                result.health_summary.append(
+                    f'Wrong state "{bfd_session.state}" for {dev.uuid}'
+                    f'dst-ip: {bfd_session.destinationPublicIp}, src-ip: {bfd_session.sourceIp}'
+                )
 
     if not bfd_sessions_health:
         result.msg = "No BFD sessions present!"
         module.fail_json(**result.model_dump(mode="json"))
 
     if not all(bfd_sessions_health):
-        result.msg = f"Not all health checks passed. health_summary: {result.health_summary}"
+        result.msg = "Not all health checks for BFD sessions passed. " \
+                    "See result.health_summary for list of all BFD sessions state."
         module.fail_json(**result.model_dump(mode="json"))
 
     result.msg = "All required health checks have been completed successfully"
@@ -307,17 +356,26 @@ def omp_sessions_health(
 ):
     EXCECTED_STATE = ["up", "UP"]
     omp_sessions_health = []
+    result.response[f"{HealthCheckTypes.OMP.value}"] = {}
 
     for dev in devices:
+        # if devbice not reachable report problem but move with other devices to have all reported
+        if dev.reachability != "reachable":
+            omp_sessions_health.append(False)
+            result.health_summary.append(
+                    f'Device {dev.personality}: {dev.uuid} - not reachable. Cannot verify OMP sessions state.',
+                )
+            continue
+
         omp_sessions = module.get_response_safely(module.session.api.omp.get_omp_summary, device_id=dev.system_ip)
-        module.logger.info(f"get_omp_summary data: {[asdict(ses) for ses in omp_sessions]}")
+        module.logger.info(f"OMP summary data: {[asdict(ses) for ses in omp_sessions]}")
+        result.response[f"{HealthCheckTypes.OMP.value}"][dev.uuid] = [asdict(omp_session) for omp_session in omp_sessions]
 
         for omp_session in omp_sessions:
-            result.response[f"{dev.uuid}"] = asdict(omp_session)
             if omp_session.oper_state in EXCECTED_STATE:
                 omp_sessions_health.append(True)
                 result.health_summary.append(
-                    f'OMP sessions state "{EXCECTED_STATE[0]}" for {dev.personality} {dev.uuid}',
+                    f'OMP sessions state "{EXCECTED_STATE[0]}" for {dev.personality} {dev.uuid}'
                 )
             else:
                 omp_sessions_health.append(False)
@@ -328,7 +386,8 @@ def omp_sessions_health(
         module.fail_json(**result.model_dump(mode="json"))
 
     if not all(omp_sessions_health):
-        result.msg = f"Not all health checks passed. health_summary: {result.health_summary}"
+        result.msg = "Not all health checks for OMP sessions passed. " \
+                    "See result.health_summary for list of all OMP sessions state."
         module.fail_json(**result.model_dump(mode="json"))
 
     result.msg = "All required health checks have been completed successfully"
@@ -349,6 +408,7 @@ def run_module():
     result = ExtendedModuleResult()
 
     devices: DataSequence[DeviceDetailsResponse] = get_devices_details(module=module)
+    module.logger.debug(f"Devices to test: {[dev.host_name for dev in devices]}")
     if not devices:
         result.msg = f"Empty devices list based on filter: {module.params.get('filters')}"
         module.exit_json(**result.model_dump(mode="json"))

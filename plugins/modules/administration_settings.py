@@ -105,7 +105,7 @@ EXAMPLES = r"""
   cisco.catalystwan.administration_settings:
     validator:
       domain_ip: "192.0.2.1"
-      port: 12346
+      port: "12346"
     manager_credentials:
       url: "https://vmanage.example.com"
       username: "admin"
@@ -166,7 +166,7 @@ response:
       description: vBond validator settings.
       returned: when validator is provided
       type: dict
-      sample: {"domain_ip": "192.0.2.1", "port": 12346}
+      sample: {"domain_ip": "192.0.2.1", "port": "12346"}
     certificates:
       description: Controller certificate authorization settings.
       returned: when certificates are provided
@@ -191,8 +191,6 @@ response:
       sample: "ON"
 """
 
-
-from enum import Enum
 from typing import get_args
 
 from catalystwan.endpoints.configuration_settings import (
@@ -216,7 +214,7 @@ def run_module():
             aliases=["vbond"],
             options=dict(
                 domain_ip=dict(type="str"),
-                port=dict(type="int"),
+                port=dict(type="str"),
             ),
         ),
         certificates=dict(
