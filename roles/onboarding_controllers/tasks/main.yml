@@ -67,7 +67,7 @@
       username: "{{ (vmanage_instances | first).admin_username }}"
       password: "{{ (vmanage_instances | first).admin_password }}"
   register: device_details_info
-  loop: "{{ vsmart_instances + vbond_instances + [(vmanage_instances|first)] }}"
+  loop: "{{ vsmart_instances + vbond_instances + [(vmanage_instances | first)] }}"
   loop_control:
     loop_var: device_item
     label: "hostname: {{ device_item.hostname }}, device_ip: {{ device_item.system_ip }}"
@@ -85,7 +85,7 @@
       username: "{{ (vmanage_instances | first).admin_username }}"
       password: "{{ (vmanage_instances | first).admin_password }}"
   register: device_details_info
-  loop: "{{ vsmart_instances + vbond_instances + [(vmanage_instances|first)] }}"
+  loop: "{{ vsmart_instances + vbond_instances + [(vmanage_instances | first)] }}"
   loop_control:
     loop_var: device_item
     label: "hostname: {{ device_item.hostname }}, device_ip: {{ device_item.system_ip }}"

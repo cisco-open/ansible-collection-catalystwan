@@ -6,11 +6,10 @@ authors = ["acichon <acichon@cisco.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.9.0"
-ansible-core = "^2.13"
-ansible = "^6.7.0"
+python = "^3.10.0"
+ansible-core = "^2.16.5"
+ansible = "^9.4.0"
 catalystwan = "v0.33.3"
-tenacity = "^8.2.3"
 ansible-lint = { version = "^6.9.0", markers = "platform_system != 'Windows'" }
 
 [tool.poetry.group.dev.dependencies]
