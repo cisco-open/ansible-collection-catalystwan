@@ -13,20 +13,22 @@ from __future__ import annotations
 class ModuleDocFragment(object):
     DOCUMENTATION = r"""
 options:
-    cisco_banner:
-        description: Cisco Banner configuration for login and message of the day (MOTD)
+    security_vsmart:
+        description: Security settings for vSmart controller
         type: dict
         suboptions:
-            login_banner:
+            protocol:
                 description:
-                - The login banner text displayed before authentication
+                - The security protocol used for control plane communication
                 required: false
                 default: null
                 type: str
-            motd_banner:
+                choices:
+                - dtls
+                - tls
+            tls_port:
                 description:
-                - The message of the day (MOTD) banner text displayed after successful
-                    authentication
+                - The port used for TLS communications
                 required: false
                 default: null
                 type: str
