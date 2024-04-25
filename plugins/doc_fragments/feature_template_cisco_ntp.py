@@ -34,19 +34,19 @@ options:
                     key:
                         description:
                         - The identifier for the authentication key
-                        required: true
+                        required: false
                         default: null
                         type: str
                     vpn:
                         description:
                         - The VPN ID associated with the NTP server
-                        required: true
+                        required: false
                         default: null
                         type: str
                     version:
                         description:
                         - The NTP version used
-                        required: true
+                        required: false
                         default: null
                         type: str
                     source_interface:
@@ -58,7 +58,7 @@ options:
                     prefer:
                         description:
                         - Whether this server is preferred over others
-                        required: true
+                        required: false
                         default: null
                         type: str
             authentication:

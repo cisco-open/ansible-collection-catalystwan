@@ -47,6 +47,7 @@ extends_documentation_fragment:
   - cisco.catalystwan.feature_template_cisco_logging
   - cisco.catalystwan.feature_template_cisco_ntp
   - cisco.catalystwan.device_models_feature_template
+  - cisco.catalystwan.manager_authentication
 author:
   - Arkadiusz Cichon (acichon@cisco.com)
 """

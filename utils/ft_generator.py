@@ -34,7 +34,7 @@ def is_pydantic_model(type_):
 
 def field_to_ansible_option(field: FieldInfo):
     # # if field.description == "List of public keys for the user":
-    # if field.description == "List of user configurations":
+    # if field.description == "The identifier for the authentication key":
     #     from IPython import embed; embed()
     option = {
         "description": [field.description],
@@ -122,6 +122,13 @@ def generate_ansible_docs(model: Type[BaseModel], model_name: str):
     return ansible_docs
 
 
+# from catalystwan.api.templates.models.cisco_ntp_model import CiscoNTPModel
+
+# available_models = {
+#     "cisco_ntp": CiscoNTPModel,
+# }
+
+
 # Function to parse YAML data and return the argument spec
 def generate_arg_spec(yaml_data):
     # Load the YAML data
@@ -133,7 +140,7 @@ def generate_arg_spec(yaml_data):
         for opt_name, opt_info in options.items():
             if "type" in opt_info:
                 # Basic fields
-                # if opt_name == "pubkey_chain":
+                # if opt_name == "key":
                 #     from IPython import embed; embed()
                 arg_spec[opt_name] = {
                     "type": opt_info["type"],
