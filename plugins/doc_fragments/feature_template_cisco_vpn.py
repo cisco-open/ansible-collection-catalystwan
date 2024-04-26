@@ -447,6 +447,8 @@ options:
                         default: null
                         type: list
                         elements: str
+                        choices:
+                        - external
                     prefix_list:
                         description:
                         - A list of prefix lists associated with the advertisement
@@ -513,6 +515,8 @@ options:
                         default: null
                         type: list
                         elements: str
+                        choices:
+                        - external
                     prefix_list:
                         description:
                         - A list of IPv6 prefix lists associated with the advertisement

@@ -1,0 +1,251 @@
+# Copyright 2024 Cisco Systems, Inc. and its affiliates
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+---
+
+# Helper playbooks to test modules and flows while developing them
+
+# Tested operations:
+
+# --- Feature Templates creation --- #
+
+
+- name: Testing playbook to verify cisco.catalystwan.feature_template module operations
+  hosts: localhost
+  gather_facts: false
+  vars_files:
+    - configuration_file_dev_vars.yml
+  vars:
+    manager_authentication: &manager_authentication
+      url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+      username: "{{ (vmanage_instances | first).admin_username }}"
+      password: "{{ (vmanage_instances | first).admin_password }}"
+  tasks:
+    - name: Get all Non-Default Feature Templates available
+      cisco.catalystwan.feature_templates_info:
+        filters:
+          factory_default: false
+        manager_credentials:
+          <<: *manager_authentication
+      register: feature_templates
+
+    - name: Delete all Non-Default Feature templates
+      cisco.catalystwan.feature_templates:
+        state: absent
+        template_name: "{{ template.templateName }}"
+        manager_credentials:
+          <<: *manager_authentication
+      loop: "{{ feature_templates.templates_info | default([], true)}}"
+      loop_control:
+        loop_var: template
+        label: "template: {{ template.templateName }}"
+
+    - name: Create Comprehensive AAA Template with TACACS+ and RADIUS
+      cisco.catalystwan.feature_templates:
+        state: present
+        template_name: "ComprehensiveAAATemplate"
+        template_description: "AAA Template with both TACACS+ and RADIUS servers"
+        device_models:
+          - vmanage
+        cisco_aaa:
+          user:
+            - name: "local_admin"
+              password: "admin_password"
+              privilege: "15"
+          tacacs:
+            - group_name: "TACACSGroup1"
+              vpn: "0"
+              source_interface: "GigabitEthernet0/1"
+              server:
+                - address: "192.168.2.10"
+                  port: "49"
+                  timeout: "5"
+                  key: "tacacs_key"
+          radius:
+            - group_name: "RADIUSGroup1"
+              vpn: "0"
+              source_interface: "GigabitEthernet0/0"
+              server:
+                - address: "192.168.1.10"
+                  auth_port: "1812"
+                  acct_port: "1813"
+                  timeout: "5"
+                  retransmit: "3"
+                  key: "radius_key"
+                  secret_key: "secret"
+          server_auth_order:
+            - "local"
+            - "RADIUSGroup1"
+            - "TACACSGroup1"
+          authentication_group: true
+          accounting_group: true
+          domain_stripping: 'yes'
+        manager_credentials:
+          <<: *manager_authentication
+
+    - name: Create Cisco Banner Feature Template
+      cisco.catalystwan.feature_templates:
+        state: present
+        template_name: "CiscoBannerConfigTemplate"
+        template_description: "Banner configuration for login and MOTD"
+        device_models:
+          - "vedge-C8000V"
+        cisco_banner:
+          login_banner: |
+            ****************************************************************
+            * Unauthorized access to this device is prohibited.            *
+            * You must have explicit permission to access or configure this *
+            * device. All activities performed on this device are logged and *
+            * violations of this policy may result in disciplinary action,   *
+            * and may be reported to law enforcement. There is no right to  *
+            * privacy on this device. Use of this system constitutes consent *
+            * to monitoring for these purposes.                             *
+            ****************************************************************
+          motd_banner: |
+            ****************************************************************
+            * Welcome to Company XYZ Network!                              *
+            * All connections are monitored and recorded for audit purposes. *
+            * Disconnect IMMEDIATELY if you are not an authorized user!     *
+            ****************************************************************
+        manager_credentials:
+          <<: *manager_authentication
+
+    - name: Create Cisco BFD Feature Template
+      cisco.catalystwan.feature_templates:
+        state: present
+        template_name: "CiscoBFDFeatureTemplate"
+        template_description: "Comprehensive BFD configuration"
+        device_models:
+          - "vedge-C8000V"
+        cisco_bfd:
+          multiplier: "3"
+          poll_interval: "500"
+          default_dscp: "46"
+          color:
+            - color: "mpls"
+              hello_interval: "50"
+              multiplier: "3"
+              pmtu_discovery: "yes"
+              dscp: "48"
+            - color: "biz-internet"
+              hello_interval: "100"
+              multiplier: "4"
+              pmtu_discovery: "no"
+              dscp: "46"
+            - color: "private1"
+              hello_interval: "150"
+              multiplier: "5"
+              pmtu_discovery: "yes"
+              dscp: "44"
+        manager_credentials:
+          <<: *manager_authentication
+
+    - name: Configure Cisco Logging Feature Template
+      cisco.catalystwan.feature_templates:
+        state: present
+        template_name: "CiscoLoggingFeatureTemplate"
+        template_description: "Comprehensive Logging Configuration"
+        device_models:
+          - "vedge-C8000V"
+        cisco_logging:
+          enable: "yes"
+          size: "10240"
+          rotate: "5"
+          tls_profile:
+            - profile: "StrictTLSProfile"
+              version: "TLSv1.2"
+              auth_type: "Mutual"
+              ciphersuite_list:
+                - "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256"
+                - "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"
+          server:
+            - name: "LogServer1"
+              vpn: "10"
+              source_interface: "GigabitEthernet0/0/0"
+              priority: "information"
+              enable_tls: "yes"
+              custom_profile: "yes"
+              profile: "StrictTLSProfile"
+          ipv6_server:
+            - name: "LogServerIPv6_1"
+              vpn: "10"
+              source_interface: "GigabitEthernet0/0/0"
+              priority: "error"
+              enable_tls: "yes"
+              custom_profile: "yes"
+              profile: "StrictTLSProfile"
+        manager_credentials:
+          <<: *manager_authentication
+
+    - name: Configure Cisco NTP Feature Template
+      cisco.catalystwan.feature_templates:
+        state: present
+        template_name: "CiscoNTPFeatureTemplate"
+        template_description: "Comprehensive NTP Configuration"
+        device_models:
+          - "vmanage"
+        cisco_ntp:
+          server:
+            - name: "0.pool.ntp.org"
+              key: "10"
+              vpn: "1"
+              version: "4"
+              source_interface: "GigabitEthernet0/0/0"
+              prefer: "yes"
+            - name: "1.pool.ntp.org"
+              key: "20"
+              vpn: "1"
+              version: "4"
+              source_interface: "GigabitEthernet0/0/1"
+          authentication:
+            - number: "10"
+              md5: "44b9d6ee8faafed3"
+            - number: "20"
+              md5: "f7a1a7e81e4567d9"
+          trusted:
+            - "10"
+            - "20"
+          enable: "yes"
+          stratum: "2"
+          source: "Loopback0"
+        manager_credentials:
+          <<: *manager_authentication
+
+    - name: Configure Cisco OMP Feature Template
+      cisco.catalystwan.feature_templates:
+        state: present
+        template_name: "CiscoOMPFeatureTemplate"
+        template_description: "Comprehensive OMP Configuration"
+        device_models:
+          - "vmanage"
+        cisco_omp:
+          graceful_restart: true
+          overlay_as: "65530"
+          send_path_limit: "5"
+          ecmp_limit: "2"
+          shutdown: false
+          omp_admin_distance_ipv4: "130"
+          omp_admin_distance_ipv6: "130"
+          advertisement_interval: "30"
+          graceful_restart_timer: "120"
+          eor_timer: "300"
+          holdtime: "180"
+          advertise:
+            - protocol: "bgp"
+              route: "external"
+            - protocol: "ospf"
+            - protocol: "static"
+          ipv6_advertise:
+            - protocol: "bgp"
+            - protocol: "ospf"
+            - protocol: "connected"
+          ignore_region_path_length: "true"
+          transport_gateway: "prefer"
+          site_types:
+            - "type-1"
+            - "type-2"
+            - "branch"
+          auto_translate: true
+        manager_credentials:
+          <<: *manager_authentication
+

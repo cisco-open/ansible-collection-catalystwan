@@ -550,6 +550,14 @@ options:
                 default: null
                 type: list
                 elements: str
+                choices:
+                - type-1
+                - type-2
+                - type-3
+                - cloud
+                - branch
+                - br
+                - spoke
             port_offset:
                 description:
                 - The port offset for the device.

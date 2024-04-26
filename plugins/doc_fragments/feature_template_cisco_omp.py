@@ -163,6 +163,14 @@ options:
                 default: null
                 type: list
                 elements: str
+                choices:
+                - type-1
+                - type-2
+                - type-3
+                - cloud
+                - branch
+                - br
+                - spoke
             auto_translate:
                 description:
                 - Enable or disable automatic translation of network settings.
