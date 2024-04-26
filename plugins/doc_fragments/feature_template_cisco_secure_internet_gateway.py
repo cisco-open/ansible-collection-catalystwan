@@ -11,7 +11,7 @@ from __future__ import annotations
 
 
 class ModuleDocFragment(object):
-    DOCUMENTATION = r"""
+    DOCUMENTATION = r'''
 options:
     cisco_secure_internet_gateway:
         description: Cisco Secure Internet Gateway feature template configuration
@@ -487,4 +487,4 @@ options:
                         type: str
                         choices:
                         - SIG
-    """
+    '''

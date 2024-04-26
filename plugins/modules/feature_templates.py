@@ -46,6 +46,8 @@ extends_documentation_fragment:
   - cisco.catalystwan.feature_template_cisco_bfd
   - cisco.catalystwan.feature_template_cisco_logging
   - cisco.catalystwan.feature_template_cisco_ntp
+  - cisco.catalystwan.feature_template_cisco_omp
+  - cisco.catalystwan.feature_template_cisco_ospf
   - cisco.catalystwan.device_models_feature_template
   - cisco.catalystwan.manager_authentication
 author:
@@ -61,6 +63,7 @@ from catalystwan.api.template_api import FeatureTemplate
 from catalystwan.dataclasses import FeatureTemplateInfo
 from catalystwan.typed_list import DataSequence
 from catalystwan.utils.device_model import DeviceModel
+from catalystwan.session import ManagerHTTPError
 from catalystwan.api.templates.models.supported import available_models
 
 from ..module_utils.result import ModuleResult
@@ -70,7 +73,8 @@ from ..module_utils.feature_templates.cisco_banner import cisco_banner_definitio
 from ..module_utils.feature_templates.cisco_bfd import cisco_bfd_definition
 from ..module_utils.feature_templates.cisco_logging import cisco_logging_definition
 from ..module_utils.feature_templates.cisco_ntp import cisco_ntp_definition
-
+from ..module_utils.feature_templates.cisco_omp import cisco_omp_definition
+from ..module_utils.feature_templates.cisco_ospf import cisco_ospf_definition
 
 class ExtendedModuleResult(ModuleResult):
     templates_info: Optional[Dict] = Field(default={})
@@ -91,7 +95,7 @@ def run_module():
         ),
         template_name=dict(type="str", required=True),
         template_description=dict(type="str", default=None),
-        device_models=dict(type="list", choices=[device_model.value for device_model in DeviceModel]),
+        device_models=dict(type="list", choices=[device_model.value for device_model in DeviceModel], default=[]),
         debug=dict(type="bool", default=False),
         device=dict(type="str", default=None),  # For this we need to think how to pass devices
         **cisco_aaa_definition,
@@ -99,6 +103,8 @@ def run_module():
         **cisco_bfd_definition,
         **cisco_logging_definition,
         **cisco_ntp_definition,
+        **cisco_omp_definition,
+        **cisco_ospf_definition,
     )
 
     result = ExtendedModuleResult()
@@ -138,7 +144,7 @@ def run_module():
     all_templates: DataSequence[FeatureTemplateInfo] = module.get_response_safely(
         module.session.api.templates.get, template=FeatureTemplate
     )
-    target_template = all_templates.filter(name=template_name)
+    target_template: FeatureTemplateInfo = all_templates.filter(name=template_name)
 
     # Code for checking if template name exists already
     # if yes, do we need some force method or we just inform user and exit?
@@ -146,7 +152,7 @@ def run_module():
         if target_template:
             module.logger.debug(f"Detected existing template:\n{target_template}\n")
             result.msg = (
-                f"Template with name {template_name} already present on vManage," "skipping create template operation."
+                f"Template with name {template_name} already present on vManage, skipping create template operation."
             )
         else:
             for model_name, model_module in available_models.items():
@@ -163,8 +169,12 @@ def run_module():
                     module.logger.debug(
                         f"Prepared template for sending to vManage, template configuration:\n{template}\n"
                     )
-
-                    module.session.api.templates.create(template=template, debug=module.params.get("debug"))
+                    try:
+                        module.session.api.templates.create(template=template, debug=module.params.get("debug"))
+                    except ManagerHTTPError as ex:
+                        module.fail_json(
+                            msg=f"Could not perform create Feature Template {template_name}.\nManager error: {ex.info}"
+                        )
                     result.changed = True
                     result.msg += f"Created template {model_name}: {template}"
 

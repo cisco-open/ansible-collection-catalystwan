@@ -11,7 +11,7 @@ from __future__ import annotations
 
 
 class ModuleDocFragment(object):
-    DOCUMENTATION = r"""
+    DOCUMENTATION = r'''
 options:
     cisco_system:
         description: Cisco System configuration settings for SD-WAN devices.
@@ -926,4 +926,4 @@ options:
                 - aggressive
                 - moderate
                 - conservative
-    """
+    '''

@@ -11,7 +11,7 @@ from __future__ import annotations
 
 
 class ModuleDocFragment(object):
-    DOCUMENTATION = r"""
+    DOCUMENTATION = r'''
 options:
     system_vsmart:
         description: Security settings for vSmart controller
@@ -554,4 +554,4 @@ options:
                 required: false
                 default: null
                 type: str
-    """
+    '''

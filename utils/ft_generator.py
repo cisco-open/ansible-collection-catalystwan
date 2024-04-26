@@ -34,7 +34,7 @@ def is_pydantic_model(type_):
 
 def field_to_ansible_option(field: FieldInfo):
     # # if field.description == "List of public keys for the user":
-    # if field.description == "The identifier for the authentication key":
+    # if field.description == "A list of site types that are allowed to participate in the overlay network.":
     #     from IPython import embed; embed()
     option = {
         "description": [field.description],
@@ -78,9 +78,14 @@ def field_to_ansible_option(field: FieldInfo):
                 option["type"] = "list"
                 option["elements"] = "dict"
                 option["suboptions"] = model_to_ansible_options(user_class)
+            elif safe_issubclass(user_class, Enum):
+                option["type"] = "list"
+                option["elements"] = "str"
+                option["choices"] = [item.value for item in user_class]       
             else:
                 option["type"] = "list"
                 option["elements"] = "str"
+                
     elif is_pydantic_model(field_type):
         option["type"] = "dict"
         option["suboptions"] = model_to_ansible_options(field_type)
@@ -174,7 +179,7 @@ for model_name, model_module in available_models.items():
     env = Environment(loader=FileSystemLoader(template_dir), trim_blocks=True, lstrip_blocks=True)
     env.filters["to_nice_yaml"] = to_nice_yaml
 
-    template_file = PurePath("ft_docs_template.j2")
+    template_file = PurePath("docs_fragments_template.j2")
     template = env.get_template(str(template_file))
 
     output = template.render(yaml_data=ansible_docs)

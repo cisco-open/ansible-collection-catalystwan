@@ -17,6 +17,12 @@ options:
       - A dictionary of filters used to select devices for module action.
     type: dict
     required: false
+    # suboptions:
+    #   description:
+    #   - The login banner text displayed before authentication
+    #   required: false
+    #   default: null
+    #   type: str
 author:
   - Arkadiusz Cichon (acichon@cisco.com)
 extends_documentation_fragment:

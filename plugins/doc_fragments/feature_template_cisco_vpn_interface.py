@@ -11,7 +11,7 @@ from __future__ import annotations
 
 
 class ModuleDocFragment(object):
-    DOCUMENTATION = r"""
+    DOCUMENTATION = r'''
 options:
     cisco_vpn_interface:
         description: Cisco VPN Interface Feature Template configuration
@@ -1176,4 +1176,4 @@ options:
                 required: false
                 default: null
                 type: str
-    """
+    '''

@@ -11,7 +11,7 @@ from __future__ import annotations
 
 
 class ModuleDocFragment(object):
-    DOCUMENTATION = r"""
+    DOCUMENTATION = r'''
 options:
     cisco_snmp:
         description: Cisco SNMP Feature Template configuration
@@ -222,4 +222,4 @@ options:
                         required: true
                         default: null
                         type: str
-    """
+    '''

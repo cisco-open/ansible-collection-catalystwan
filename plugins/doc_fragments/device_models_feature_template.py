@@ -11,12 +11,11 @@ from __future__ import annotations
 
 
 class ModuleDocFragment(object):
-    DOCUMENTATION = r"""
+    DOCUMENTATION = r'''
 options:
     device_models:
         description:
           - Defines the SD-WAN device type for template application.
-        required: true
         type: list
         default: []
         elements: str
@@ -85,4 +84,4 @@ options:
         - "vedge-C8200-1N-4T"
         - "vedge-C8200L-1N-4T"
         - "vedge-ISRv"
-    """
+    '''
