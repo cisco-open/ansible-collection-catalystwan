@@ -35,7 +35,7 @@
         template_name: "{{ template.templateName }}"
         manager_credentials:
           <<: *manager_authentication
-      loop: "{{ feature_templates.templates_info | default([], true)}}"
+      loop: "{{ feature_templates.templates_info | default([], true) }}"
       loop_control:
         loop_var: template
         label: "template: {{ template.templateName }}"
@@ -219,11 +219,11 @@
         device_models:
           - "vmanage"
         cisco_omp:
-          graceful_restart: true
+          graceful_restart: "enabled"
           overlay_as: "65530"
           send_path_limit: "5"
           ecmp_limit: "2"
-          shutdown: false
+          shutdown: "enabled" # TODO
           omp_admin_distance_ipv4: "130"
           omp_admin_distance_ipv6: "130"
           advertisement_interval: "30"
@@ -245,7 +245,6 @@
             - "type-1"
             - "type-2"
             - "branch"
-          auto_translate: true
+          auto_translate: "enabled"
         manager_credentials:
           <<: *manager_authentication
-
