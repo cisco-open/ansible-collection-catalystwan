@@ -1,7 +1,7 @@
 ---
 # .ansible-lint
 
-profile: null # min, basic, moderate,safety, shared, production
+profile: production # min, basic, moderate,safety, shared, production
 
 # Allows dumping of results in SARIF format
 # sarif_file: result.sarif
@@ -12,6 +12,7 @@ profile: null # min, basic, moderate,safety, shared, production
 exclude_paths:
   - .dev_dir/dev_vars.yml
   - .dev_dir/example_dev_vars.yml
+  - .dev_dir/*
   - playbooks/tests/configuration_file_dev_vars.yml
 # parseable: true
 # quiet: true
@@ -19,7 +20,24 @@ exclude_paths:
 verbosity: 1
 
 # # Mock modules or roles in order to pass ansible-playbook --syntax-check
-# mock_modules:
+mock_modules:
+  - cisco.catalystwan.active_sessions_info
+  - cisco.catalystwan.administration_settings
+  - cisco.catalystwan.alarms
+  - cisco.catalystwan.devices_certificates
+  - cisco.catalystwan.devices_controllers
+  - cisco.catalystwan.devices_info
+  - cisco.catalystwan.devices_wan_edges
+  - cisco.catalystwan.health_checks
+  - cisco.catalystwan.server_info
+  - cisco.catalystwan.software_repository
+  - cisco.catalystwan.software_repository_info
+  - cisco.catalystwan.software_upgrade
+  - cisco.catalystwan.software_upgrade_info
+  - cisco.catalystwan.users
+  - cisco.catalystwan.vmanage_mode
+  - cisco.catalystwan.wait_for_api_server
+  - cisco.catalystwan.vmanage_mode
 #   - zuul_return
 #   # note the foo.bar is invalid as being neither a module or a collection
 #   - fake_namespace.fake_collection.fake_module
