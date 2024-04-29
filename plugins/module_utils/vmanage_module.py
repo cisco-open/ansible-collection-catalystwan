@@ -155,7 +155,7 @@ class AnsibleCatalystwanModule:
 
         except ManagerHTTPError as ex:
             self.fail_json(
-                msg=f"Could not call '{get_data_func}' endpoint.\nManager error: {str(ex)} {ex.info}",
+                msg=f"Could not call '{get_data_func}' endpoint.\nManager error: {ex.info}",
                 exception=traceback.format_exc(),
             )
 

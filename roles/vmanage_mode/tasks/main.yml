@@ -6,7 +6,7 @@
 - name: Verify required variables for selected role
   ansible.builtin.include_tasks: variables_assertion.yml
 
-- name: Set vManage mode for all controller devices and for all Edge devices
+- name: Set vManage mode for all controller devices
   cisco.catalystwan.vmanage_mode:
     hostnames:
       - "{{ instance_item.hostname }}"
@@ -14,7 +14,21 @@
       url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
       username: "{{ (vmanage_instances | first).admin_username }}"
       password: "{{ (vmanage_instances | first).admin_password }}"
-  loop: "{{ vsmart_instances + vbond_instances + vmanage_instances + edge_instances }}"
+  loop: "{{ vsmart_instances + vbond_instances + vmanage_instances }}"
   loop_control:
     loop_var: instance_item
     label: "hostname: {{ instance_item.hostname }}"
+
+- name: Set vManage mode for all Edge devices
+  cisco.catalystwan.vmanage_mode:
+    hostnames:
+      - "{{ instance_item.hostname }}"
+    manager_authentication:
+      url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+      username: "{{ (vmanage_instances | first).admin_username }}"
+      password: "{{ (vmanage_instances | first).admin_password }}"
+  loop: "{{ edge_instances }}"
+  loop_control:
+    loop_var: instance_item
+    label: "hostname: {{ instance_item.hostname }}"
+  when: edge_instances is defined

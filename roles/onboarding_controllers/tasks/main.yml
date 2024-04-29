@@ -6,35 +6,43 @@
 - name: Verify required variables for selected role
   ansible.builtin.include_tasks: variables_assertion.yml
 
-- name: Generate CSR for vManage
+- name: Generate CSR for vManages
   cisco.catalystwan.devices_certificates:
     generate_csr: true
-    device_ip: "{{ vmanage_instances[0].system_ip }}"
+    device_ip: "{{ device_item.system_ip }}"
     manager_authentication:
-      url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
-      username: "{{ (vmanage_instances | first).admin_username }}"
-      password: "{{ (vmanage_instances | first).admin_password }}"
+      url: "{{ device_item.mgmt_public_ip }}"
+      username: "{{ device_item.admin_username }}"
+      password: "{{ device_item.admin_password }}"
+  loop: "{{ vmanage_instances }}"
+  loop_control:
+    loop_var: device_item
+    label: "hostname: {{ device_item.hostname }}, device_ip: {{ device_item.system_ip }}"
 
-- name: Add vSmart device
+- name: Add vSmart devices
   cisco.catalystwan.devices_controllers:
-    device_ip: "{{ vsmart_instances[0].transport_public_ip }}"
-    username: "{{ vsmart_instances[0].admin_username }}"
-    password: "{{ vsmart_instances[0].admin_password }}"
-    hostname: "{{ vsmart_instances[0].hostname }}"
+    device_ip: "{{ device_item.transport_public_ip }}"
+    username: "{{ device_item.admin_username }}"
+    password: "{{ device_item.admin_password }}"
+    hostname: "{{ device_item.hostname }}"
     personality: "vsmart"
     state: present
     manager_authentication:
       url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
       username: "{{ (vmanage_instances | first).admin_username }}"
       password: "{{ (vmanage_instances | first).admin_password }}"
+  loop: "{{ vsmart_instances }}"
+  loop_control:
+    loop_var: device_item
+    label: "hostname: {{ device_item.hostname }}"
   register: devices_result
 
-- name: Add vBond device
+- name: Add vBond devices
   cisco.catalystwan.devices_controllers:
-    device_ip: "{{ vbond_instances[0].transport_public_ip }}"
-    username: "{{ vbond_instances[0].admin_username }}"
-    password: "{{ vbond_instances[0].admin_password }}"
-    hostname: "{{ vbond_instances[0].hostname }}"
+    device_ip: "{{ device_item.transport_public_ip }}"
+    username: "{{ device_item.admin_username }}"
+    password: "{{ device_item.admin_password }}"
+    hostname: "{{ device_item.hostname }}"
     personality: "vbond"
     state: present  # state present means that device was added and certificated was installed
     # Consider using loop to check certificates check
@@ -43,6 +51,10 @@
       url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
       username: "{{ (vmanage_instances | first).admin_username }}"
       password: "{{ (vmanage_instances | first).admin_password }}"
+  loop: "{{ vbond_instances }}"
+  loop_control:
+    loop_var: device_item
+    label: "hostname: {{ device_item.hostname }}"
   register: devices_result
 
 - name: Wait until all controller devices are discoverable via system ip
@@ -55,7 +67,7 @@
       username: "{{ (vmanage_instances | first).admin_username }}"
       password: "{{ (vmanage_instances | first).admin_password }}"
   register: device_details_info
-  loop: "{{ vsmart_instances + vbond_instances + vmanage_instances }}"
+  loop: "{{ vsmart_instances + vbond_instances + [(vmanage_instances | first)] }}"
   loop_control:
     loop_var: device_item
     label: "hostname: {{ device_item.hostname }}, device_ip: {{ device_item.system_ip }}"
@@ -73,7 +85,7 @@
       username: "{{ (vmanage_instances | first).admin_username }}"
       password: "{{ (vmanage_instances | first).admin_password }}"
   register: device_details_info
-  loop: "{{ vsmart_instances + vbond_instances + vmanage_instances }}"
+  loop: "{{ vsmart_instances + vbond_instances + [(vmanage_instances | first)] }}"
   loop_control:
     loop_var: device_item
     label: "hostname: {{ device_item.hostname }}, device_ip: {{ device_item.system_ip }}"
