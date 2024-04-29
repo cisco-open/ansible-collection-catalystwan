@@ -36,9 +36,9 @@ options:
         type: str
       retrieve_interval:
         description: Defines the interval to retrieve certificates in minutes.
-        type: int
-        choices: [1, 2, 3, ..., 60]
-        default: 5
+        type: str
+        choices: ["1", "2", "3", ..., "60"]
+        default: "5"
       validity_period:
         description: Defines the validity period for the certificate.
         type: str
@@ -51,8 +51,8 @@ options:
   pnp_connect_sync:
     description: Configures the PnP Connect Sync mode.
     type: str
-    choices: ["ON", "OFF"]
-    default: "OFF"
+    choices: ["on", "off"]
+    default: "off"
     aliases: [pnp_connect_sync_mode]
   smart_account_credentials:
     description: Smart Account credentials for authentication.
@@ -105,7 +105,7 @@ EXAMPLES = r"""
   cisco.catalystwan.administration_settings:
     validator:
       domain_ip: "192.0.2.1"
-      port: 12346
+      port: "12346"
     manager_credentials:
       url: "https://vmanage.example.com"
       username: "admin"
@@ -166,7 +166,7 @@ response:
       description: vBond validator settings.
       returned: when validator is provided
       type: dict
-      sample: {"domain_ip": "192.0.2.1", "port": 12346}
+      sample: {"domain_ip": "192.0.2.1", "port": "12346"}
     certificates:
       description: Controller certificate authorization settings.
       returned: when certificates are provided
@@ -174,7 +174,7 @@ response:
       sample: {
         "certificate_signing": "cisco",
         "validity_period": "2Y",
-        "retrieve_interval": 10,
+        "retrieve_interval": "10",
         "first_name": "John",
         "last_name": "Doe",
         "email": "john.doe@example.com"
@@ -191,8 +191,7 @@ response:
       sample: "ON"
 """
 
-
-from enum import Enum
+from typing import get_args
 
 from catalystwan.endpoints.configuration_settings import (
     Certificate,
@@ -200,18 +199,12 @@ from catalystwan.endpoints.configuration_settings import (
     Organization,
     SmartAccountCredentials,
     PnPConnectSync,
-    ModeEnum,
+    OnOffMode,
     SoftwareInstallTimeout,
 )
 
 from ..module_utils.result import ModuleResult
 from ..module_utils.vmanage_module import AnsibleCatalystwanModule
-
-
-class CertificateRetrieveInterval(int, Enum):
-    MIN = 1
-    MAX = 61
-    DEFAULT = 5
 
 
 def run_module():
@@ -221,7 +214,7 @@ def run_module():
             aliases=["vbond"],
             options=dict(
                 domain_ip=dict(type="str"),
-                port=dict(type="int"),
+                port=dict(type="str"),
             ),
         ),
         certificates=dict(
@@ -235,11 +228,11 @@ def run_module():
                 ),
                 validity_period=dict(type="str", choices=["1Y", "2Y"], default="1Y"),
                 retrieve_interval=dict(
-                    type="int",
+                    type="str",
                     choices=[
-                        i for i in range(CertificateRetrieveInterval.MIN.value, CertificateRetrieveInterval.MAX.value)
+                        str(i) for i in range(1, 61)
                     ],
-                    default=CertificateRetrieveInterval.DEFAULT.value,
+                    default="5",
                 ),
                 first_name=dict(type="str"),
                 last_name=dict(type="str"),
@@ -256,8 +249,8 @@ def run_module():
         ),
         pnp_connect_sync=dict(
             type="str",
-            choices=[ModeEnum.ON, ModeEnum.OFF],
-            default=ModeEnum.OFF.value,
+            choices=list(get_args(OnOffMode)),
+            default="off",
             aliases=["pnp_connect_sync_mode"],
         ),
         org=dict(type="str", aliases=["organization"]),
@@ -341,7 +334,7 @@ def run_module():
         pnp_sync_data = module.get_response_safely(
             module.session.endpoints.configuration_settings.get_pnp_connect_sync
         ).single_or_default()
-        modify_pnp_sync = True if pnp_sync_data.mode.value != pnp_sync_payload.mode.value else False
+        modify_pnp_sync = True if pnp_sync_data.mode != pnp_sync_payload.mode else False
 
     if module.params.get("software_install_timeout"):
         software_install_timeout_payload = SoftwareInstallTimeout(

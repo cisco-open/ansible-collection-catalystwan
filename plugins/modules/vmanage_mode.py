@@ -141,7 +141,7 @@ def run_module():
 
         except ManagerHTTPError as ex:
             module.fail_json(
-                msg=f"{result.msg} Could not change vManage mode: {str(ex)}", exception=traceback.format_exc()
+                msg=f"{result.msg} Could not change vManage mode: {str(ex.info)}", exception=traceback.format_exc()
             )
 
     module.exit_json(**result.model_dump(mode="json"))
