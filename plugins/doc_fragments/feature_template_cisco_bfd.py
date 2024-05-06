@@ -89,8 +89,8 @@ options:
                         description:
                         - Whether to enable Path MTU Discovery
                         required: false
-                        default: null
-                        type: str
+                        default: true
+                        type: bool
                     dscp:
                         description:
                         - The DSCP value used for BFD packets

@@ -21,18 +21,18 @@ options:
                 description:
                 - Indicates whether SNMP is administratively shut down
                 required: false
-                default: null
-                type: str
+                default: true
+                type: bool
             contact:
                 description:
                 - The contact information for the SNMP administrator
-                required: true
+                required: false
                 default: null
                 type: str
             location:
                 description:
                 - The physical location information for the SNMP agent
-                required: true
+                required: false
                 default: null
                 type: str
             view:
@@ -52,7 +52,7 @@ options:
                     oid:
                         description:
                         - List of OIDs to include or exclude in the view
-                        required: true
+                        required: false
                         default: null
                         type: list
                         elements: dict
@@ -68,9 +68,9 @@ options:
                                 description:
                                 - Indicates whether the OID should be excluded from
                                     the view
-                                required: true
+                                required: false
                                 default: null
-                                type: str
+                                type: bool
             community:
                 description:
                 - List of SNMP communities for different access rights
@@ -146,7 +146,7 @@ options:
                     auth:
                         description:
                         - The authentication protocol used
-                        required: true
+                        required: false
                         default: null
                         type: str
                         choices:
@@ -155,7 +155,7 @@ options:
                     auth_password:
                         description:
                         - The password for authentication
-                        required: true
+                        required: false
                         default: null
                         type: str
                     priv:
@@ -169,7 +169,7 @@ options:
                     priv_password:
                         description:
                         - The password for privacy
-                        required: true
+                        required: false
                         default: null
                         type: str
                     group:
@@ -191,7 +191,7 @@ options:
                         - The VPN ID where the SNMP target resides
                         required: true
                         default: null
-                        type: str
+                        type: int
                     ip:
                         description:
                         - The IP address of the SNMP target
@@ -203,23 +203,23 @@ options:
                         - The port number for the SNMP target
                         required: true
                         default: null
-                        type: str
+                        type: int
                     community_name:
                         description:
                         - The community name for the SNMP target
-                        required: true
+                        required: false
                         default: null
                         type: str
                     user:
                         description:
                         - The user name for the SNMP target
-                        required: true
+                        required: false
                         default: null
                         type: str
                     source_interface:
                         description:
                         - The source interface for sending SNMP traps
-                        required: true
+                        required: false
                         default: null
                         type: str
     '''

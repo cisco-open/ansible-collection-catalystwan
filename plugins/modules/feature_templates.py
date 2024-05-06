@@ -75,6 +75,8 @@ from ..module_utils.feature_templates.cisco_logging import cisco_logging_definit
 from ..module_utils.feature_templates.cisco_ntp import cisco_ntp_definition
 from ..module_utils.feature_templates.cisco_omp import cisco_omp_definition
 from ..module_utils.feature_templates.cisco_ospf import cisco_ospf_definition
+from ..module_utils.feature_templates.cisco_system import cisco_system_definition
+
 
 class ExtendedModuleResult(ModuleResult):
     templates_info: Optional[Dict] = Field(default={})

@@ -22,7 +22,7 @@ options:
                 - The unique identifier for the VPN instance (VRF).
                 required: false
                 default: null
-                type: str
+                type: int
             vpn_name:
                 description:
                 - The name of the VPN instance.
@@ -193,7 +193,7 @@ options:
                         - The VPN identifier where the service route is to be applied.
                         required: true
                         default: null
-                        type: str
+                        type: int
                     service:
                         description:
                         - The service associated with the route.
@@ -372,7 +372,7 @@ options:
                         - The VPN identifier where the GRE route is to be applied.
                         required: true
                         default: null
-                        type: str
+                        type: int
                     interface:
                         description:
                         - A list of interfaces associated with the GRE route.
@@ -400,7 +400,7 @@ options:
                         - The VPN identifier where the IPSec route is to be applied.
                         required: true
                         default: null
-                        type: str
+                        type: int
                     interface:
                         description:
                         - A list of interfaces associated with the IPSec route.
@@ -620,7 +620,7 @@ options:
                         - The identifier for the NAT pool.
                         required: true
                         default: null
-                        type: str
+                        type: int
                     prefix_length:
                         description:
                         - The length of the network prefix for the NAT pool.
@@ -736,7 +736,7 @@ options:
                             NAT.
                         required: true
                         default: null
-                        type: str
+                        type: int
                     static_nat_direction:
                         description:
                         - The direction (inside or outside) for the subnet static
@@ -774,14 +774,14 @@ options:
                         - The source port number for the port forwarding rule.
                         required: true
                         default: null
-                        type: str
+                        type: int
                     translate_port:
                         description:
                         - The destination port number to which the source port is
                             translated.
                         required: true
                         default: null
-                        type: str
+                        type: int
                     source_ip:
                         description:
                         - The source IP address for the port forwarding rule.
@@ -876,7 +876,7 @@ options:
                         - The VPN instance (VRF) from which routes are to be imported.
                         required: true
                         default: null
-                        type: str
+                        type: int
                     protocol:
                         description:
                         - The routing protocol from which routes are to be imported.

@@ -33,21 +33,21 @@ options:
                 description:
                 - Compatibility switch for RFC 1583.
                 required: false
-                default: null
-                type: str
+                default: true
+                type: bool
             originate:
                 description:
                 - Controls the origination of default information into the OSPF domain.
                 required: false
                 default: null
-                type: str
+                type: bool
             always:
                 description:
                 - Ensures that the default route is always advertised, regardless
                     of the existence of a default route in the routing table.
                 required: false
                 default: null
-                type: str
+                type: bool
             metric:
                 description:
                 - The metric value to be set for the default route advertised by OSPF.
@@ -132,8 +132,8 @@ options:
                         - Default information originate, which controls the advertisement
                             of default route.
                         required: false
-                        default: null
-                        type: str
+                        default: true
+                        type: bool
             router_lsa:
                 description:
                 - Configuration options for the Router LSA in OSPF.
@@ -156,7 +156,7 @@ options:
                         - Time in seconds for advertisement.
                         required: true
                         default: null
-                        type: str
+                        type: int
             route_policy:
                 description:
                 - A list of OSPF route policies.
@@ -192,21 +192,21 @@ options:
                         - The OSPF area number.
                         required: true
                         default: null
-                        type: str
+                        type: int
                     stub:
                         description:
                         - Configuration for the OSPF area to be a stub area. If set,
                             no-summary can be applied.
                         required: false
                         default: null
-                        type: str
+                        type: bool
                     nssa:
                         description:
                         - Configuration for the OSPF area to be a Not-So-Stubby Area
                             (NSSA). If set, no-summary can be applied.
                         required: false
                         default: null
-                        type: str
+                        type: bool
                     interface:
                         description:
                         - A list of OSPF interface configurations associated with
@@ -270,8 +270,8 @@ options:
                                 description:
                                 - Whether the interface is a passive OSPF interface.
                                 required: false
-                                default: null
-                                type: str
+                                default: false
+                                type: bool
                             type:
                                 description:
                                 - The OSPF authentication type for the interface.
@@ -320,6 +320,6 @@ options:
                                 description:
                                 - Whether to suppress advertising this range.
                                 required: false
-                                default: null
-                                type: str
+                                default: false
+                                type: bool
     '''

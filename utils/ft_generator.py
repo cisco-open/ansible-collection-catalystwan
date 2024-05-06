@@ -1,11 +1,12 @@
 # Copyright 2024 Cisco Systems, Inc. and its affiliates
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 
+from __future__ import annotations
 
 import yaml
 
 from enum import Enum
-from typing import Type, Union, get_args, get_origin
+from typing import Annotated, Type, Union, get_args, get_origin, Literal
 from pathlib import Path, PurePath
 from pprint import pformat
 from jinja2 import Environment, FileSystemLoader
@@ -13,6 +14,7 @@ from pydantic import BaseModel
 from pydantic.fields import FieldInfo
 
 from catalystwan.api.templates.models.supported import available_models
+from catalystwan.api.templates.device_variable import DeviceVariable
 from catalystwan.utils.device_model import DeviceModel
 
 PROJECT_ROOT_DIR = PurePath(Path.cwd())
@@ -32,23 +34,27 @@ def is_pydantic_model(type_):
         return False
 
 
-def field_to_ansible_option(field: FieldInfo):
-    # # if field.description == "List of public keys for the user":
-    # if field.description == "A list of site types that are allowed to participate in the overlay network.":
+def field_to_ansible_option(field: FieldInfo, field_name: str, model_name: str):
+    # if field.description == "List of public keys for the user":
+    # if field.description == "Configure Accounting Method":
     #     from IPython import embed; embed()
     option = {
         "description": [field.description],
         "required": field.is_required(),
         "default": None,
-        "type": "str",  # default type is str, will be overwritten as needed
+        "type": None # "str", #None,  # default type is None, will be overwritten as needed
     }
     if not field.is_required():
         if safe_issubclass(field.default, str) or safe_issubclass(field.default, str):
             option["default"] = field.default
-        if safe_issubclass(type(field.default), Enum):
+        elif safe_issubclass(type(field.default), Enum):
             option["default"] = field.default.value
-        if safe_issubclass(type(field.default), list):
+        elif safe_issubclass(type(field.default), str):
             option["default"] = field.default
+        elif safe_issubclass(type(field.default), list):
+            option["default"] = field.default
+        elif type(field.default) == DeviceVariable:
+            option["default"] = field.default.name
 
     field_type = get_origin(field.annotation) or field.annotation
     args = get_args(field.annotation)
@@ -56,10 +62,13 @@ def field_to_ansible_option(field: FieldInfo):
 
     if field_type == bool:
         option["type"] = "bool"
+    
+    elif field_type == int:
+        option["type"] = "int"
 
     elif is_pydantic_model(field_type):
         option["type"] = "dict"
-        option["suboptions"] = model_to_ansible_options(field_type)
+        option["suboptions"] = model_to_ansible_options(field_type, model_name)
 
     elif field_type == list or (field_type == Union and list in subargs_base_types):
         elements_type = next((arg for arg in args if arg is not None), None)
@@ -67,7 +76,7 @@ def field_to_ansible_option(field: FieldInfo):
             # from IPython import embed; embed()
             option["type"] = "list"
             option["elements"] = "dict"
-            option["suboptions"] = model_to_ansible_options(elements_type)
+            option["suboptions"] = model_to_ansible_options(elements_type, model_name)
         else:
             origin_type = get_origin(elements_type)
             if origin_type == list:
@@ -77,28 +86,55 @@ def field_to_ansible_option(field: FieldInfo):
             if is_pydantic_model(user_class):
                 option["type"] = "list"
                 option["elements"] = "dict"
-                option["suboptions"] = model_to_ansible_options(user_class)
+                option["suboptions"] = model_to_ansible_options(user_class, model_name)
             elif safe_issubclass(user_class, Enum):
                 option["type"] = "list"
                 option["elements"] = "str"
-                option["choices"] = [item.value for item in user_class]       
+                option["choices"] = [item.value for item in user_class]
             else:
                 option["type"] = "list"
                 option["elements"] = "str"
                 
     elif is_pydantic_model(field_type):
         option["type"] = "dict"
-        option["suboptions"] = model_to_ansible_options(field_type)
+        option["suboptions"] = model_to_ansible_options(field_type, model_name)
     elif safe_issubclass(field_type, Enum):
         option["type"] = "str"
         option["choices"] = [item.value for item in field_type]
     elif field_type == Union and safe_issubclass(next((arg for arg in args if arg is not None), None), Enum):
         option["type"] = "str"
         option["choices"] = [item.value for item in args[0]]
+    elif field_type == Union and Annotated in subargs_base_types:
+        elements_type = next((arg for arg in args if arg is not None), None)
+        origin_type = get_origin(elements_type)
+        if origin_type == Annotated:
+            user_class = get_args(elements_type)[0]
+        else:
+            user_class = None
+        if user_class == bool:
+            option["type"] = "bool"
+            option["default"] = field.default
+            # from IPython import embed; embed()
+    # THIS LINE IS NEWEST FOR LITERALS
+    elif field_type == Union and Literal in subargs_base_types:
+        elements_type = next((arg for arg in args if arg is not None), None)
+        option["type"] = "str"
+        option["choices"] = [item for item in get_args(elements_type)]
+    elif field_type == Literal:
+        option["type"] = "str"
+        option["choices"] = [item for item in args]
+    else:
+        print(f"With model: {model_name}, field_name: {field_name} field: {field}")
+        option["type"] = "str"
+        if hasattr(field.default, "value"):
+            option["default"] = field.default.value
+        # from IPython import embed; embed()
+        # raise TypeError(f"Cannot properly create field from model: {model_name}, field_name: {field_name} field: {field}")
+
     return option
 
 
-def model_to_ansible_options(model: Type[BaseModel]):
+def model_to_ansible_options(model: Type[BaseModel], model_name: str):
     options = {}
     for field_name, field in model.model_fields.items():
         if field_name in [
@@ -108,7 +144,7 @@ def model_to_ansible_options(model: Type[BaseModel]):
             "device_specific_variables",
         ]:
             continue
-        options[field_name] = field_to_ansible_option(field)
+        options[field_name] = field_to_ansible_option(field, field_name, model_name)
     return options
 
 
@@ -120,7 +156,7 @@ def generate_ansible_docs(model: Type[BaseModel], model_name: str):
             model_name: {
                 "description": model._docs_description.default,
                 "type": "dict",
-                "suboptions": model_to_ansible_options(model),
+                "suboptions": model_to_ansible_options(model, model_name),
             }
         }
     }
@@ -181,8 +217,12 @@ for model_name, model_module in available_models.items():
 
     template_file = PurePath("docs_fragments_template.j2")
     template = env.get_template(str(template_file))
-
-    output = template.render(yaml_data=ansible_docs)
+    try:
+        output = template.render(yaml_data=ansible_docs)
+    except Exception as ex:
+        print(ex)
+        print(ansible_docs)
+        raise ex
 
     filename = f"{PROJECT_ROOT_DIR}/plugins/doc_fragments/feature_template_{model_name}.py"
     with open(filename, "w") as f:

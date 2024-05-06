@@ -22,7 +22,7 @@ options:
                 - Enable or disable graceful restart for the OMP session
                 required: false
                 default: null
-                type: str
+                type: bool
             send_path_limit:
                 description:
                 - The maximum number of paths that can be sent to a TLOC
@@ -34,20 +34,20 @@ options:
                 - Enable or disable sending additional backup paths
                 required: false
                 default: null
-                type: str
+                type: bool
             discard_rejected:
                 description:
                 - Discard routes that are rejected by policy instead of marking them
                     as rejected
                 required: false
                 default: null
-                type: str
+                type: bool
             shutdown:
                 description:
                 - Enable or disable the shutdown of the OMP session
                 required: false
                 default: null
-                type: str
+                type: bool
             graceful_restart_timer:
                 description:
                 - The time interval for graceful restart of OMP sessions
@@ -71,7 +71,7 @@ options:
                 - Prefer routes from the same affinity group
                 required: false
                 default: null
-                type: str
+                type: bool
             advertisement_interval:
                 description:
                 - Interval between sending OMP route advertisements

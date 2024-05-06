@@ -17,9 +17,29 @@ options:
         description: Cisco AAA Feature Template configuration
         type: dict
         suboptions:
+            authentication_group:
+                description:
+                - 'Whether to enable the authentication group, GUI equivalent: Authentication
+                    Param'
+                required: false
+                default: false
+                type: bool
+            accounting_group:
+                description:
+                - 'Whether to enable the accounting group, GUI equivalent: Accounting
+                    Param'
+                required: false
+                default: false
+                type: bool
+            server_auth_order:
+                description:
+                - ServerGroups authentication order to user access
+                required: false
+                default: local
+                type: str
             user:
                 description:
-                - List of user configurations
+                - List of local user configurations
                 required: false
                 default: null
                 type: list
@@ -47,27 +67,132 @@ options:
                         description:
                         - The privilege level for the user
                         required: false
-                        default: null
+                        default: '15'
                         type: str
+                        choices:
+                        - '1'
+                        - '15'
                     pubkey_chain:
                         description:
                         - List of public keys for the user
                         required: false
                         default: []
                         type: list
-                        elements: str
-            authentication_group:
+                        elements: dict
+                        suboptions:
+                            key_string:
+                                description:
+                                - Set the RSA key string
+                                required: true
+                                default: null
+                                type: str
+                            key_type:
+                                description:
+                                - Only RSA is supported
+                                required: false
+                                default: ssh-rsa
+                                type: str
+            accounting_rules:
                 description:
-                - Whether to enable the authentication group
+                - Configure the accounting rules
+                required: false
+                default: null
+                type: list
+                elements: dict
+                suboptions:
+                    rule_id:
+                        description:
+                        - Accounting Rule ID
+                        required: true
+                        default: null
+                        type: str
+                    method:
+                        description:
+                        - Configure Accounting Method
+                        required: true
+                        default: null
+                        type: str
+                        choices:
+                        - commands
+                        - exec
+                        - network
+                        - system
+                    level:
+                        description:
+                        - Privilege level when method is commands
+                        required: false
+                        default: null
+                        type: str
+                        choices:
+                        - '1'
+                        - '15'
+                    start_stop:
+                        description:
+                        - Enable Start-Stop
+                        required: false
+                        default: true
+                        type: bool
+                    group:
+                        description:
+                        - List of groups.
+                        required: true
+                        default: null
+                        type: str
+            authorization_console:
+                description:
+                - For enabling console authorization
                 required: false
                 default: null
                 type: bool
-            accounting_group:
+            authorization_config_commands:
                 description:
-                - Whether to enable the accounting group
+                - For configuration mode commands
                 required: false
                 default: null
                 type: bool
+            authorization_rules:
+                description:
+                - Configure the accounting rules
+                required: false
+                default: null
+                type: list
+                elements: dict
+                suboptions:
+                    rule_id:
+                        description:
+                        - Authorization Rule ID
+                        required: true
+                        default: null
+                        type: str
+                    method:
+                        description:
+                        - Configure Authorization Method
+                        required: true
+                        default: null
+                        type: str
+                        choices:
+                        - commands
+                    level:
+                        description:
+                        - Privilege level when method is commands
+                        required: false
+                        default: null
+                        type: str
+                        choices:
+                        - '1'
+                        - '15'
+                    group:
+                        description:
+                        - List of groups.
+                        required: true
+                        default: null
+                        type: str
+                    authenticated:
+                        description:
+                        - Succeed if user has authenticated
+                        required: false
+                        default: false
+                        type: bool
             radius:
                 description:
                 - List of Radius group configurations
@@ -113,26 +238,26 @@ options:
                                 - The authentication port for the RADIUS server
                                 required: false
                                 default: null
-                                type: str
+                                type: int
                             acct_port:
                                 description:
                                 - The accounting port for the RADIUS server
                                 required: false
                                 default: null
-                                type: str
+                                type: int
                             timeout:
                                 description:
                                 - The timeout period in seconds for the RADIUS server
                                 required: false
                                 default: null
-                                type: str
+                                type: int
                             retransmit:
                                 description:
                                 - The number of retransmit attempts for the RADIUS
                                     server
                                 required: false
                                 default: null
-                                type: str
+                                type: int
                             key:
                                 description:
                                 - The key for the RADIUS server
@@ -157,6 +282,40 @@ options:
                                 required: false
                                 default: null
                                 type: str
+            radius_client:
+                description:
+                - Specify a RADIUS client
+                required: false
+                default: null
+                type: list
+                elements: dict
+                suboptions:
+                    ip:
+                        description:
+                        - The Client IP
+                        required: true
+                        default: null
+                        type: str
+                    vpn:
+                        description:
+                        - The VPN Configuration
+                        required: true
+                        default: null
+                        type: list
+                        elements: dict
+                        suboptions:
+                            name:
+                                description:
+                                - VPN ID
+                                required: true
+                                default: null
+                                type: str
+                            server_key:
+                                description:
+                                - Specify a RADIUS client server-key
+                                required: false
+                                default: null
+                                type: str
             domain_stripping:
                 description:
                 - The domain stripping configuration
@@ -167,9 +326,37 @@ options:
                 - 'yes'
                 - 'no'
                 - right-to-left
+            authentication_type:
+                description:
+                - Authentication Type
+                required: false
+                default: any
+                type: str
+                choices:
+                - any
+                - all
+                - session-key
             port:
                 description:
-                - The port number for AAA
+                - Specify Radius Dynamic Author Port
+                required: false
+                default: null
+                type: str
+            server_key_password:
+                description:
+                - Specify a radius dynamic author server-key
+                required: false
+                default: null
+                type: str
+            cts_authorization_list:
+                description:
+                - Specify a radius dynamic author server-key
+                required: false
+                default: null
+                type: str
+            radius_trustsec_group:
+                description:
+                - RADIUS trustsec group
                 required: false
                 default: null
                 type: str
@@ -192,7 +379,7 @@ options:
                         - The VPN ID for the TACACS+ group
                         required: false
                         default: null
-                        type: str
+                        type: int
                     source_interface:
                         description:
                         - The source interface for the TACACS+ group
@@ -213,24 +400,24 @@ options:
                                 required: true
                                 default: null
                                 type: str
-                            port:
-                                description:
-                                - The port for the TACACS+ server
-                                required: false
-                                default: null
-                                type: str
-                            timeout:
-                                description:
-                                - The timeout period in seconds for the TACACS+ server
-                                required: false
-                                default: null
-                                type: str
                             key:
                                 description:
                                 - The key for the TACACS+ server
                                 required: true
                                 default: null
                                 type: str
+                            port:
+                                description:
+                                - The port for the TACACS+ server
+                                required: false
+                                default: null
+                                type: int
+                            timeout:
+                                description:
+                                - The timeout period in seconds for the TACACS+ server
+                                required: false
+                                default: null
+                                type: int
                             secret_key:
                                 description:
                                 - The secret key for the TACACS+ server
@@ -243,11 +430,4 @@ options:
                                 required: false
                                 default: null
                                 type: str
-            server_auth_order:
-                description:
-                - Authentication order to user access
-                required: false
-                default: null
-                type: list
-                elements: str
     '''

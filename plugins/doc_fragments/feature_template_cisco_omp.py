@@ -22,8 +22,8 @@ options:
                 description:
                 - Enable or disable graceful restart for OMP.
                 required: false
-                default: null
-                type: str
+                default: true
+                type: bool
             overlay_as:
                 description:
                 - The autonomous system number used for the overlay.
@@ -47,7 +47,7 @@ options:
                 - Enable or disable the shutdown of OMP.
                 required: false
                 default: null
-                type: str
+                type: bool
             omp_admin_distance_ipv4:
                 description:
                 - The administrative distance for IPv4 routes learned via OMP.
@@ -144,8 +144,8 @@ options:
                 description:
                 - Whether to ignore the region part of the path length for OMP routes.
                 required: false
-                default: null
-                type: str
+                default: false
+                type: bool
             transport_gateway:
                 description:
                 - Specifies the preferred transport gateway selection strategy.
@@ -175,6 +175,6 @@ options:
                 description:
                 - Enable or disable automatic translation of network settings.
                 required: false
-                default: null
-                type: str
+                default: false
+                type: bool
     '''

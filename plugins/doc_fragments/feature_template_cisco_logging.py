@@ -22,7 +22,7 @@ options:
                 - Whether logging to disk is enabled
                 required: false
                 default: null
-                type: str
+                type: bool
             size:
                 description:
                 - The maximum file size for the log file
@@ -119,14 +119,14 @@ options:
                         description:
                         - Whether to enable TLS encryption
                         required: false
-                        default: null
-                        type: str
+                        default: false
+                        type: bool
                     custom_profile:
                         description:
                         - Whether to use a custom TLS profile
                         required: false
-                        default: null
-                        type: str
+                        default: false
+                        type: bool
                     profile:
                         description:
                         - The custom TLS profile to use
@@ -178,14 +178,14 @@ options:
                         description:
                         - Whether to enable TLS encryption for the IPv6 server
                         required: false
-                        default: null
-                        type: str
+                        default: false
+                        type: bool
                     custom_profile:
                         description:
                         - Whether to use a custom TLS profile for the IPv6 server
                         required: false
-                        default: null
-                        type: str
+                        default: false
+                        type: bool
                     profile:
                         description:
                         - The custom TLS profile to use for the IPv6 server

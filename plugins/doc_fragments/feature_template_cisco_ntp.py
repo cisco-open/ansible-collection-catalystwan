@@ -60,7 +60,7 @@ options:
                         - Whether this server is preferred over others
                         required: false
                         default: null
-                        type: str
+                        type: bool
             authentication:
                 description:
                 - List of authentication keys
@@ -74,7 +74,7 @@ options:
                         - The authentication key number
                         required: true
                         default: null
-                        type: str
+                        type: int
                     md5:
                         description:
                         - The MD5 hash used for authentication
@@ -93,7 +93,7 @@ options:
                 - Whether the device is an NTP master
                 required: false
                 default: null
-                type: str
+                type: bool
             stratum:
                 description:
                 - The stratum level if the device is an NTP master

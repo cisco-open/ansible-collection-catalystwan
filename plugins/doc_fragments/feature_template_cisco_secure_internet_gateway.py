@@ -22,7 +22,7 @@ options:
                 - VPN ID associated with the Cisco Secure Internet Gateway service.
                 required: false
                 default: null
-                type: str
+                type: int
             interface:
                 description:
                 - List of interface configurations associated with the service.
@@ -130,7 +130,7 @@ options:
                         - MTU (Maximum Transmission Unit) size for the interface.
                         required: false
                         default: null
-                        type: str
+                        type: int
                     dpd_interval:
                         description:
                         - Dead Peer Detection (DPD) interval in seconds.
@@ -148,7 +148,7 @@ options:
                         - Internet Key Exchange (IKE) protocol version.
                         required: false
                         default: null
-                        type: str
+                        type: int
                     pre_shared_secret:
                         description:
                         - Pre-shared secret key for IKE authentication.
@@ -289,7 +289,7 @@ options:
                                     in failover decisions.
                                 required: false
                                 default: null
-                                type: str
+                                type: int
                             backup_interface:
                                 description:
                                 - Name of the backup interface. Can be 'None' if no
@@ -303,7 +303,7 @@ options:
                                     in failover decisions.
                                 required: false
                                 default: null
-                                type: str
+                                type: int
                     auth_required:
                         description:
                         - Flag indicating if authentication is required for the service.
@@ -340,14 +340,14 @@ options:
                         - Primary data center for the service. 'Auto' for automatic
                             selection.
                         required: false
-                        default: null
+                        default: Auto
                         type: str
                     secondary_data_center:
                         description:
                         - Secondary data center for the service. 'Auto' for automatic
                             selection.
                         required: false
-                        default: null
+                        default: Auto
                         type: str
                     ip:
                         description:
@@ -424,14 +424,14 @@ options:
                         description:
                         - Alias for the primary data center setting.
                         required: false
-                        default: null
+                        default: Auto
                         type: str
                     data_center_secondary:
                         description:
                         - Secondary data center for the service. 'Auto' for automatic
                             selection or a specific identifier for a manual selection.
                         required: false
-                        default: null
+                        default: Auto
                         type: str
             tracker_src_ip:
                 description:

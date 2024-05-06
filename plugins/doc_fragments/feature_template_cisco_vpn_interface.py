@@ -35,7 +35,7 @@ options:
                     False otherwise.
                 required: false
                 default: null
-                type: str
+                type: bool
             ipv4_address:
                 description:
                 - The primary IPv4 address assigned to the interface.
@@ -62,7 +62,7 @@ options:
                     True if enabled, False otherwise.
                 required: false
                 default: null
-                type: str
+                type: bool
             dhcp_distance:
                 description:
                 - Administrative distance for DHCP routes on the interface.
@@ -81,7 +81,7 @@ options:
                     True if enabled, False otherwise.
                 required: false
                 default: null
-                type: str
+                type: bool
             secondary_ipv6_address:
                 description:
                 - A list of secondary IPv6 addresses assigned to the interface.
@@ -160,7 +160,7 @@ options:
                     True if enabled, False otherwise.
                 required: false
                 default: null
-                type: str
+                type: bool
             iperf_server:
                 description:
                 - The IP address of the iPerf server used for performance testing
@@ -174,7 +174,7 @@ options:
                     the interface.
                 required: false
                 default: null
-                type: str
+                type: bool
             nat_choice:
                 description:
                 - The type of NAT configured on the interface, if applicable.
@@ -216,7 +216,7 @@ options:
                 - Indicates if NAT overload (PAT - Port Address Translation) is enabled.
                 required: false
                 default: null
-                type: str
+                type: bool
             loopback_interface:
                 description:
                 - The associated loopback interface, if any, for the VPN interface.
@@ -235,21 +235,21 @@ options:
                 - Indicates whether the interface is enabled or disabled.
                 required: false
                 default: null
-                type: str
+                type: bool
             nat64:
                 description:
                 - Indicates whether NAT64 is enabled on the interface, allowing IPv6
                     addresses to communicate with IPv4 services.
                 required: false
                 default: null
-                type: str
+                type: bool
             nat66:
                 description:
                 - Indicates whether NAT66 is enabled on the interface, translating
                     IPv6 addresses into IPv6 addresses.
                 required: false
                 default: null
-                type: str
+                type: bool
             static_nat66:
                 description:
                 - List of static NAT66 entries for translating IPv6 addresses into
@@ -276,7 +276,7 @@ options:
                         - VPN ID associated with the source network prefix.
                         required: false
                         default: null
-                        type: str
+                        type: int
             static:
                 description:
                 - List of static NAT entries for configuring one-to-one address mappings.
@@ -311,7 +311,7 @@ options:
                         - VPN ID associated with the source IP for static NAT.
                         required: false
                         default: null
-                        type: str
+                        type: int
             static_port_forward:
                 description:
                 - List of static port forwarding entries for the interface.
@@ -346,13 +346,13 @@ options:
                         - Source port number for port forwarding.
                         required: false
                         default: null
-                        type: str
+                        type: int
                     translate_port:
                         description:
                         - Translated port number for port forwarding.
                         required: false
                         default: null
-                        type: str
+                        type: int
                     proto:
                         description:
                         - Protocol used for port forwarding (TCP/UDP).
@@ -367,14 +367,14 @@ options:
                         - VPN ID associated with the source IP for port forwarding.
                         required: false
                         default: null
-                        type: str
+                        type: int
             enable_core_region:
                 description:
                 - Indicates if the interface is part of the core network region for
                     centralized services.
                 required: false
                 default: null
-                type: str
+                type: bool
             core_region:
                 description:
                 - Configuration details for the core region.
@@ -424,25 +424,25 @@ options:
                             decisions.
                         required: false
                         default: null
-                        type: str
+                        type: int
             border:
                 description:
                 - Defines if the interface is at the border of a network segment.
                 required: false
                 default: null
-                type: str
+                type: bool
             per_tunnel_qos:
                 description:
                 - Enable or disable per-tunnel Quality of Service (QoS).
                 required: false
                 default: null
-                type: str
+                type: bool
             per_tunnel_qos_aggregator:
                 description:
                 - Enable or disable per-tunnel QoS aggregator.
                 required: false
                 default: null
-                type: str
+                type: bool
             mode:
                 description:
                 - Defines the operating mode for the interface.
@@ -507,14 +507,14 @@ options:
                 - Enables or disables control connections on the interface.
                 required: false
                 default: null
-                type: str
+                type: bool
             vbond_as_stun_server:
                 description:
                 - Configures the vBond orchestrator to act as a STUN server for the
                     interface.
                 required: false
                 default: null
-                type: str
+                type: bool
             exclude_controller_group_list:
                 description:
                 - List of controller groups to exclude from connections.
@@ -534,13 +534,13 @@ options:
                     blocking.
                 required: false
                 default: null
-                type: str
+                type: bool
             restrict:
                 description:
                 - Indicates whether the interface color is restricted for use.
                 required: false
                 default: null
-                type: str
+                type: bool
             dst_ip:
                 description:
                 - Destination IP address for GRE (Generic Routing Encapsulation) tunnel
@@ -597,13 +597,13 @@ options:
                     back to.
                 required: false
                 default: null
-                type: str
+                type: bool
             low_bandwidth_link:
                 description:
                 - Indicates if the link is considered a low bandwidth link.
                 required: false
                 default: null
-                type: str
+                type: bool
             tunnel_tcp_mss_adjust:
                 description:
                 - Adjusts the Maximum Segment Size (MSS) value for TCP connections
@@ -617,102 +617,102 @@ options:
                     in the IP header.
                 required: false
                 default: null
-                type: str
+                type: bool
             propagate_sgt:
                 description:
                 - Enables or disables the propagation of Security Group Tags (SGTs)
                     across the tunnel interface.
                 required: false
                 default: null
-                type: str
+                type: bool
             network_broadcast:
                 description:
                 - Allows or disallows network broadcast traffic through the tunnel
                     interface.
                 required: false
                 default: null
-                type: str
+                type: bool
             all:
                 description:
                 - Permits or denies all services through the tunnel interface.
                 required: false
                 default: null
-                type: str
+                type: bool
             bgp:
                 description:
                 - Allows or disallows Border Gateway Protocol (BGP) traffic through
                     the tunnel interface.
                 required: false
                 default: null
-                type: str
+                type: bool
             dhcp:
                 description:
                 - Enables or disables Dynamic Host Configuration Protocol (DHCP) on
                     the tunnel interface.
                 required: false
                 default: null
-                type: str
+                type: bool
             dns:
                 description:
                 - Allows or disallows Domain Name System (DNS) queries through the
                     tunnel interface.
                 required: false
                 default: null
-                type: str
+                type: bool
             icmp:
                 description:
                 - Enables or disables Internet Control Message Protocol (ICMP) for
                     ping and traceroute through the tunnel interface.
                 required: false
                 default: null
-                type: str
+                type: bool
             sshd:
                 description:
                 - Allows or disallows Secure Shell (SSH) daemon access through the
                     tunnel interface.
                 required: false
                 default: null
-                type: str
+                type: bool
             netconf:
                 description:
                 - Enables or disables NETCONF protocol support on the tunnel interface.
                 required: false
                 default: null
-                type: str
+                type: bool
             ntp:
                 description:
                 - Allows or disallows Network Time Protocol (NTP) synchronization
                     through the tunnel interface.
                 required: false
                 default: null
-                type: str
+                type: bool
             ospf:
                 description:
                 - Permits or denies Open Shortest Path First (OSPF) routing protocol
                     traffic through the tunnel interface.
                 required: false
                 default: null
-                type: str
+                type: bool
             stun:
                 description:
                 - Enables or disables Session Traversal Utilities for NAT (STUN) on
                     the tunnel interface.
                 required: false
                 default: null
-                type: str
+                type: bool
             snmp:
                 description:
                 - Allows or disallows Simple Network Management Protocol (SNMP) through
                     the tunnel interface.
                 required: false
                 default: null
-                type: str
+                type: bool
             https:
                 description:
                 - Permits or denies HTTPS traffic through the tunnel interface.
                 required: false
                 default: null
-                type: str
+                type: bool
             media_type:
                 description:
                 - Specifies the media type used by the interface, such as copper or
@@ -801,8 +801,8 @@ options:
                 description:
                 - Enables or disables (shuts down) the interface.
                 required: false
-                default: null
-                type: str
+                default: false
+                type: bool
             arp_timeout:
                 description:
                 - Time in seconds before an ARP cache entry is timed out.
@@ -815,25 +815,25 @@ options:
                     on the interface.
                 required: false
                 default: null
-                type: str
+                type: bool
             ip_directed_broadcast:
                 description:
                 - Allows or disallows IP directed broadcasts on the interface.
                 required: false
                 default: null
-                type: str
+                type: bool
             icmp_redirect_disable:
                 description:
                 - Enables or disables ICMP redirect messages on the interface.
                 required: false
                 default: null
-                type: str
+                type: bool
             qos_adaptive:
                 description:
                 - Activates or deactivates adaptive QoS on the interface.
                 required: false
                 default: null
-                type: str
+                type: bool
             period:
                 description:
                 - Time period in seconds for measuring and adapting QoS settings.
@@ -922,7 +922,7 @@ options:
                     IP addresses.
                 required: false
                 default: null
-                type: str
+                type: bool
             rule_name:
                 description:
                 - Specifies the name of the rewrite rule applied to the interface.
@@ -988,19 +988,19 @@ options:
                         - VRRP group ID.
                         required: true
                         default: null
-                        type: str
+                        type: int
                     priority:
                         description:
                         - Priority value for the VRRP group (higher values take precedence).
                         required: false
                         default: null
-                        type: str
+                        type: int
                     timer:
                         description:
                         - VRRP advertisement interval timer in milliseconds.
                         required: false
                         default: null
-                        type: str
+                        type: int
                     track_omp:
                         description:
                         - Flag to track Overlay Management Protocol (OMP) session
@@ -1045,7 +1045,7 @@ options:
                         - VRRP value to determine the primary node for the VRRP group.
                         required: true
                         default: null
-                        type: str
+                        type: int
                     tracking_object:
                         description:
                         - List of tracking objects associated with the VRRP configuration.
@@ -1059,7 +1059,7 @@ options:
                                 - Unique identifier for the tracking object.
                                 required: true
                                 default: null
-                                type: str
+                                type: int
                             track_action:
                                 description:
                                 - Action to take when the tracked object state changes
@@ -1076,7 +1076,7 @@ options:
                                     the tracked object is down.
                                 required: true
                                 default: null
-                                type: str
+                                type: int
             ipv6_vrrp:
                 description:
                 - A list of Virtual Router Redundancy Protocol (VRRP) configurations
@@ -1091,20 +1091,20 @@ options:
                         - IPv6 VRRP group ID.
                         required: true
                         default: null
-                        type: str
+                        type: int
                     priority:
                         description:
                         - Priority value for the IPv6 VRRP group (higher values take
                             precedence).
                         required: false
                         default: null
-                        type: str
+                        type: int
                     timer:
                         description:
                         - IPv6 VRRP advertisement interval timer in milliseconds.
                         required: false
                         default: null
-                        type: str
+                        type: int
                     track_omp:
                         description:
                         - Flag to track Overlay Management Protocol (OMP) session
@@ -1145,7 +1145,7 @@ options:
                 - Enables or disables Security Group Tag (SGT) propagation.
                 required: false
                 default: null
-                type: str
+                type: bool
             security_group_tag:
                 description:
                 - Specifies a static Security Group Tag (SGT) for the interface.
@@ -1157,19 +1157,19 @@ options:
                 - Marks the interface as trusted or untrusted for TrustSec.
                 required: false
                 default: null
-                type: str
+                type: bool
             enable_sgt_authorization_and_forwarding:
                 description:
                 - Enables or disables Security Group Tag (SGT) authorization and forwarding.
                 required: false
                 default: null
-                type: str
+                type: bool
             enable_sgt_enforcement:
                 description:
                 - Activates or deactivates Security Group Tag (SGT) enforcement.
                 required: false
                 default: null
-                type: str
+                type: bool
             enforcement_sgt:
                 description:
                 - Specifies the Security Group Tag (SGT) to be enforced on the interface.

@@ -444,7 +444,7 @@ options:
                 description:
                 - The hostname for the device.
                 required: false
-                default: null
+                default: system_host_name
                 type: dict
                 suboptions:
                     name:
@@ -482,7 +482,7 @@ options:
                 - Enable or disable geo-fencing.
                 required: false
                 default: null
-                type: str
+                type: bool
             mobile_number:
                 description:
                 - List of mobile numbers for SMS notifications.
@@ -502,8 +502,8 @@ options:
                 description:
                 - Enable or disable SMS notifications.
                 required: false
-                default: null
-                type: str
+                default: false
+                type: bool
             device_groups:
                 description:
                 - List of device groups the device belongs to.
@@ -522,7 +522,7 @@ options:
                 description:
                 - The system IP address of the device.
                 required: false
-                default: null
+                default: system_system_ip
                 type: dict
                 suboptions:
                     name:
@@ -541,8 +541,8 @@ options:
                 description:
                 - The site ID of the device.
                 required: false
-                default: null
-                type: str
+                default: system_site_id
+                type: int
             site_type:
                 description:
                 - The site type classification for the device.
@@ -569,7 +569,7 @@ options:
                 - Enable or disable port hopping.
                 required: false
                 default: null
-                type: str
+                type: bool
             control_session_pps:
                 description:
                 - Control session packets per second setting.
@@ -581,7 +581,7 @@ options:
                 - Enable or disable transport tracking.
                 required: false
                 default: null
-                type: str
+                type: bool
             track_interface_tag:
                 description:
                 - The tag of the interface to be tracked.
@@ -614,26 +614,26 @@ options:
                 - Enable or disable multi-tenant support.
                 required: false
                 default: null
-                type: str
+                type: bool
             track_default_gateway:
                 description:
                 - Enable or disable default gateway tracking.
                 required: false
                 default: null
-                type: str
+                type: bool
             admin_tech_on_failure:
                 description:
                 - Enable or disable automatic generation of admin technical details
                     on failure.
                 required: false
                 default: null
-                type: str
+                type: bool
             enable_tunnel:
                 description:
                 - Enable or disable tunnel functionality.
                 required: false
                 default: null
-                type: str
+                type: bool
             idle_timeout:
                 description:
                 - The idle timeout setting for tunnels.
@@ -755,7 +755,7 @@ options:
                         - The tracking object number.
                         required: true
                         default: null
-                        type: str
+                        type: int
                     interface:
                         description:
                         - The name of the interface to track.
@@ -778,14 +778,14 @@ options:
                         description:
                         - The subnet mask associated with the IP address for tracking.
                         required: false
-                        default: null
+                        default: 0.0.0.0
                         type: str
                     vpn:
                         description:
                         - The VPN instance associated with the tracking object.
                         required: true
                         default: null
-                        type: str
+                        type: int
                     object:
                         description:
                         - A list of objects related to the tracking.
@@ -799,7 +799,7 @@ options:
                                 - The unique identifier for the object.
                                 required: true
                                 default: null
-                                type: str
+                                type: int
                     boolean:
                         description:
                         - The boolean condition to use when evaluating multiple objects.
@@ -848,7 +848,7 @@ options:
                 - Enable or disable automatic preference setting for affinity groups.
                 required: false
                 default: null
-                type: str
+                type: bool
             affinity_per_vrf:
                 description:
                 - List of affinity configurations per VRF.
@@ -874,7 +874,7 @@ options:
                 - Enable or disable the transport gateway feature.
                 required: false
                 default: null
-                type: str
+                type: bool
             enable_mrf_migration:
                 description:
                 - Enable Multicast Routing Framework (MRF) migration settings.
@@ -895,7 +895,7 @@ options:
                 - Enable or disable management region configuration.
                 required: false
                 default: null
-                type: str
+                type: bool
             vrf:
                 description:
                 - List of VRF configurations.
@@ -909,7 +909,7 @@ options:
                         - The VRF (VPN Routing and Forwarding) instance ID.
                         required: true
                         default: null
-                        type: str
+                        type: int
                     gateway_preference:
                         description:
                         - A list of preferred gateway values for the VRF.
@@ -922,7 +922,7 @@ options:
                 - Enable or disable the management gateway feature.
                 required: false
                 default: null
-                type: str
+                type: bool
             epfr:
                 description:
                 - Edge Policy-based Framework Routing (EPFR) setting.
