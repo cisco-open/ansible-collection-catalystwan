@@ -268,122 +268,249 @@
     #     manager_credentials:
     #       <<: *manager_authentication
 
-    - name: Configure Cisco OMP Feature Template
-      cisco.catalystwan.feature_templates:
-        state: present
-        template_name: "CiscoOMPFeatureTemplate"
-        template_description: "Comprehensive OMP Configuration"
-        debug: true
-        device_models:
-          - "vedge-C8000V"
-        cisco_omp:
-          graceful_restart: true
-          overlay_as: "65000"
-          send_path_limit: "10"
-          ecmp_limit: "8"
-          shutdown: false
-          omp_admin_distance_ipv4: "110"
-          omp_admin_distance_ipv6: "115"
-          advertisement_interval: "30"
-          graceful_restart_timer: "120"
-          eor_timer: "300"
-          holdtime: "180"
-          advertise:
-            - protocol: "bgp"
-              route: "external"
-            - protocol: "ospf"
-            - protocol: "connected"
-            - protocol: "static"
-            - protocol: "eigrp"
-            - protocol: "lisp"
-          ipv6_advertise:
-            - protocol: "bgp"
-            - protocol: "ospf"
-            - protocol: "connected"
-            - protocol: "static"
-          ignore_region_path_length: true
-          transport_gateway: "prefer"
-          site_types:
-            - "type-1"
-            - "type-2"
-            - "cloud"
-            - "branch"
-            - "spoke"
-          auto_translate: true
-        manager_credentials:
-          <<: *manager_authentication
+    # - name: Configure Cisco OMP Feature Template
+    #   cisco.catalystwan.feature_templates:
+    #     state: present
+    #     template_name: "CiscoOMPFeatureTemplate"
+    #     template_description: "Comprehensive OMP Configuration"
+    #     debug: true
+    #     device_models:
+    #       - "vedge-C8000V"
+    #     cisco_omp:
+    #       graceful_restart: true
+    #       overlay_as: "65000"
+    #       send_path_limit: "10"
+    #       ecmp_limit: "8"
+    #       shutdown: false
+    #       omp_admin_distance_ipv4: "110"
+    #       omp_admin_distance_ipv6: "115"
+    #       advertisement_interval: "30"
+    #       graceful_restart_timer: "120"
+    #       eor_timer: "300"
+    #       holdtime: "180"
+    #       advertise:
+    #         - protocol: "bgp"
+    #           route: "external"
+    #         - protocol: "ospf"
+    #         - protocol: "connected"
+    #         - protocol: "static"
+    #         - protocol: "eigrp"
+    #         - protocol: "lisp"
+    #       ipv6_advertise:
+    #         - protocol: "bgp"
+    #         - protocol: "ospf"
+    #         - protocol: "connected"
+    #         - protocol: "static"
+    #       ignore_region_path_length: true
+    #       transport_gateway: "prefer"
+    #       site_types:
+    #         - "type-1"
+    #         - "type-2"
+    #         - "cloud"
+    #         - "branch"
+    #         - "spoke"
+    #       auto_translate: true
+    #     manager_credentials:
+    #       <<: *manager_authentication
 
+    # - name: Configure Cisco OSPF Feature Template
+    #   cisco.catalystwan.feature_templates:
+    #     state: present
+    #     template_name: "CiscoOSPFeatureTemplate"
+    #     template_description: "Comprehensive OSPF Configuration"
+    #     device_models:
+    #       - "vedge-C8000V"
+    #     cisco_ospf:
+    #       router_id: "1.1.1.1"
+    #       reference_bandwidth: "10000"
+    #       rfc1583: false
+    #       originate: true
+    #       always: true
+    #       metric: "10"
+    #       metric_type: "type1"
+    #       external: "20"
+    #       inter_area: "30"
+    #       intra_area: "40"
+    #       delay: "5"
+    #       initial_hold: "10"
+    #       max_hold: "40"
+    #       redistribute:
+    #         - protocol: "static"
+    #           route_policy: "static_policy"
+    #           dia: true
+    #         - protocol: "bgp"
+    #           route_policy: "bgp_to_ospf_policy"
+    #           dia: false
+    #       router_lsa:
+    #         - ad_type: "administrative"
+    #           time: 10
+    #       route_policy:
+    #         - direction: "in"
+    #           pol_name: "ospf_in_policy"
+    #       area:
+    #         - a_num: 0
+    #           stub: false
+    #           nssa: true
+    #           interface:
+    #             - name: "GigabitEthernet0/0"
+    #               hello_interval: "10"
+    #               dead_interval: "40"
+    #               retransmit_interval: "5"
+    #               cost: "1"
+    #               priority: "1"
+    #               network: "broadcast"
+    #               passive_interface: false
+    #               type: "simple"
+    #               message_digest_key: "1"
+    #               md5: "md5keystring"
+    #           range:
+    #             - address: "192.168.1.0/24"
+    #               cost: "100"
+    #               no_advertise: true
+    #     manager_credentials:
+    #         <<: *manager_authentication
 
-    - name: Configure Cisco OSPF Feature Template
-      cisco.catalystwan.feature_templates:
-        state: present
-        template_name: "CiscoOSPFeatureTemplate"
-        template_description: "Comprehensive OSPF Configuration"
-        device_models:
-          - "vedge-C8000V"
-        cisco_ospf:
-          router_id: "1.1.1.1"
-          reference_bandwidth: "10000"
-          rfc1583: false
-          originate: true
-          always: true
-          metric: "10"
-          metric_type: "type1"
-          external: "20"
-          inter_area: "30"
-          intra_area: "40"
-          delay: "5"
-          initial_hold: "10"
-          max_hold: "40"
-          redistribute:
-            - protocol: "static"
-              route_policy: "static_policy"
-              dia: true
-            - protocol: "bgp"
-              route_policy: "bgp_to_ospf_policy"
-              dia: false
-          router_lsa:
-            - ad_type: "administrative"
-              time: 10
-          route_policy:
-            - direction: "in"
-              pol_name: "ospf_in_policy"
-          area:
-            - a_num: 0
-              stub: false
-              nssa: true
-              interface:
-                - name: "GigabitEthernet0/0"
-                  hello_interval: "10"
-                  dead_interval: "40"
-                  retransmit_interval: "5"
-                  cost: "1"
-                  priority: "1"
-                  network: "broadcast"
-                  passive_interface: false
-                  type: "simple"
-                  message_digest_key: "1"
-                  md5: "md5keystring"
-              range:
-                - address: "192.168.1.0/24"
-                  cost: "100"
-                  no_advertise: true
-        manager_credentials:
-            <<: *manager_authentication
+    # - name: "Configure Secure Internet Gateway feature template"
+    #   cisco.catalystwan.feature_templates:
+    #     state: present
+    #     template_name: "CiscoSecureInternetGatewayFeatureTemplate"
+    #     template_description: "Comprehensive CiscoSecureInternetGateway Configuration"
+    #     debug: true
+    #     device_models:
+    #       - "vedge-C8000V"
+    #     cisco_secure_internet_gateway:
+    #       vpn_id: 10
+    #       child_org_id: "example_org"
+    #       interface:
+    #         - if_name: "GigabitEthernet0/0"
+    #           auto: true
+    #           shutdown: false
+    #           description: "Main interface for SIG"
+    #           unnumbered: false
+    #           address: "192.168.1.1/24"
+    #           tunnel_source: "192.168.1.1"
+    #           tunnel_source_interface: "Loopback0"
+    #           tunnel_route_via: "192.168.2.1"
+    #           tunnel_destination: "203.0.113.1"
+    #           application: "sig"
+    #           tunnel_set: "secure-internet-gateway-umbrella"
+    #           tunnel_dc_preference: "primary-dc"
+    #           tcp_mss_adjust: "1400"
+    #           mtu: 1400
+    #           dpd_interval: "30"
+    #           dpd_retries: "3"
+    #           ike_version: 2
+    #           pre_shared_secret: "MyPreSharedSecret"
+    #           ike_rekey_interval: "3600"
+    #           ike_ciphersuite: "aes256-cbc-sha1"
+    #           ike_group: "14"
+    #           pre_shared_key_dynamic: false
+    #           ike_local_id: "local-id"
+    #           ike_remote_id: "remote-id"
+    #           ipsec_rekey_interval: "3600"
+    #           ipsec_replay_window: "32"
+    #           ipsec_ciphersuite: "aes256-gcm"
+    #           perfect_forward_secrecy: "group-14"
+    #           tracker: true
+    #           track_enable: true
+    #       service:
+    #         - svc_type: "sig"
+    #           interface_pair:
+    #             - active_interface: "GigabitEthernet0/0"
+    #               active_interface_weight: 10
+    #               backup_interface: "GigabitEthernet0/1"
+    #               backup_interface_weight: 5
+    #           auth_required: "yes"
+    #           xff_forward_enabled: "yes"
+    #           ofw_enabled: "no"
+    #           ips_control: "yes"
+    #           caution_enabled: "no"
+    #           primary_data_center: "Auto"
+    #           secondary_data_center: "Auto"
+    #           ip: "yes"
+    #           idle_time: "30"
+    #           display_time_unit: "MINUTE"
+    #           ip_enforced_for_known_browsers: "yes"
+    #           refresh_time: "5"
+    #           refresh_time_unit: "MINUTE"
+    #           enabled: "yes"
+    #           block_internet_until_accepted: "no"
+    #           force_ssl_inspection: "yes"
+    #           timeout: "60"
+    #           data_center_primary: "Auto"
+    #           data_center_secondary: "Auto"
+    #       tracker_src_ip: "192.0.2.1"
+    #       tracker:
+    #         - name: "health-check-tracker"
+    #           endpoint_api_url: "https://api.example.com/health"
+    #           threshold: "5"
+    #           interval: "60"
+    #           multiplier: "2"
+    #           tracker_type: "SIG"
+    #     manager_credentials:
+    #       <<: *manager_authentication
 
+    # - name: "Configure Cisco SNMP feature template"
+    #   cisco.catalystwan.feature_templates:
+    #     state: present
+    #     template_name: "CiscoSNMPFeatureTemplate"
+    #     template_description: "Comprehensive Cisco SNMP Configuration"
+    #     cisco_snmp:
+    #       shutdown: false
+    #       contact: "SNMP Admin"
+    #       location: "Data Center A"
+    #       view:
+    #         - name: "SystemView"
+    #           oid:
+    #             - id: "1.3.6.1.2.1.1"
+    #               exclude: false
+    #             - id: "1.3.6.1.2.1.2"
+    #               exclude: true
+    #         - name: "AllView"
+    #           oid:
+    #             - id: "1.3.6.1"
+    #               exclude: false
+    #       community:
+    #         - name: "public"
+    #           view: "SystemView"
+    #           authorization: "read-only"
+    #         - name: "private"
+    #           view: "AllView"
+    #           authorization: "read-only"
+    #       group:
+    #         - name: "v3group"
+    #           security_level: "auth-priv"
+    #           view: "AllView"
+    #       user:
+    #         - name: "snmpuser"
+    #           auth: "md5"
+    #           auth_password: "authpass"
+    #           priv: "aes-cfb-128"
+    #           priv_password: "privpass"
+    #           group: "v3group"
+    #       target:
+    #         - vpn_id: 10
+    #           ip: "192.0.2.50"
+    #           port: 162
+    #           community_name: "public"
+    #           user: "snmpuser"
+    #           source_interface: "GigabitEthernet0/0"
+    #     manager_credentials:
+    #       <<: *manager_authentication
 
-
-    # INVALID
-    # - name: Create Comprehensive Cisco System Template
+    # - name: "Create Comprehensive Cisco System Template"
     #   cisco.catalystwan.feature_templates:
     #     state: present
     #     template_name: "ComprehensiveCiscoSystemTemplate"
     #     template_description: "Cisco System template"
     #     debug: true
+    #     device_models:
+    #       - "vedge-C8000V"
     #     cisco_system:
     #       timezone: "UTC"
+    #       description: "Example desc"
     #       hostname:
-    #         name: "sdwan-hostname" # Replace with the actual hostname
+    #         name: "sdwan-hostname"
     #       location: "Data Center A"
     #       latitude: "37.7749"
     #       longitude: "-122.4194"
@@ -397,9 +524,10 @@
     #         - "group1"
     #         - "group2"
     #       controller_group_list:
-    #         - "controller_group1"
+    #         - 1
+    #         - 3
     #       system_ip:
-    #         name: "192.0.2.1" # Replace with the actual system IP
+    #         name: "192.0.2.1"
     #       overlay_id: "1"
     #       site_id: 1001
     #       site_type:
@@ -409,7 +537,7 @@
     #       port_hop: true
     #       control_session_pps: "500"
     #       track_transport: true
-    #       track_interface_tag: "eth0"
+    #       track_interface_tag: "1"
     #       console_baud_rate: "9600"
     #       max_omp_sessions: "50"
     #       multi_tenant: false
@@ -424,16 +552,13 @@
     #           endpoint_ip_transport_port: "8080"
     #           protocol: "tcp"
     #           port: "443"
-    #           endpoint_dns_name: "example.com"
-    #           endpoint_api_url: "https://api.example.com"
     #           elements:
-    #             - "element1"
-    #             - "element2"
+    #             - "element1, element2"
     #           boolean: "and"
     #           threshold: "10"
     #           interval: "30"
     #           multiplier: "3"
-    #           type: "interface"
+    #           type: "static-route"
     #       object_track:
     #         - object_number: 10
     #           interface: 'GigabitEthernet0/0/0'
@@ -445,6 +570,15 @@
     #             - number: 101
     #           boolean: 'and'
     #         - object_number: 20
+    #           interface: 'GigabitEthernet0/0/0'
+    #           sig: '100'
+    #           ip: '192.0.2.1'
+    #           mask: '255.255.255.0'
+    #           vpn: 1
+    #           object:
+    #             - number: 101
+    #           boolean: 'and'
+    #         - object_number: 30
     #           interface: 'GigabitEthernet0/0/1'
     #           sig: '200'
     #           ip: '198.51.100.1'
@@ -460,22 +594,58 @@
     #       vrf:
     #         - vrf_id: 1
     #           gateway_preference:
-    #             - '192.0.2.1'
-    #             - '192.0.2.2'
+    #             - 4 
+    #             - 5
     #         - vrf_id: 2
     #           gateway_preference:
-    #             - '198.51.100.1'
-    #             - '198.51.100.2'
+    #             - 12
+    #             - 13
     #       enable_management_region: true
-    #       migration_bgp_community: '65535:12345'
+    #       migration_bgp_community: 65535
     #       enable_mrf_migration: enabled
     #       transport_gateway: true
     #       affinity_group_number: 1
     #       affinity_per_vrf:
     #         - affinity_group_number: 1
     #           vrf_range: "22"
-    #       role: 'vSmart'
-    #       secondary_region: 'secondaryRegion'
-    #       region_id: 'primaryRegion'
+    #       role: "edge-router"
+    #       # secondary_region: 55
+    #       # region_id: 44
+    #     manager_credentials:
+    #       <<: *manager_authentication
+
+    - name: "Create Comprehensive Cisco VPN Interface Template"
+      cisco.catalystwan.feature_templates:
+        state: present
+        template_name: "ComprehensiveCiscoVPNInterfaceTemplate"
+        template_description: "Cisco VPN Interface template"
+        device_specific_variables:
+          ipv4_address: ipv4_address_variable
+        debug: true
+        device_models:
+          - "vedge-C8000V"
+        cisco_vpn_interface:
+          if_name: "GigabitEthernet4"
+          interface_description: "Service or Lan Net interface"
+          poe: true
+          ipv4_address: device_specific_variable
+        manager_credentials:
+          <<: *manager_authentication
+
+    # # Example of devices specific variables - this works in Feature Templates, need to check Device Templates
+    # - name: Create Cisco Banner Feature Template
+    #   cisco.catalystwan.feature_templates:
+    #     state: present
+    #     template_name: "CiscoBannerConfigTemplate"
+    #     template_description: "Banner configuration for login and MOTD"
+    #     debug: true
+    #     device_specific_variables:
+    #       login_banner: "var_name_1"
+    #       motd_banner: "var_name_2"
+    #     device_models:
+    #       - "vedge-C8000V"
+    #     cisco_banner:
+    #       login_banner: device_specific_variable
+    #       motd_banner: device_specific_variable
     #     manager_credentials:
     #       <<: *manager_authentication

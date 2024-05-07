@@ -34,6 +34,11 @@ options:
       - Description for the Feature Template.
     type: str
     required: true
+  device_specific_variables:
+    description:
+      - Dictionary containing device specific variables names to be defined in template.
+    type: dict
+    required: false
   debug:
     description:
       - If to write payload of created template and response from vmanage as json to file.
@@ -48,6 +53,10 @@ extends_documentation_fragment:
   - cisco.catalystwan.feature_template_cisco_ntp
   - cisco.catalystwan.feature_template_cisco_omp
   - cisco.catalystwan.feature_template_cisco_ospf
+  - cisco.catalystwan.feature_template_cisco_secure_internet_gateway
+  - cisco.catalystwan.feature_template_cisco_snmp
+  - cisco.catalystwan.feature_template_cisco_system
+  - cisco.catalystwan.feature_template_cisco_vpn_interface
   - cisco.catalystwan.device_models_feature_template
   - cisco.catalystwan.manager_authentication
 author:
@@ -56,8 +65,8 @@ author:
 
 
 from enum import Enum
-from pydantic import Field
-from typing import Optional, Dict
+from pydantic import BaseModel, Field, ConfigDict
+from typing import Optional, Dict, Final
 
 from catalystwan.api.template_api import FeatureTemplate
 from catalystwan.dataclasses import FeatureTemplateInfo
@@ -68,6 +77,7 @@ from catalystwan.api.templates.models.supported import available_models
 
 from ..module_utils.result import ModuleResult
 from ..module_utils.vmanage_module import AnsibleCatalystwanModule
+from catalystwan.api.templates.device_variable import DeviceVariable
 from ..module_utils.feature_templates.cisco_aaa import cisco_aaa_definition
 from ..module_utils.feature_templates.cisco_banner import cisco_banner_definition
 from ..module_utils.feature_templates.cisco_bfd import cisco_bfd_definition
@@ -75,7 +85,12 @@ from ..module_utils.feature_templates.cisco_logging import cisco_logging_definit
 from ..module_utils.feature_templates.cisco_ntp import cisco_ntp_definition
 from ..module_utils.feature_templates.cisco_omp import cisco_omp_definition
 from ..module_utils.feature_templates.cisco_ospf import cisco_ospf_definition
+from ..module_utils.feature_templates.cisco_secure_internet_gateway import cisco_secure_internet_gateway_definition
+from ..module_utils.feature_templates.cisco_snmp import cisco_snmp_definition
 from ..module_utils.feature_templates.cisco_system import cisco_system_definition
+from ..module_utils.feature_templates.cisco_vpn_interface import cisco_vpn_interface_definition
+
+ALLOW: Final[str] = "allow"
 
 
 class ExtendedModuleResult(ModuleResult):
@@ -86,6 +101,10 @@ class State(str, Enum):
     PRESENT = "present"
     MODIFIED = "modified"
     ABSENT = "absent"
+
+
+class Values(BaseModel):
+    model_config = ConfigDict(extra=ALLOW, populate_by_name=True)
 
 
 def run_module():
@@ -99,6 +118,7 @@ def run_module():
         template_description=dict(type="str", default=None),
         device_models=dict(type="list", choices=[device_model.value for device_model in DeviceModel], default=[]),
         debug=dict(type="bool", default=False),
+        device_specific_variables=dict(type="raw", default={}),
         device=dict(type="str", default=None),  # For this we need to think how to pass devices
         **cisco_aaa_definition,
         **cisco_banner_definition,
@@ -107,6 +127,10 @@ def run_module():
         **cisco_ntp_definition,
         **cisco_omp_definition,
         **cisco_ospf_definition,
+        **cisco_secure_internet_gateway_definition,
+        **cisco_snmp_definition,
+        **cisco_system_definition,
+        **cisco_vpn_interface_definition,
     )
 
     result = ExtendedModuleResult()
@@ -141,6 +165,7 @@ def run_module():
     )
     # Verify if we are dealing with one or more templates
     template_name = module.params.get("template_name")
+    device_specific_variables = module.params.get("device_specific_variables")
     module.logger.info(f"Module input: \n{module.params}\n")
 
     all_templates: DataSequence[FeatureTemplateInfo] = module.get_response_safely(
@@ -158,27 +183,46 @@ def run_module():
             )
         else:
             for model_name, model_module in available_models.items():
-                if model_name in module.params.keys() and module.params[model_name] is not None:
-                    module.logger.debug(f"Template input:\n{module.params_without_none_values[model_name]}\n")
-                    # Perform action with template
-                    template = model_module(
-                        template_name=template_name,
-                        template_description=module.params.get("template_description"),
-                        device_models=module.params.get("device_models"),
-                        **module.params_without_none_values[model_name],
-                    )
+                if model_name in module.params.keys():
+                    if module.params[model_name] is not None:
+                        module.logger.debug(f"Template input:\n{module.params_without_none_values[model_name]}\n")
+                        # Perform action with template
+                        
+                        module.logger.debug(f"device_specific_variables:\n{device_specific_variables}\n")
+                        # only temporary part for debugging
+                        configuration = module.params_without_none_values[model_name]
+                        # Check if any device_specific_variables defined
+                        if device_specific_variables:
+                            _dsv = Values()
+                            for key, value in device_specific_variables.items():
+                                dev_value = DeviceVariable(name=value)
+                                setattr(_dsv, key, dev_value)
+                                module.logger.debug(f"{_dsv}")
+                        
+                            for field, value in configuration.items():
+                                if value == "device_specific_variable":
+                                    module.logger.debug(f"{field}: {value}")
+                                    configuration[field] = _dsv.model_extra[field]
+                                    module.logger.debug(f"configuration[field]:\n{configuration[field]}\n")
 
-                    module.logger.debug(
-                        f"Prepared template for sending to vManage, template configuration:\n{template}\n"
-                    )
-                    try:
-                        module.session.api.templates.create(template=template, debug=module.params.get("debug"))
-                    except ManagerHTTPError as ex:
-                        module.fail_json(
-                            msg=f"Could not perform create Feature Template {template_name}.\nManager error: {ex.info}"
+                        template = model_module(
+                            template_name=template_name,
+                            template_description=module.params.get("template_description"),
+                            device_models=module.params.get("device_models"),
+                            **configuration,
                         )
-                    result.changed = True
-                    result.msg += f"Created template {model_name}: {template}"
+
+                        module.logger.debug(
+                            f"Prepared template for sending to vManage, template configuration:\n{template}\n"
+                        )
+                        try:
+                            module.session.api.templates.create(template=template, debug=module.params.get("debug"))
+                        except ManagerHTTPError as ex:
+                            module.fail_json(
+                                msg=f"Could not perform create Feature Template {template_name}.\nManager error: {ex.info}"
+                            )
+                        result.changed = True
+                        result.msg += f"Created template {model_name}: {template}"
 
     if module.params.get("state") == "absent":
         module.session.api.templates.delete(template=FeatureTemplate, name=template_name)

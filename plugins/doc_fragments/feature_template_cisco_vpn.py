@@ -108,7 +108,7 @@ options:
                     ECMP hash key.
                 required: false
                 default: null
-                type: str
+                type: bool
             host:
                 description:
                 - A list of host configurations within the VPN instance.
@@ -276,7 +276,7 @@ options:
                             this static route.
                         required: false
                         default: null
-                        type: str
+                        type: bool
                     distance:
                         description:
                         - The administrative distance for the static route.
@@ -294,7 +294,7 @@ options:
                         - A flag indicating whether DHCP is used for this static route.
                         required: false
                         default: null
-                        type: str
+                        type: bool
             route_v6:
                 description:
                 - A list of IPv6 route configurations within the VPN instance.
@@ -335,7 +335,7 @@ options:
                             for this static route.
                         required: false
                         default: null
-                        type: str
+                        type: bool
                     vpn:
                         description:
                         - The VPN instance identifier associated with the IPv6 static
@@ -470,7 +470,7 @@ options:
                                     be considered.
                                 required: false
                                 default: null
-                                type: str
+                                type: bool
                             region:
                                 description:
                                 - The network region where the prefix list is applied.
@@ -538,7 +538,7 @@ options:
                                     be considered.
                                 required: false
                                 default: null
-                                type: str
+                                type: bool
                             region:
                                 description:
                                 - The network region where the prefix list is applied.
@@ -579,7 +579,7 @@ options:
                         - A flag indicating whether address overload is allowed.
                         required: false
                         default: null
-                        type: str
+                        type: bool
                     leak_from_global:
                         description:
                         - A flag indicating whether leaking from the global table

@@ -36,7 +36,7 @@ def is_pydantic_model(type_):
 
 def field_to_ansible_option(field: FieldInfo, field_name: str, model_name: str):
     # if field.description == "List of public keys for the user":
-    # if field.description == "Configure Accounting Method":
+    # if field.description == "Flag indicating if interface tracking is enabled.":
     #     from IPython import embed; embed()
     option = {
         "description": [field.description],
@@ -91,6 +91,10 @@ def field_to_ansible_option(field: FieldInfo, field_name: str, model_name: str):
                 option["type"] = "list"
                 option["elements"] = "str"
                 option["choices"] = [item.value for item in user_class]
+            elif get_origin(user_class) == Literal:
+                option["type"] = "list"
+                option["elements"] = "str"
+                option["choices"] = [item for item in get_args(user_class)]
             else:
                 option["type"] = "list"
                 option["elements"] = "str"
@@ -104,6 +108,8 @@ def field_to_ansible_option(field: FieldInfo, field_name: str, model_name: str):
     elif field_type == Union and safe_issubclass(next((arg for arg in args if arg is not None), None), Enum):
         option["type"] = "str"
         option["choices"] = [item.value for item in args[0]]
+    elif field_type == Union and bool in args:
+        option["type"] = "bool"
     elif field_type == Union and Annotated in subargs_base_types:
         elements_type = next((arg for arg in args if arg is not None), None)
         origin_type = get_origin(elements_type)

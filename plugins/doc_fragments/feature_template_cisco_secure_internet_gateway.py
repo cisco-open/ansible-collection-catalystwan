@@ -23,6 +23,12 @@ options:
                 required: false
                 default: null
                 type: int
+            child_org_id:
+                description:
+                - Child Organization Id
+                required: false
+                default: ''
+                type: str
             interface:
                 description:
                 - List of interface configurations associated with the service.
@@ -246,13 +252,13 @@ options:
                         - Flag indicating if interface tracking is enabled.
                         required: false
                         default: null
-                        type: str
+                        type: bool
                     track_enable:
                         description:
                         - Flag indicating if tracking is enabled for the interface.
                         required: false
                         default: null
-                        type: str
+                        type: bool
             service:
                 description:
                 - List of service configurations for the Cisco Secure Internet Gateway.
@@ -309,32 +315,32 @@ options:
                         - Flag indicating if authentication is required for the service.
                         required: false
                         default: null
-                        type: str
+                        type: bool
                     xff_forward_enabled:
                         description:
                         - Flag indicating if X-Forwarded-For HTTP header is enabled.
                         required: false
                         default: null
-                        type: str
+                        type: bool
                     ofw_enabled:
                         description:
                         - Flag indicating if on-premise firewall is enabled.
                         required: false
                         default: null
-                        type: str
+                        type: bool
                     ips_control:
                         description:
                         - Flag indicating if Intrusion Prevention System (IPS) control
                             is enabled.
                         required: false
                         default: null
-                        type: str
+                        type: bool
                     caution_enabled:
                         description:
                         - Flag indicating if caution warnings are enabled.
                         required: false
                         default: null
-                        type: str
+                        type: bool
                     primary_data_center:
                         description:
                         - Primary data center for the service. 'Auto' for automatic
@@ -355,7 +361,7 @@ options:
                             for the service.
                         required: false
                         default: null
-                        type: str
+                        type: bool
                     idle_time:
                         description:
                         - Idle time before a session is considered inactive.
@@ -377,7 +383,7 @@ options:
                         - Flag indicating if IP is enforced for known browsers.
                         required: false
                         default: null
-                        type: str
+                        type: bool
                     refresh_time:
                         description:
                         - Time after which the service information is refreshed.
@@ -399,20 +405,20 @@ options:
                         - Flag indicating if the service is enabled.
                         required: false
                         default: null
-                        type: str
+                        type: bool
                     block_internet_until_accepted:
                         description:
                         - Flag indicating if Internet access is blocked until the
                             service is accepted.
                         required: false
                         default: null
-                        type: str
+                        type: bool
                     force_ssl_inspection:
                         description:
                         - Flag indicating if SSL inspection is forced.
                         required: false
                         default: null
-                        type: str
+                        type: bool
                     timeout:
                         description:
                         - Timeout value for the service, after which the session is

@@ -451,19 +451,19 @@ options:
                 - Enable automatic generation of tech-support file on failure
                 required: false
                 default: null
-                type: str
+                type: bool
             iptables_enable:
                 description:
                 - Enable or disable iptables for security
                 required: false
                 default: null
-                type: str
+                type: bool
             track_default_gateway:
                 description:
                 - Enable or disable tracking of the default gateway
                 required: false
                 default: null
-                type: str
+                type: bool
             dns_cache_timeout:
                 description:
                 - DNS cache timeout in minutes
@@ -475,7 +475,7 @@ options:
                 - Enable or disable tracking of transport connections
                 required: false
                 default: null
-                type: str
+                type: bool
             controller_group_id:
                 description:
                 - Group ID for the vSmart controller
@@ -493,7 +493,7 @@ options:
                 - Enable or disable port hopping
                 required: false
                 default: null
-                type: str
+                type: bool
             port_offset:
                 description:
                 - Port offset for port hopping

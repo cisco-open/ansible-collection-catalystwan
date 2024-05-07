@@ -84,7 +84,7 @@ options:
                 suboptions:
                     name:
                         description:
-                        - The name of the server
+                        - The hostname/IPv4 address of the server
                         required: true
                         default: null
                         type: str

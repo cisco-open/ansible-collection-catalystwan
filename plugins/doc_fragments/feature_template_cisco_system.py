@@ -440,6 +440,12 @@ options:
                 - Africa/Lusaka
                 - Africa/Harare
                 - UTC
+            description:
+                description:
+                - Set a text description of the device
+                required: false
+                default: null
+                type: str
             hostname:
                 description:
                 - The hostname for the device.
@@ -912,7 +918,7 @@ options:
                         type: int
                     gateway_preference:
                         description:
-                        - A list of preferred gateway values for the VRF.
+                        - List of affinity group preferences for VRF
                         required: false
                         default: null
                         type: list
