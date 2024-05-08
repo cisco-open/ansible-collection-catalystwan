@@ -36,7 +36,7 @@ def is_pydantic_model(type_):
 
 def field_to_ansible_option(field: FieldInfo, field_name: str, model_name: str):
     # if field.description == "List of public keys for the user":
-    # if field.description == "Flag indicating if interface tracking is enabled.":
+    # if field.description == "The list of subtypes for the import protocol.":
     #     from IPython import embed; embed()
     option = {
         "description": [field.description],
@@ -95,21 +95,38 @@ def field_to_ansible_option(field: FieldInfo, field_name: str, model_name: str):
                 option["type"] = "list"
                 option["elements"] = "str"
                 option["choices"] = [item for item in get_args(user_class)]
+            elif origin_type == Literal:
+                option["type"] = "list"
+                option["elements"] = "str"
+                option["choices"] = [item for item in get_args(elements_type)]
+            elif user_class == int:
+                option["type"] = "list"
+                option["elements"] = "int"
             else:
                 option["type"] = "list"
                 option["elements"] = "str"
-                
-    elif is_pydantic_model(field_type):
-        option["type"] = "dict"
-        option["suboptions"] = model_to_ansible_options(field_type, model_name)
+
     elif safe_issubclass(field_type, Enum):
         option["type"] = "str"
         option["choices"] = [item.value for item in field_type]
+
+    # Special for field.description == "The interface configuration for the IPv4 static route."
+    elif field_type == Union and is_pydantic_model(next((arg for arg in args if arg is not None), None)):
+        elements_type = next((arg for arg in args if arg is not None), None)
+        option["type"] = "dict"
+        option["elements"] = "dict"
+        option["suboptions"] = model_to_ansible_options(elements_type, model_name)
+
     elif field_type == Union and safe_issubclass(next((arg for arg in args if arg is not None), None), Enum):
         option["type"] = "str"
         option["choices"] = [item.value for item in args[0]]
+
     elif field_type == Union and bool in args:
         option["type"] = "bool"
+
+    elif field_type == Union and int in args:
+        option["type"] = "int"
+
     elif field_type == Union and Annotated in subargs_base_types:
         elements_type = next((arg for arg in args if arg is not None), None)
         origin_type = get_origin(elements_type)
@@ -120,15 +137,17 @@ def field_to_ansible_option(field: FieldInfo, field_name: str, model_name: str):
         if user_class == bool:
             option["type"] = "bool"
             option["default"] = field.default
-            # from IPython import embed; embed()
+
     # THIS LINE IS NEWEST FOR LITERALS
     elif field_type == Union and Literal in subargs_base_types:
         elements_type = next((arg for arg in args if arg is not None), None)
         option["type"] = "str"
         option["choices"] = [item for item in get_args(elements_type)]
+
     elif field_type == Literal:
         option["type"] = "str"
         option["choices"] = [item for item in args]
+
     else:
         print(f"With model: {model_name}, field_name: {field_name} field: {field}")
         option["type"] = "str"

@@ -35,7 +35,7 @@ options:
                     environments.
                 required: false
                 default: null
-                type: str
+                type: int
             org_name:
                 description:
                 - The name of the organization to which the VPN instance belongs.
@@ -48,13 +48,13 @@ options:
                     Management Protocol (OMP).
                 required: false
                 default: null
-                type: str
+                type: int
             omp_admin_distance_ipv6:
                 description:
                 - The administrative distance for IPv6 routes received over OMP.
                 required: false
                 default: null
-                type: str
+                type: int
             dns:
                 description:
                 - A list of DNS configurations for the VPN instance.
@@ -235,7 +235,7 @@ options:
                                 - The administrative distance of the next hop.
                                 required: false
                                 default: null
-                                type: str
+                                type: int
                     next_hop_with_track:
                         description:
                         - A list of IPv4 next hops with tracking for the route.
@@ -257,7 +257,7 @@ options:
                                     requires tracking.
                                 required: false
                                 default: null
-                                type: str
+                                type: int
                             tracker:
                                 description:
                                 - The tracker associated with this next hop.
@@ -269,7 +269,37 @@ options:
                         - The interface configuration for the IPv4 static route.
                         required: false
                         default: null
-                        type: str
+                        type: dict
+                        elements: dict
+                        suboptions:
+                            interface_name:
+                                description:
+                                - The name of the interface used for routing.
+                                required: true
+                                default: null
+                                type: str
+                            interface_next_hop:
+                                description:
+                                - A list of next hops associated with the interface
+                                    for routing purposes.
+                                required: false
+                                default: null
+                                type: list
+                                elements: dict
+                                suboptions:
+                                    address:
+                                        description:
+                                        - The IP address of the next hop for the route.
+                                        required: false
+                                        default: null
+                                        type: str
+                                    distance:
+                                        description:
+                                        - The administrative distance of the next
+                                            hop.
+                                        required: false
+                                        default: null
+                                        type: int
                     null0:
                         description:
                         - A flag indicating whether to route traffic to null0 for
@@ -282,13 +312,13 @@ options:
                         - The administrative distance for the static route.
                         required: false
                         default: null
-                        type: str
+                        type: int
                     vpn:
                         description:
                         - The VPN instance identifier associated with the static route.
                         required: false
                         default: null
-                        type: str
+                        type: int
                     dhcp:
                         description:
                         - A flag indicating whether DHCP is used for this static route.
@@ -328,7 +358,7 @@ options:
                                 - The administrative distance of the IPv6 next hop.
                                 required: false
                                 default: null
-                                type: str
+                                type: int
                     null0:
                         description:
                         - A flag indicating whether to route IPv6 traffic to null0
@@ -342,7 +372,7 @@ options:
                             route.
                         required: false
                         default: null
-                        type: str
+                        type: int
                     nat:
                         description:
                         - The type of NAT to apply for the IPv6 static route, if applicable.
@@ -626,7 +656,7 @@ options:
                         - The length of the network prefix for the NAT pool.
                         required: false
                         default: null
-                        type: str
+                        type: int
                     range_start:
                         description:
                         - The starting IP address for the NAT pool range.
@@ -664,7 +694,7 @@ options:
                         - The tracker identifier associated with the NAT pool.
                         required: false
                         default: null
-                        type: str
+                        type: int
             static:
                 description:
                 - A list of static configurations within the VPN instance for NAT.
@@ -679,7 +709,7 @@ options:
                             NAT rule.
                         required: false
                         default: null
-                        type: str
+                        type: int
                     source_ip:
                         description:
                         - The original source IP address to be translated by static
@@ -707,7 +737,7 @@ options:
                         - The tracker identifier associated with the static NAT rule.
                         required: false
                         default: null
-                        type: str
+                        type: int
             subnet_static:
                 description:
                 - A list of subnet-specific static configurations within the VPN instance
@@ -753,7 +783,7 @@ options:
                             NAT rule.
                         required: false
                         default: null
-                        type: str
+                        type: int
             port_forward:
                 description:
                 - A list of port forwarding configurations within the VPN instance.
@@ -768,7 +798,7 @@ options:
                             forwarding rule.
                         required: false
                         default: null
-                        type: str
+                        type: int
                     source_port:
                         description:
                         - The source port number for the port forwarding rule.
@@ -829,6 +859,8 @@ options:
                         default: null
                         type: list
                         elements: str
+                        choices:
+                        - external
                     route_policy:
                         description:
                         - The route policy that specifies the conditions for route
@@ -896,6 +928,8 @@ options:
                         default: null
                         type: list
                         elements: str
+                        choices:
+                        - external
                     route_policy:
                         description:
                         - The route policy that specifies the criteria for route importation.
@@ -956,6 +990,8 @@ options:
                         default: null
                         type: list
                         elements: str
+                        choices:
+                        - external
                     route_policy:
                         description:
                         - The route policy that specifies the criteria for route exportation.

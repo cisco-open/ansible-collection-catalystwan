@@ -28,13 +28,13 @@ options:
                 - The maximum file size for the log file
                 required: false
                 default: null
-                type: str
+                type: int
             rotate:
                 description:
                 - The number of log files to maintain before rotating
                 required: false
                 default: null
-                type: str
+                type: int
             tls_profile:
                 description:
                 - List of TLS profiles configurations
@@ -93,7 +93,7 @@ options:
                         - The VPN ID for the server
                         required: true
                         default: null
-                        type: str
+                        type: int
                     source_interface:
                         description:
                         - The source interface for the server
@@ -152,7 +152,7 @@ options:
                         - The VPN ID for the IPv6 server
                         required: true
                         default: null
-                        type: str
+                        type: int
                     source_interface:
                         description:
                         - The source interface for the IPv6 server

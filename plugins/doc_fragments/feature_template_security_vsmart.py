@@ -31,5 +31,5 @@ options:
                 - The port used for TLS communications
                 required: false
                 default: null
-                type: str
+                type: int
     '''

@@ -440,105 +440,21 @@ options:
                 - Africa/Lusaka
                 - Africa/Harare
                 - UTC
-            idle_timeout:
+            host_name:
                 description:
-                - Idle timeout in minutes for user sessions
+                - The hostname for the vSmart controller
                 required: false
                 default: null
                 type: str
-            admin_tech_on_failure:
+            dual_stack_ipv6:
                 description:
-                - Enable automatic generation of tech-support file on failure
+                - Enable Dual Stack IPv6 Default
                 required: false
                 default: null
                 type: bool
-            iptables_enable:
+            description:
                 description:
-                - Enable or disable iptables for security
-                required: false
-                default: null
-                type: bool
-            track_default_gateway:
-                description:
-                - Enable or disable tracking of the default gateway
-                required: false
-                default: null
-                type: bool
-            dns_cache_timeout:
-                description:
-                - DNS cache timeout in minutes
-                required: false
-                default: null
-                type: str
-            track_transport:
-                description:
-                - Enable or disable tracking of transport connections
-                required: false
-                default: null
-                type: bool
-            controller_group_id:
-                description:
-                - Group ID for the vSmart controller
-                required: false
-                default: null
-                type: str
-            control_session_pps:
-                description:
-                - Control session packets per second limit
-                required: false
-                default: null
-                type: str
-            port_hop:
-                description:
-                - Enable or disable port hopping
-                required: false
-                default: null
-                type: bool
-            port_offset:
-                description:
-                - Port offset for port hopping
-                required: false
-                default: null
-                type: str
-            overlay_id:
-                description:
-                - Overlay ID for the vSmart controller
-                required: false
-                default: null
-                type: str
-            site_id:
-                description:
-                - Site ID for the vSmart controller
-                required: false
-                default: null
-                type: str
-            system_ip:
-                description:
-                - System IP address for the vSmart controller
-                required: false
-                default: null
-                type: str
-            device_groups:
-                description:
-                - Device group names for the vSmart controller
-                required: false
-                default: null
-                type: str
-            longitude:
-                description:
-                - Geographical longitude of the vSmart controller
-                required: false
-                default: null
-                type: str
-            latitude:
-                description:
-                - Geographical latitude of the vSmart controller
-                required: false
-                default: null
-                type: str
-            system_tunnel_mtu:
-                description:
-                - MTU size for system tunnels
+                - Set a text description of the device
                 required: false
                 default: null
                 type: str
@@ -548,10 +464,258 @@ options:
                 required: false
                 default: null
                 type: str
-            host_name:
+            system_tunnel_mtu:
                 description:
-                - The hostname for the vSmart controller
+                - MTU size for system tunnels
                 required: false
                 default: null
                 type: str
+            latitude:
+                description:
+                - Geographical latitude of the vSmart controller
+                required: false
+                default: null
+                type: int
+            longitude:
+                description:
+                - Geographical longitude of the vSmart controller
+                required: false
+                default: null
+                type: int
+            device_groups:
+                description:
+                - Device group names for the vSmart controller
+                required: false
+                default: null
+                type: str
+            system_ip:
+                description:
+                - System IP address for the vSmart controller
+                required: false
+                default: null
+                type: str
+            site_id:
+                description:
+                - Site ID for the vSmart controller
+                required: false
+                default: null
+                type: int
+            overlay_id:
+                description:
+                - Overlay ID for the vSmart controller
+                required: false
+                default: null
+                type: int
+            topology:
+                description:
+                - Set the topology
+                required: false
+                default: null
+                type: str
+                choices:
+                - Hub and Spoke
+            port_offset:
+                description:
+                - Port offset for port hopping
+                required: false
+                default: null
+                type: int
+            port_hop:
+                description:
+                - Enable or disable port hopping
+                required: false
+                default: null
+                type: bool
+            control_session_pps:
+                description:
+                - Control session packets per second limit
+                required: false
+                default: null
+                type: int
+            controller_group_id:
+                description:
+                - Group ID for the vSmart controller
+                required: false
+                default: null
+                type: int
+            track_transport:
+                description:
+                - Enable or disable tracking of transport connections
+                required: false
+                default: null
+                type: bool
+            track_default_gateway:
+                description:
+                - Enable or disable tracking of the default gateway
+                required: false
+                default: null
+                type: bool
+            iptables_enable:
+                description:
+                - Enable or disable iptables for security
+                required: false
+                default: null
+                type: bool
+            admin_tech_on_failure:
+                description:
+                - Enable automatic generation of tech-support file on failure
+                required: false
+                default: null
+                type: bool
+            idle_timeout:
+                description:
+                - Idle timeout in minutes for user sessions
+                required: false
+                default: null
+                type: int
+            dns_cache_timeout:
+                description:
+                - DNS cache timeout in minutes
+                required: false
+                default: null
+                type: int
+            region_list_id:
+                description:
+                - Configure a list of region ID
+                required: false
+                default: null
+                type: int
+            management_region:
+                description:
+                - Management Region
+                required: false
+                default: null
+                type: bool
+            compatible:
+                description:
+                - Configure compatible TLOC color
+                required: false
+                default: null
+                type: dict
+                elements: dict
+                suboptions:
+                    color_1:
+                        description:
+                        - First TLOC color in comparsion
+                        required: false
+                        default: null
+                        type: str
+                        choices:
+                        - default
+                        - mpls
+                        - metro-ethernet
+                        - biz-internet
+                        - public-internet
+                        - lte
+                        - 3g
+                        - red
+                        - green
+                        - blue
+                        - gold
+                        - silver
+                        - bronze
+                        - custom1
+                        - custom2
+                        - custom3
+                        - private1
+                        - private2
+                        - private3
+                        - private4
+                        - private5
+                        - private6
+                    color_2:
+                        description:
+                        - Second TLOC color in comparsion
+                        required: false
+                        default: null
+                        type: str
+                        choices:
+                        - default
+                        - mpls
+                        - metro-ethernet
+                        - biz-internet
+                        - public-internet
+                        - lte
+                        - 3g
+                        - red
+                        - green
+                        - blue
+                        - gold
+                        - silver
+                        - bronze
+                        - custom1
+                        - custom2
+                        - custom3
+                        - private1
+                        - private2
+                        - private3
+                        - private4
+                        - private5
+                        - private6
+            incompatible:
+                description:
+                - Configure incompatible TLOC color
+                required: false
+                default: null
+                type: dict
+                elements: dict
+                suboptions:
+                    color_1:
+                        description:
+                        - First TLOC color in comparsion
+                        required: false
+                        default: null
+                        type: str
+                        choices:
+                        - default
+                        - mpls
+                        - metro-ethernet
+                        - biz-internet
+                        - public-internet
+                        - lte
+                        - 3g
+                        - red
+                        - green
+                        - blue
+                        - gold
+                        - silver
+                        - bronze
+                        - custom1
+                        - custom2
+                        - custom3
+                        - private1
+                        - private2
+                        - private3
+                        - private4
+                        - private5
+                        - private6
+                    color_2:
+                        description:
+                        - Second TLOC color in comparsion
+                        required: false
+                        default: null
+                        type: str
+                        choices:
+                        - default
+                        - mpls
+                        - metro-ethernet
+                        - biz-internet
+                        - public-internet
+                        - lte
+                        - 3g
+                        - red
+                        - green
+                        - blue
+                        - gold
+                        - silver
+                        - bronze
+                        - custom1
+                        - custom2
+                        - custom3
+                        - private1
+                        - private2
+                        - private3
+                        - private4
+                        - private5
+                        - private6
     '''

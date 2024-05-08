@@ -482,7 +482,7 @@ options:
                 - The range for geo-fencing feature.
                 required: false
                 default: null
-                type: str
+                type: int
             enable_fencing:
                 description:
                 - Enable or disable geo-fencing.
@@ -523,7 +523,7 @@ options:
                 required: false
                 default: null
                 type: list
-                elements: str
+                elements: int
             system_ip:
                 description:
                 - The system IP address of the device.
@@ -542,7 +542,7 @@ options:
                 - The overlay ID of the device.
                 required: false
                 default: null
-                type: str
+                type: int
             site_id:
                 description:
                 - The site ID of the device.
@@ -569,7 +569,7 @@ options:
                 - The port offset for the device.
                 required: false
                 default: null
-                type: str
+                type: int
             port_hop:
                 description:
                 - Enable or disable port hopping.
@@ -581,7 +581,7 @@ options:
                 - Control session packets per second setting.
                 required: false
                 default: null
-                type: str
+                type: int
             track_transport:
                 description:
                 - Enable or disable transport tracking.
@@ -593,7 +593,7 @@ options:
                 - The tag of the interface to be tracked.
                 required: false
                 default: null
-                type: str
+                type: int
             console_baud_rate:
                 description:
                 - The console baud rate setting for the device.
@@ -614,7 +614,7 @@ options:
                 - The maximum number of OMP (Overlay Management Protocol) sessions.
                 required: false
                 default: null
-                type: str
+                type: int
             multi_tenant:
                 description:
                 - Enable or disable multi-tenant support.
@@ -645,13 +645,13 @@ options:
                 - The idle timeout setting for tunnels.
                 required: false
                 default: null
-                type: str
+                type: int
             on_demand_idle_timeout_min:
                 description:
                 - The minimum idle timeout for on-demand tunnels.
                 required: false
                 default: null
-                type: str
+                type: int
             tracker:
                 description:
                 - List of tracker configurations.
@@ -692,7 +692,7 @@ options:
                         - The port number used for the tracker.
                         required: false
                         default: null
-                        type: str
+                        type: int
                     endpoint_dns_name:
                         description:
                         - The DNS name of the endpoint to track.
@@ -726,19 +726,19 @@ options:
                         - The threshold for triggering the tracker.
                         required: false
                         default: null
-                        type: str
+                        type: int
                     interval:
                         description:
                         - The interval at which the tracker checks the elements.
                         required: false
                         default: null
-                        type: str
+                        type: int
                     multiplier:
                         description:
                         - The multiplier used for determining the loss threshold.
                         required: false
                         default: null
-                        type: str
+                        type: int
                     type:
                         description:
                         - The type of tracker (interface or static route).
@@ -820,13 +820,13 @@ options:
                 - The region ID of the device.
                 required: false
                 default: null
-                type: str
+                type: int
             secondary_region:
                 description:
                 - The secondary region ID of the device.
                 required: false
                 default: null
-                type: str
+                type: int
             role:
                 description:
                 - The role of the device in the network.
@@ -841,14 +841,14 @@ options:
                 - The affinity group number for VRF binding.
                 required: false
                 default: null
-                type: str
+                type: int
             preference:
                 description:
                 - List of affinity group preferences.
                 required: false
                 default: null
                 type: list
-                elements: str
+                elements: int
             preference_auto:
                 description:
                 - Enable or disable automatic preference setting for affinity groups.
@@ -868,7 +868,7 @@ options:
                         - The affinity group number for VRF binding.
                         required: false
                         default: null
-                        type: str
+                        type: int
                     vrf_range:
                         description:
                         - The range of VRFs associated with the affinity group.
@@ -895,7 +895,7 @@ options:
                 - BGP community value for MRF migration.
                 required: false
                 default: null
-                type: str
+                type: int
             enable_management_region:
                 description:
                 - Enable or disable management region configuration.
@@ -922,7 +922,7 @@ options:
                         required: false
                         default: null
                         type: list
-                        elements: str
+                        elements: int
             management_gateway:
                 description:
                 - Enable or disable the management gateway feature.

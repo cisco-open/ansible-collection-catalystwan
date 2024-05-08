@@ -29,19 +29,19 @@ options:
                 - The autonomous system number used for the overlay.
                 required: false
                 default: null
-                type: str
+                type: int
             send_path_limit:
                 description:
                 - The maximum number of paths that can be sent for each prefix.
                 required: false
                 default: null
-                type: str
+                type: int
             ecmp_limit:
                 description:
                 - The maximum number of equal-cost multi-path routes.
                 required: false
                 default: null
-                type: str
+                type: int
             shutdown:
                 description:
                 - Enable or disable the shutdown of OMP.
@@ -53,39 +53,39 @@ options:
                 - The administrative distance for IPv4 routes learned via OMP.
                 required: false
                 default: null
-                type: str
+                type: int
             omp_admin_distance_ipv6:
                 description:
                 - The administrative distance for IPv6 routes learned via OMP.
                 required: false
                 default: null
-                type: str
+                type: int
             advertisement_interval:
                 description:
                 - The interval between sending unsolicited OMP route advertisements.
                 required: false
                 default: null
-                type: str
+                type: int
             graceful_restart_timer:
                 description:
                 - The timer for graceful restart, specifying the period during which
                     peerings are preserved.
                 required: false
                 default: null
-                type: str
+                type: int
             eor_timer:
                 description:
                 - End-of-RIB (EOR) timer which indicates stability of the route table.
                 required: false
                 default: null
-                type: str
+                type: int
             holdtime:
                 description:
                 - The amount of time that the routes are preserved while the peer
                     is unreachable.
                 required: false
                 default: null
-                type: str
+                type: int
             advertise:
                 description:
                 - A list of IPv4 advertise rules.

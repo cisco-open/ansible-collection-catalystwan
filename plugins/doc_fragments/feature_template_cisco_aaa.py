@@ -212,7 +212,7 @@ options:
                         - The VPN ID for the RADIUS group
                         required: true
                         default: null
-                        type: str
+                        type: int
                     source_interface:
                         description:
                         - The source interface for the RADIUS group
@@ -341,7 +341,7 @@ options:
                 - Specify Radius Dynamic Author Port
                 required: false
                 default: null
-                type: str
+                type: int
             server_key_password:
                 description:
                 - Specify a radius dynamic author server-key

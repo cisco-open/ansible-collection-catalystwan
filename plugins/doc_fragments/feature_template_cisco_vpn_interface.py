@@ -68,7 +68,7 @@ options:
                 - Administrative distance for DHCP routes on the interface.
                 required: false
                 default: null
-                type: str
+                type: int
             ipv6_address:
                 description:
                 - The primary IPv6 address assigned to the interface.
@@ -146,7 +146,7 @@ options:
                         - Optional VPN ID where the DHCP helper is configured.
                         required: false
                         default: null
-                        type: str
+                        type: int
             tracker:
                 description:
                 - A list of tracker identifiers associated with the interface.
@@ -191,14 +191,14 @@ options:
                     on this interface.
                 required: false
                 default: null
-                type: str
+                type: int
             tcp_timeout:
                 description:
                 - The timeout value in seconds for TCP connections through the NAT
                     on this interface.
                 required: false
                 default: null
-                type: str
+                type: int
             nat_range_start:
                 description:
                 - The starting IP address in the range used for NAT on this interface.
@@ -229,7 +229,7 @@ options:
                     size of the subnet.
                 required: false
                 default: null
-                type: str
+                type: int
             enable:
                 description:
                 - Indicates whether the interface is enabled or disabled.
@@ -417,7 +417,7 @@ options:
                             have higher priority).
                         required: false
                         default: null
-                        type: str
+                        type: int
                     weight:
                         description:
                         - Weight for the encapsulation type used in load balancing
@@ -457,14 +457,14 @@ options:
                 - Specifies the total bandwidth available across all tunnels.
                 required: false
                 default: null
-                type: str
+                type: int
             group:
                 description:
                 - Identifies the group or groups the interface belongs to.
                 required: false
                 default: null
                 type: list
-                elements: str
+                elements: int
             value:
                 description:
                 - The value field often corresponds to a specific attribute or setting,
@@ -501,7 +501,7 @@ options:
                     the interface.
                 required: false
                 default: null
-                type: str
+                type: int
             control_connections:
                 description:
                 - Enables or disables control connections on the interface.
@@ -521,13 +521,13 @@ options:
                 required: false
                 default: null
                 type: list
-                elements: str
+                elements: int
             vmanage_connection_preference:
                 description:
                 - Preference value for establishing vManage connections.
                 required: false
                 default: null
-                type: str
+                type: int
             port_hop:
                 description:
                 - Enables or disables port hopping for the interface to evade port
@@ -570,21 +570,21 @@ options:
                     mappings.
                 required: false
                 default: null
-                type: str
+                type: int
             hello_interval:
                 description:
                 - Time interval in seconds between successive hello packets sent over
                     the tunnel interface.
                 required: false
                 default: null
-                type: str
+                type: int
             hello_tolerance:
                 description:
                 - Time in seconds to wait before declaring a neighbor down due to
                     missing hello packets.
                 required: false
                 default: null
-                type: str
+                type: int
             bind:
                 description:
                 - Interface or IP address to which the tunnel interface is bound.
@@ -610,7 +610,7 @@ options:
                     over the tunnel.
                 required: false
                 default: null
-                type: str
+                type: int
             clear_dont_fragment:
                 description:
                 - Enables or disables the clearing of the 'Don't Fragment' (DF) bit
@@ -729,20 +729,20 @@ options:
                 - Sets the Maximum Transmission Unit (MTU) size for the interface.
                 required: false
                 default: null
-                type: str
+                type: int
             mtu:
                 description:
                 - Specifies the MTU size for the tunnel or logical interface.
                 required: false
                 default: null
-                type: str
+                type: int
             tcp_mss_adjust:
                 description:
                 - Adjusts the TCP Maximum Segment Size (MSS) value for connections
                     over the interface.
                 required: false
                 default: null
-                type: str
+                type: int
             tloc_extension:
                 description:
                 - Defines the Transport Location (TLOC) extension for the interface.
@@ -755,7 +755,7 @@ options:
                     statistics.
                 required: false
                 default: null
-                type: str
+                type: int
             src_ip:
                 description:
                 - Source IP address for GRE tunnel extension.
@@ -808,7 +808,7 @@ options:
                 - Time in seconds before an ARP cache entry is timed out.
                 required: false
                 default: null
-                type: str
+                type: int
             autonegotiate:
                 description:
                 - Enables or disables autonegotiation of speed and duplex settings
@@ -839,51 +839,51 @@ options:
                 - Time period in seconds for measuring and adapting QoS settings.
                 required: false
                 default: null
-                type: str
+                type: int
             bandwidth_down:
                 description:
                 - Specifies the downstream bandwidth in Kbps for adaptive QoS calculations.
                 required: false
                 default: null
-                type: str
+                type: int
             dmin:
                 description:
                 - Specifies the minimum downstream bandwidth in Kbps for adaptive
                     QoS.
                 required: false
                 default: null
-                type: str
+                type: int
             dmax:
                 description:
                 - Specifies the maximum downstream bandwidth in Kbps for adaptive
                     QoS.
                 required: false
                 default: null
-                type: str
+                type: int
             bandwidth_up:
                 description:
                 - Specifies the upstream bandwidth in Kbps for adaptive QoS calculations.
                 required: false
                 default: null
-                type: str
+                type: int
             umin:
                 description:
                 - Specifies the minimum upstream bandwidth in Kbps for adaptive QoS.
                 required: false
                 default: null
-                type: str
+                type: int
             umax:
                 description:
                 - Specifies the maximum upstream bandwidth in Kbps for adaptive QoS.
                 required: false
                 default: null
-                type: str
+                type: int
             shaping_rate:
                 description:
                 - Defines the traffic shaping rate for the interface.
                 required: false
                 default: null
-                type: str
+                type: int
             qos_map:
                 description:
                 - Associates a QoS map with the interface for traffic classification
@@ -909,13 +909,13 @@ options:
                 - Specifies the upstream bandwidth in Kbps available on the interface.
                 required: false
                 default: null
-                type: str
+                type: int
             bandwidth_downstream:
                 description:
                 - Specifies the downstream bandwidth in Kbps available on the interface.
                 required: false
                 default: null
-                type: str
+                type: int
             block_non_source_ip:
                 description:
                 - Enables or disables blocking of traffic with non-matching source
@@ -1151,7 +1151,7 @@ options:
                 - Specifies a static Security Group Tag (SGT) for the interface.
                 required: false
                 default: null
-                type: str
+                type: int
             trusted:
                 description:
                 - Marks the interface as trusted or untrusted for TrustSec.
@@ -1175,5 +1175,5 @@ options:
                 - Specifies the Security Group Tag (SGT) to be enforced on the interface.
                 required: false
                 default: null
-                type: str
+                type: int
     '''

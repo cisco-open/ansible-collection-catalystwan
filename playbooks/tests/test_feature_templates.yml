@@ -260,8 +260,8 @@
     #         - number: 2
     #           md5: "md5key2"
     #       trusted:
-    #         - "1"
-    #         - "2"
+    #         - 1
+    #         - 2
     #       enable: true
     #       stratum: "2"
     #       source: "Loopback0"
@@ -614,21 +614,428 @@
     #     manager_credentials:
     #       <<: *manager_authentication
 
-    - name: "Create Comprehensive Cisco VPN Interface Template"
+    # - name: "Create Comprehensive Cisco VPN Interface Template"
+    #   cisco.catalystwan.feature_templates:
+    #     state: present
+    #     template_name: "ComprehensiveCiscoVPNInterfaceTemplate"
+    #     template_description: "Cisco VPN Interface template"
+    #     debug: true
+    #     device_models:
+    #       - "vedge-C8000V"
+    #     cisco_vpn_interface:
+    #       if_name: "GigabitEthernet0/0"
+    #       interface_description: "WAN interface"
+    #       poe: true
+    #       ipv4_address: "192.0.2.1/24"
+    #       secondary_ipv4_address:
+    #         - address: "192.0.2.2/24"
+    #         - address: "192.0.2.3/24"
+    #       dhcp_ipv4_client: false
+    #       dhcp_distance: "1"
+    #       ipv6_address: "2001:db8::1/64"
+    #       dhcp_ipv6_client: true
+    #       secondary_ipv6_address:
+    #         - address: "2001:db8::2/64"
+    #         - address: "2001:db8::3/64"
+    #       access_list_ipv4:
+    #         - direction: "in"
+    #           acl_name: "ACL-INBOUND"
+    #         - direction: "out"
+    #           acl_name: "ACL-OUTBOUND"
+    #       dhcp_helper:
+    #         - "192.0.2.254"
+    #       dhcp_helper_v6:
+    #         - address: "2001:db8::1"
+    #           vpn: "0"
+    #       tracker:
+    #         - "Tracker1"
+    #         - "Tracker2"
+    #       auto_bandwidth_detect: true
+    #       iperf_server: "192.0.2.100"
+    #       nat: true
+    #       nat_choice: "Interface"
+    #       udp_timeout: "30"
+    #       tcp_timeout: "60"
+    #       nat_range_start: "192.0.2.100"
+    #       nat_range_end: "192.0.2.200"
+    #       overload: true
+    #       loopback_interface: "Loopback0"
+    #       prefix_length: "24"
+    #       enable: true
+    #       nat64: false
+    #       nat66: false
+    #       static_nat66:
+    #         - source_prefix: "2001:db8:1234::/64"
+    #           translated_source_prefix: "2001:db8:5678::/64"
+    #           source_vpn_id: 10
+    #       static:
+    #         - source_ip: "192.0.2.1"
+    #           translate_ip: "203.0.113.1"
+    #           static_nat_direction: "inside"
+    #           source_vpn: 10
+    #       static_port_forward:
+    #         - source_ip: "192.0.2.2"
+    #           translate_ip: "203.0.113.2"
+    #           static_nat_direction: "outside"
+    #           source_port: 8080
+    #           translate_port: 9090
+    #           proto: "tcp"
+    #           source_vpn: 10
+    #       enable_core_region: true
+    #       core_region: "core"
+    #       secondary_region: "secondary-only"
+    #       tloc_encapsulation:
+    #         - encap: "ipsec"
+    #           preference: "100"
+    #           weight: 1
+    #       border: true
+    #       per_tunnel_qos: true
+    #       per_tunnel_qos_aggregator: true
+    #       mode: "hub"
+    #       tunnels_bandwidth: "1000"
+    #       group:
+    #         - "1"
+    #         - "2"
+    #       value: "mpls"
+    #       max_control_connections: "5"
+    #       control_connections: true
+    #       vbond_as_stun_server: true
+    #       exclude_controller_group_list:
+    #         - "3"
+    #         - "4"
+    #       vmanage_connection_preference: "100"
+    #       port_hop: true
+    #       restrict: false
+    #       dst_ip: "198.51.100.14"
+    #       carrier: "carrier1"
+    #       nat_refresh_interval: "30"
+    #       hello_interval: "10"
+    #       hello_tolerance: "30"
+    #       bind: "GigabitEthernet0/0"
+    #       last_resort_circuit: false
+    #       low_bandwidth_link: false
+    #       tunnel_tcp_mss_adjust: "1360"
+    #       clear_dont_fragment: true
+    #       propagate_sgt: false
+    #       network_broadcast: true
+    #       all: false
+    #       bgp: true
+    #       dhcp: false
+    #       dns: true
+    #       icmp: true
+    #       sshd: true
+    #       netconf: false
+    #       ntp: true
+    #       ospf: false
+    #       stun: false
+    #       snmp: true
+    #       https: true
+    #       media_type: "rj45"
+    #       intrf_mtu: "1500"
+    #       mtu: "1400"
+    #       tcp_mss_adjust: "1360"
+    #       tloc_extension: "100"
+    #       load_interval: "300"
+    #       src_ip: "198.51.100.1"
+    #       xconnect: "10"
+    #       mac_address: "00:0C:29:4B:55:3A"
+    #       speed: "1000"
+    #       duplex: "full"
+    #       shutdown: false
+    #       arp_timeout: "1200"
+    #       autonegotiate: true
+    #       ip_directed_broadcast: false
+    #       icmp_redirect_disable: true
+    #       qos_adaptive: true
+    #       period: "60"
+    #       bandwidth_down: "10000"
+    #       dmin: "5000"
+    #       dmax: "15000"
+    #       bandwidth_up: "5000"
+    #       umin: "2500"
+    #       umax: "7500"
+    #       shaping_rate: "5000"
+    #       qos_map: "default_qos_map"
+    #       qos_map_vpn: "vpn_qos_map"
+    #       service_provider: "ISP1"
+    #       bandwidth_upstream: "5000"
+    #       bandwidth_downstream: "10000"
+    #       block_non_source_ip: true
+    #       rule_name: "rewrite_rule_1"
+    #       access_list_ipv6:
+    #         - direction: "in"
+    #           acl_name: "ipv6_acl_1"
+    #       ip:
+    #         - addr: "192.0.2.1"
+    #           mac: "00:0C:29:4B:55:3A"
+    #       vrrp:
+    #         - grp_id: 1
+    #           priority: 110
+    #           timer: 100
+    #           track_omp: true
+    #           track_prefix_list: "TRACKING_LIST"
+    #           address: "192.0.2.254"
+    #           ipv4_secondary:
+    #             - address: "192.0.2.253"
+    #           tloc_change_pref: true
+    #           value: 20
+    #           tracking_object:
+    #             - name: 10
+    #               track_action: "Decrement"
+    #               decrement: 20
+    #       ipv6_vrrp:
+    #         - grp_id: 1
+    #           priority: 110
+    #           timer: 100
+    #           track_omp: true
+    #           track_prefix_list: "TRACKING_LIST_IPV6"
+    #           ipv6:
+    #             - ipv6_link_local: "FE80::1"
+    #               prefix: "2001:db8::/64"
+    #       enable_sgt_propagation: true
+    #       security_group_tag: "0000"
+    #       trusted: true
+    #       enable_sgt_authorization_and_forwarding: true
+    #       enable_sgt_enforcement: true
+    #       enforcement_sgt: "010001"
+    #     manager_credentials:
+    #       <<: *manager_authentication
+
+    # - name: "Create Comprehensive Cisco VPN Template"
+    #   cisco.catalystwan.feature_templates:
+    #     state: present
+    #     template_name: "ComprehensiveCiscoVPNTemplate"
+    #     template_description: "Cisco VPN template"
+    #     debug: true
+    #     device_models:
+    #       - "vedge-C8000V"
+    #     cisco_vpn:
+    #       vpn_id: 10
+    #       vpn_name: "CorporateVPN"
+    #       tenant_vpn_id: 200
+    #       org_name: "ACME_Corporation"
+    #       omp_admin_distance_ipv4: 5
+    #       omp_admin_distance_ipv6: 5
+    #       dns:
+    #         - dns_addr: "8.8.8.8"
+    #           role: "primary"
+    #         - dns_addr: "8.8.4.4"
+    #           role: "secondary"
+    #       dns_ipv6:
+    #         - dns_addr: "2001:4860:4860::8888"
+    #           role: "primary"
+    #         - dns_addr: "2001:4860:4860::8844"
+    #           role: "secondary"
+    #       layer4: true
+    #       host:
+    #         - hostname: "server1.example.com"
+    #           ip:
+    #             - "192.168.1.10"
+    #       service:
+    #         - svc_type: "FW"
+    #           address:
+    #             - "192.168.2.10"
+    #           interface: "GigabitEthernet0/0"
+    #           track_enable: true
+    #       service_route:
+    #         - prefix: "192.168.3.0/24"
+    #           vpn: 10
+    #           service: "sig"
+    #       route_v4:
+    #         - prefix: "192.168.1.0/24"
+    #           next_hop:
+    #             - address: "192.168.1.1"
+    #               distance: 10
+    #           next_hop_with_track:
+    #             - address: "192.168.1.2"
+    #               distance: 20
+    #               tracker: "Track1"
+    #           route_interface:
+    #             interface_name: "GigabitEthernet0/0"
+    #             interface_next_hop:
+    #               - address: "2001:db8:abcd:0012::1"
+    #                 distance: 1
+    #           null0: false
+    #           distance: 1
+    #           vpn: 10
+    #           dhcp: false
+    #       route_v6:
+    #         - prefix: "2001:db8:abcd:0012::/64"
+    #           next_hop:
+    #             - address: "2001:db8:abcd:0012::1"
+    #               distance: 10
+    #           null0: false
+    #           vpn: 10
+    #           nat: "NAT64"
+    #       gre_route:
+    #         - prefix: "10.0.0.0/8"
+    #           vpn: 20
+    #           interface:
+    #             - "Tunnel0"
+    #       ipsec_route:
+    #         - prefix: "172.16.0.0/12"
+    #           vpn: 30
+    #           interface:
+    #             - "Tunnel1"
+    #       advertise:
+    #         - protocol: bgp
+    #           route_policy: "BGP-Export-Policy"
+    #           protocol_sub_type:
+    #             - external
+    #           prefix_list:
+    #             - prefix_entry: "192.168.50.0/24"
+    #               aggregate_only: false
+    #               region: core
+    #             - prefix_entry: "192.168.60.0/24"
+    #               aggregate_only: true
+    #               region: access
+    #       ipv6_advertise:
+    #         - protocol: bgp
+    #           route_policy: "BGP-IPv6-Export-Policy"
+    #           protocol_sub_type:
+    #             - external
+    #           prefix_list:
+    #             - prefix_entry: "2001:db8:abcd:0012::/64"
+    #               aggregate_only: false
+    #               region: core
+    #             - prefix_entry: "2001:db8:abcd:0034::/64"
+    #               aggregate_only: true
+    #               region: access
+    #       pool:
+    #         - name: "NAT64Pool1"
+    #           start_address: "203.0.113.1"
+    #           end_address: "203.0.113.100"
+    #           overload: true
+    #           leak_from_global: true
+    #           leak_from_global_protocol: static
+    #           leak_to_global: false
+    #       natpool:
+    #         - name: 101
+    #           prefix_length: 24
+    #           range_start: "192.0.2.1"
+    #           range_end: "192.0.2.100"
+    #           overload: 'true'
+    #           direction: inside
+    #           tracker_id: 1
+    #       static:
+    #         - pool_name: 101
+    #           source_ip: "198.51.100.5"
+    #           translate_ip: "203.0.113.5"
+    #           static_nat_direction: inside
+    #           tracker_id: 2
+    #       subnet_static:
+    #         - source_ip_subnet: "198.51.100.0/24"
+    #           translate_ip_subnet: "203.0.113.0/24"
+    #           prefix_length: 24
+    #           static_nat_direction: inside
+    #       port_forward:
+    #         - pool_name: 101
+    #           source_port: 8080
+    #           translate_port: 80
+    #           source_ip: "198.51.100.5"
+    #           translate_ip: "203.0.113.5"
+    #           proto: tcp
+    #       route_import:
+    #         - protocol: bgp
+    #           protocol_sub_type: ['external']
+    #           route_policy: 'import-bgp-routes'
+    #           redistribute:
+    #             - protocol: ospf
+    #               route_policy: 'ospf-to-bgp'
+    #       route_import_from:
+    #         - source_vpn: 10
+    #           protocol: static
+    #           protocol_sub_type:
+    #             - external
+    #           route_policy: 'import-static-from-vpn10'
+    #           redistribute:
+    #             - protocol: eigrp
+    #               route_policy: 'eigrp-to-vpn10'
+    #       route_export:
+    #         - protocol: bgp
+    #           protocol_sub_type:
+    #             - external
+    #           route_policy: 'export-bgp-routes'
+    #           redistribute:
+    #             - protocol: bgp
+    #               route_policy: 'static-to-bgp'
+    #     manager_credentials:
+    #       <<: *manager_authentication
+
+    # - name: "Create Comprehensive OMP vSmart Template"
+    #   cisco.catalystwan.feature_templates:
+    #     state: present
+    #     template_name: "OMPvSmartConfigTemplate"
+    #     template_description: "Apply OMP settings for vSmart controller"
+    #     debug: true
+    #     device_models: vsmart
+    #     omp_vsmart:
+    #       graceful_restart: true
+    #       graceful_restart_timer: 120
+    #       send_path_limit: 100
+    #       send_backup_paths: true
+    #       shutdown: false
+    #       discard_rejected: false
+    #       eor_timer: 50
+    #       holdtime: 300
+    #       affinity_group_preference: true
+    #       advertisement_interval: 30
+    #       tloc_color: true
+    #     manager_credentials:
+    #       <<: *manager_authentication
+
+    # - name: "Create Comprehensive Security vSmart Template"
+    #   cisco.catalystwan.feature_templates:
+    #     state: present
+    #     template_name: "SecurityvSmartConfigTemplate"
+    #     template_description: "Apply Security settings for vSmart controller"
+    #     debug: true
+    #     device_models: vsmart
+    #     security_vsmart:
+    #       protocol: dtls
+    #       tls_port: 120
+    #     manager_credentials:
+    #       <<: *manager_authentication
+
+    - name: "Create Comprehensive System vSmart Template"
       cisco.catalystwan.feature_templates:
         state: present
-        template_name: "ComprehensiveCiscoVPNInterfaceTemplate"
-        template_description: "Cisco VPN Interface template"
-        device_specific_variables:
-          ipv4_address: ipv4_address_variable
+        template_name: "SystemvSmartConfigTemplate"
+        template_description: "Apply System settings for vSmart controller"
         debug: true
-        device_models:
-          - "vedge-C8000V"
-        cisco_vpn_interface:
-          if_name: "GigabitEthernet4"
-          interface_description: "Service or Lan Net interface"
-          poe: true
-          ipv4_address: device_specific_variable
+        device_models: vsmart
+        system_vsmart:
+          timezone: UTC
+          idle_timeout: 100
+          admin_tech_on_failure: true
+          iptables_enable: true
+          track_default_gateway: true
+          dns_cache_timeout: 10
+          track_transport: true
+          controller_group_id: 44
+          control_session_pps: 999
+          port_hop: true
+          port_offset: 5
+          overlay_id: 44
+          site_id: 500
+          system_ip: "192.168.1.1"
+          device_groups: "example1,example2"
+          latitude: "37"
+          longitude: "-122"
+          system_tunnel_mtu: "example_mtu_size"
+          location: "Location"
+          host_name: "myhostname"
+          dual_stack_ipv6: true
+          description: "Example description"
+          topology: "Hub and Spoke"
+          region_list_id: 12
+          management_region: true
+          compatible:
+            color_1: mpls
+            color_2: metro-ethernet
+          incompatible:
+            color_1: biz-internet
+            color_2: public-internet
         manager_credentials:
           <<: *manager_authentication
 

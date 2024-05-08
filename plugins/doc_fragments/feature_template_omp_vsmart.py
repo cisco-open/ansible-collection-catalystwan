@@ -28,7 +28,7 @@ options:
                 - The maximum number of paths that can be sent to a TLOC
                 required: false
                 default: null
-                type: str
+                type: int
             send_backup_paths:
                 description:
                 - Enable or disable sending additional backup paths
@@ -53,29 +53,35 @@ options:
                 - The time interval for graceful restart of OMP sessions
                 required: false
                 default: null
-                type: str
+                type: int
             eor_timer:
                 description:
                 - The End of Routes (EOR) timer value
                 required: false
                 default: null
-                type: str
+                type: int
             holdtime:
                 description:
                 - The hold time interval for OMP sessions
                 required: false
                 default: null
-                type: str
+                type: int
             affinity_group_preference:
                 description:
-                - Prefer routes from the same affinity group
+                - Filter routes based on affinity preference list
                 required: false
-                default: null
+                default: false
                 type: bool
             advertisement_interval:
                 description:
                 - Interval between sending OMP route advertisements
                 required: false
                 default: null
-                type: str
+                type: int
+            tloc_color:
+                description:
+                - Filter routes based on TLOC color
+                required: false
+                default: false
+                type: bool
     '''

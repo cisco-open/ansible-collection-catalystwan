@@ -130,7 +130,7 @@ options:
                         - TCP Maximum Segment Size (MSS) adjust value.
                         required: false
                         default: null
-                        type: str
+                        type: int
                     mtu:
                         description:
                         - MTU (Maximum Transmission Unit) size for the interface.
@@ -142,13 +142,13 @@ options:
                         - Dead Peer Detection (DPD) interval in seconds.
                         required: false
                         default: null
-                        type: str
+                        type: int
                     dpd_retries:
                         description:
                         - Number of retries for Dead Peer Detection (DPD).
                         required: false
                         default: null
-                        type: str
+                        type: int
                     ike_version:
                         description:
                         - Internet Key Exchange (IKE) protocol version.
@@ -166,7 +166,7 @@ options:
                         - Interval for rekeying the IKE security association.
                         required: false
                         default: null
-                        type: str
+                        type: int
                     ike_ciphersuite:
                         description:
                         - Ciphersuite for IKE security association establishment.
@@ -212,13 +212,13 @@ options:
                         - Interval for rekeying the IPsec security association.
                         required: false
                         default: null
-                        type: str
+                        type: int
                     ipsec_replay_window:
                         description:
                         - Replay window size for IPsec security association.
                         required: false
                         default: null
-                        type: str
+                        type: int
                     ipsec_ciphersuite:
                         description:
                         - Ciphersuite for IPsec security association establishment.
@@ -367,7 +367,7 @@ options:
                         - Idle time before a session is considered inactive.
                         required: false
                         default: null
-                        type: str
+                        type: int
                     display_time_unit:
                         description:
                         - Unit of time used for displaying time-related settings.
@@ -389,7 +389,7 @@ options:
                         - Time after which the service information is refreshed.
                         required: false
                         default: null
-                        type: str
+                        type: int
                     refresh_time_unit:
                         description:
                         - Unit of time used for the refresh time setting.
@@ -425,7 +425,7 @@ options:
                             considered inactive.
                         required: false
                         default: null
-                        type: str
+                        type: int
                     data_center_primary:
                         description:
                         - Alias for the primary data center setting.
@@ -471,20 +471,20 @@ options:
                         - Threshold value for the tracker to trigger an alert or action.
                         required: false
                         default: null
-                        type: str
+                        type: int
                     interval:
                         description:
                         - Interval at which the tracker performs health checks.
                         required: false
                         default: null
-                        type: str
+                        type: int
                     multiplier:
                         description:
                         - Multiplier value used by the tracker to escalate repeated
                             failures.
                         required: false
                         default: null
-                        type: str
+                        type: int
                     tracker_type:
                         description:
                         - Type of tracker used for monitoring.

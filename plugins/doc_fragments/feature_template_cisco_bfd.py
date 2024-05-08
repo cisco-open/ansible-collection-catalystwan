@@ -22,19 +22,19 @@ options:
                 - The default BFD multiplier for all colors
                 required: false
                 default: null
-                type: str
+                type: int
             poll_interval:
                 description:
                 - The BFD poll interval in milliseconds
                 required: false
                 default: null
-                type: str
+                type: int
             default_dscp:
                 description:
                 - The default DSCP value for BFD packets
                 required: false
                 default: null
-                type: str
+                type: int
             color:
                 description:
                 - List of color-specific BFD configurations
@@ -78,13 +78,13 @@ options:
                         - The BFD hello interval in milliseconds
                         required: false
                         default: null
-                        type: str
+                        type: int
                     multiplier:
                         description:
                         - The BFD multiplier for the color
                         required: false
                         default: null
-                        type: str
+                        type: int
                     pmtu_discovery:
                         description:
                         - Whether to enable Path MTU Discovery
@@ -96,5 +96,5 @@ options:
                         - The DSCP value used for BFD packets
                         required: false
                         default: null
-                        type: str
+                        type: int
     '''

@@ -28,7 +28,7 @@ options:
                 - The reference bandwidth used by OSPF for cost calculation.
                 required: false
                 default: null
-                type: str
+                type: int
             rfc1583:
                 description:
                 - Compatibility switch for RFC 1583.
@@ -53,7 +53,7 @@ options:
                 - The metric value to be set for the default route advertised by OSPF.
                 required: false
                 default: null
-                type: str
+                type: int
             metric_type:
                 description:
                 - The metric type (Type 1 or Type 2) for OSPF external routes.
@@ -68,37 +68,37 @@ options:
                 - The OSPF external route metric.
                 required: false
                 default: null
-                type: str
+                type: int
             inter_area:
                 description:
                 - The OSPF inter-area route metric.
                 required: false
                 default: null
-                type: str
+                type: int
             intra_area:
                 description:
                 - The OSPF intra-area route metric.
                 required: false
                 default: null
-                type: str
+                type: int
             delay:
                 description:
                 - The OSPF Shortest Path First (SPF) delay time.
                 required: false
                 default: null
-                type: str
+                type: int
             initial_hold:
                 description:
                 - The initial hold time between consecutive SPF calculations.
                 required: false
                 default: null
-                type: str
+                type: int
             max_hold:
                 description:
                 - The maximum hold time between consecutive SPF calculations.
                 required: false
                 default: null
-                type: str
+                type: int
             redistribute:
                 description:
                 - A list of OSPF redistribution configurations.
@@ -228,33 +228,33 @@ options:
                                     the router sends on the interface.
                                 required: false
                                 default: null
-                                type: str
+                                type: int
                             dead_interval:
                                 description:
                                 - The time interval an OSPF router waits for a Hello
                                     packet before declaring the sending router down.
                                 required: false
                                 default: null
-                                type: str
+                                type: int
                             retransmit_interval:
                                 description:
                                 - The interval between LSA retransmissions for adjacencies
                                     belonging to the interface.
                                 required: false
                                 default: null
-                                type: str
+                                type: int
                             cost:
                                 description:
                                 - The OSPF cost (metric) for this interface.
                                 required: false
                                 default: null
-                                type: str
+                                type: int
                             priority:
                                 description:
                                 - The OSPF priority of the interface.
                                 required: false
                                 default: null
-                                type: str
+                                type: int
                             network:
                                 description:
                                 - The OSPF network type for the interface.
@@ -287,7 +287,7 @@ options:
                                 - The message-digest key ID for OSPF authentication.
                                 required: false
                                 default: null
-                                type: str
+                                type: int
                             md5:
                                 description:
                                 - The MD5 string for OSPF message-digest authentication.
@@ -315,7 +315,7 @@ options:
                                 - The OSPF cost (metric) for this range.
                                 required: false
                                 default: null
-                                type: str
+                                type: int
                             no_advertise:
                                 description:
                                 - Whether to suppress advertising this range.

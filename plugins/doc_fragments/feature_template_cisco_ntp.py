@@ -36,19 +36,19 @@ options:
                         - The identifier for the authentication key
                         required: false
                         default: null
-                        type: str
+                        type: int
                     vpn:
                         description:
                         - The VPN ID associated with the NTP server
                         required: false
                         default: null
-                        type: str
+                        type: int
                     version:
                         description:
                         - The NTP version used
                         required: false
                         default: null
-                        type: str
+                        type: int
                     source_interface:
                         description:
                         - The source interface for NTP messages
@@ -87,7 +87,7 @@ options:
                 required: false
                 default: null
                 type: list
-                elements: str
+                elements: int
             enable:
                 description:
                 - Whether the device is an NTP master
@@ -99,7 +99,7 @@ options:
                 - The stratum level if the device is an NTP master
                 required: false
                 default: null
-                type: str
+                type: int
             source:
                 description:
                 - The source interface for NTP messages if the device is an NTP master
