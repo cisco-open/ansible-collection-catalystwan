@@ -259,6 +259,12 @@ options:
                         required: false
                         default: null
                         type: bool
+                    tunnel_public_ip:
+                        description:
+                        - Public IP required to setup GRE tunnel to Zscaler
+                        required: false
+                        default: null
+                        type: str
             service:
                 description:
                 - List of service configurations for the Cisco Secure Internet Gateway.
@@ -426,9 +432,16 @@ options:
                         required: false
                         default: null
                         type: int
+                    location_name:
+                        description:
+                        - Secondary data center for the service. 'Auto' for automatic
+                            selection.
+                        required: false
+                        default: Auto
+                        type: str
                     data_center_primary:
                         description:
-                        - Alias for the primary data center setting.
+                        - Zscaler location name (optional)
                         required: false
                         default: Auto
                         type: str

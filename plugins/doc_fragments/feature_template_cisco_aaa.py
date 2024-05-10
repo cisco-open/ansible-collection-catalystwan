@@ -76,7 +76,7 @@ options:
                         description:
                         - List of public keys for the user
                         required: false
-                        default: []
+                        default: null
                         type: list
                         elements: dict
                         suboptions:
