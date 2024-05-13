@@ -48,8 +48,8 @@
         template_name: "ComprehensiveAAATemplate"
         template_description: "AAA Template with both TACACS+ and RADIUS servers"
         debug: true
-        # device_models:
-        #   - vedge-C8000V
+        device_models:
+          - vedge-C8000V
         cisco_aaa:
           user:
             - name: "local_admin"
@@ -57,7 +57,7 @@
               secret: "admin_secret"
               privilege: "15"
               pubkey_chain:
-                - key_string: "AAAAB3NzaC1yc2EAAAADAQABAAABAQC3myRj5L6ZFLdRnOEZdUd+4Qq0XPLW9RfO6qD7DJ2t4ZzLh6Oz+IUJg8d8bJDfxO9zGKs5uUQ9f2H5yTGX5G8Z5kKp8QDp1MkDVqwGJ4UM7JqH8s8kD7xcl8SyPc5TjzK4s4W+8LPNOPXmIKtHh1Qlvkp5N7w3M/Rm5ZVX5/3+Hk8Ib5syigQQd/5u5xJj9k3i2x3m3LZ7v5e7YlCpRdCQGf6ZCwvbVQHdJp5nlU0HxJbqjOTL4IcDj09G3Dq2C5JnohKJb7E7HVCUl7F5vYpC/4iNjges65GgdzaFJsT9qA8CgxyF+7J3PpLk5qPAQDT5OjArJj4x9Bw3j3lZdH example@example.com"
+                - key_string: "AAAAB3NzaC1yc2EAAAADAQABAAABAQC3myRj5L6ZFLdRnOEZdUd+4Qq0XPLW9RfO6qD7DJ2t4ZzLh6Oz+IUJg8d8bJDfxO9zGKs5uUQ9f2H5yTGX5G8Z5kKp8QDp1MkDVqwGJ4UM7JqH8s8kD7xcl8SyPc5TjzK4s4W+8LPNOPXmIKtHh1Qlvkp5N7w3M/Rm5ZVX5/3+Hk8Ib5syigQQd/5u5xJj9k3i2x3m3LZ7v5e7YlCpRdCQGf6ZCwvbVQHdJp5nlU0HxJbqjOTL4IcDj09G3Dq2C5JnohKJb7E7HVCUl7F5vYpC/4iNjges65GgdzaFJsT9qA8CgxyF+7J3PpLk5qPAQDT5OjArJj4x9Bw3j3lZdH example@example.com"  # noqa yaml[line-length]
                   key_type: "ssh-rsa"
           authentication_group: true
           accounting_group: true
@@ -110,7 +110,7 @@
                   timeout: 10
                   key: "tacacs_key"
                   secret_key: "tacacs_secret"
-                  key_enum: "key_enum_value" 
+                  key_enum: "key_enum_value"
         manager_credentials:
           <<: *manager_authentication
 
@@ -120,8 +120,8 @@
         template_name: "CiscoBannerConfigTemplate"
         template_description: "Banner configuration for login and MOTD"
         debug: true
-        # device_models:
-        #   - "vedge-C8000V"
+        device_models:
+          - "vedge-C8000V"
         cisco_banner:
           login_banner: |
             ****************************************************************
@@ -148,8 +148,8 @@
         template_name: "CiscoBFDFeatureTemplate"
         template_description: "Comprehensive BFD configuration"
         debug: true
-        # device_models:
-        #   - "vedge-C8000V"
+        device_models:
+          - "vedge-C8000V"
         cisco_bfd:
           multiplier: "3"
           poll_interval: "500"
@@ -184,8 +184,8 @@
         template_name: "CiscoLoggingFeatureTemplate"
         template_description: "Comprehensive Logging Configuration"
         debug: true
-        # device_models:
-        #   - "vedge-C8000V"
+        device_models:
+          - "vedge-C8000V"
         cisco_logging:
           enable: true
           size: "20"
@@ -238,8 +238,8 @@
         template_name: "CiscoNTPFeatureTemplate"
         template_description: "Comprehensive NTP Configuration"
         debug: true
-        # device_models:
-        #   - "vedge-C8000V"
+        device_models:
+          - "vedge-C8000V"
         cisco_ntp:
           server:
             - name: "0.pool.ntp.org"
@@ -274,8 +274,8 @@
         template_name: "CiscoOMPFeatureTemplate"
         template_description: "Comprehensive OMP Configuration"
         debug: true
-        # device_models:
-        #   - "vsmart"
+        device_models:
+          - "vsmart"
         cisco_omp:
           graceful_restart: true
           overlay_as: "65000"
@@ -319,8 +319,8 @@
         template_name: "CiscoOSPFeatureTemplate"
         template_description: "Comprehensive OSPF Configuration"
         debug: true
-        # device_models:
-        #   - "vedge-C8000V"
+        device_models:
+          - "vedge-C8000V"
         cisco_ospf:
           router_id: "1.1.1.1"
           reference_bandwidth: "10000"
@@ -369,7 +369,7 @@
                   cost: "100"
                   no_advertise: true
         manager_credentials:
-            <<: *manager_authentication
+          <<: *manager_authentication
 
     - name: "Configure Secure Internet Gateway feature template"
       cisco.catalystwan.feature_templates:
@@ -377,8 +377,8 @@
         template_name: "CiscoSecureInternetGatewayFeatureTemplate"
         template_description: "Comprehensive CiscoSecureInternetGateway Configuration"
         debug: true
-        # device_models:
-        #   - "vedge-C8000V"
+        device_models:
+          - "vedge-C8000V"
         cisco_secure_internet_gateway:
           vpn_id: 10
           child_org_id: "example_org"
@@ -455,6 +455,7 @@
       cisco.catalystwan.feature_templates:
         state: present
         template_name: "CiscoSNMPFeatureTemplate"
+        debug: true
         template_description: "Comprehensive Cisco SNMP Configuration"
         cisco_snmp:
           shutdown: false
@@ -505,8 +506,8 @@
         template_name: "ComprehensiveCiscoSystemTemplate"
         template_description: "Cisco System template"
         debug: true
-        # device_models:
-        #   - "vedge-C8000V"
+        device_models:
+          - "vedge-C8000V"
         cisco_system:
           timezone: "UTC"
           description: "Example desc"
@@ -595,7 +596,7 @@
           vrf:
             - vrf_id: 1
               gateway_preference:
-                - 4 
+                - 4
                 - 5
             - vrf_id: 2
               gateway_preference:
@@ -621,8 +622,8 @@
         template_name: "ComprehensiveCiscoVPNInterfaceTemplate"
         template_description: "Cisco VPN Interface template"
         debug: true
-        # device_models:
-        #   - "vedge-C8000V"
+        device_models:
+          - "vedge-C8000V"
         cisco_vpn_interface:
           if_name: "GigabitEthernet0/0"
           interface_description: "WAN interface"
@@ -808,8 +809,8 @@
         template_name: "ComprehensiveCiscoVPNTemplate"
         template_description: "Cisco VPN template"
         debug: true
-        # device_models:
-        #   - "vedge-C8000V"
+        device_models:
+          - "vedge-C8000V"
         cisco_vpn:
           vpn_id: 10
           vpn_name: "CorporateVPN"
@@ -969,7 +970,7 @@
         template_name: "OMPvSmartConfigTemplate"
         template_description: "Apply OMP settings for vSmart controller"
         debug: true
-        device_models: vsmart
+        device_models: "vsmart"
         omp_vsmart:
           graceful_restart: true
           graceful_restart_timer: 120
@@ -1040,40 +1041,20 @@
         manager_credentials:
           <<: *manager_authentication
 
-#     # # Example of devices specific variables - this works in Feature Templates, need to check Device Templates
-#     # - name: Create Cisco Banner Feature Template
-#     #   cisco.catalystwan.feature_templates:
-#     #     state: present
-#     #     template_name: "CiscoBannerConfigTemplate"
-#     #     template_description: "Banner configuration for login and MOTD"
-#     #     debug: true
-#     #     device_specific_variables:
-#     #       login_banner: "var_name_1"
-#     #       motd_banner: "var_name_2"
-#     #     device_models:
-#     #       - "vedge-C8000V"
-#     #     cisco_banner:
-#     #       login_banner: device_specific_variable
-#     #       motd_banner: device_specific_variable
-#     #     manager_credentials:
-#     #       <<: *manager_authentication
-
-
-
-# """
-# By default it should use default Feature Template
-
-# But if user want to change it, they have choice and they should do it explicitly
-
-
-
-# Change create -> add for Feature Template
-
-# """
-#     - name: "Create Comprehensive OMP vSmart Template"
-#       cisco.catalystwan.device_templates:
-#         state: attached
-#         template_name: "OMPvSmartConfigTemplate"
-#         template_description: "Apply OMP settings for vSmart controller"
-#         debug: true
-#         device_models: ""
+    # Example of devices specific variables - this works in Feature Templates, need to check Device Templates
+    - name: Create Cisco Banner Feature Template
+      cisco.catalystwan.feature_templates:
+        state: present
+        template_name: "CiscoBannerConfigTemplateDSV"
+        template_description: "Banner configuration for login and MOTD with DSV"
+        debug: true
+        device_specific_variables:
+          login_banner: "var_name_1"
+          motd_banner: "var_name_2"
+        device_models:
+          - "vedge-C8000V"
+        cisco_banner:
+          login_banner: device_specific_variable
+          motd_banner: device_specific_variable
+        manager_credentials:
+          <<: *manager_authentication

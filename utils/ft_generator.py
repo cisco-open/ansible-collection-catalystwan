@@ -15,7 +15,7 @@ from pydantic.fields import FieldInfo
 
 from catalystwan.api.templates.models.supported import available_models
 from catalystwan.api.templates.device_variable import DeviceVariable
-from catalystwan.utils.device_model import DeviceModel
+from catalystwan.models.common import DeviceModel
 
 PROJECT_ROOT_DIR = PurePath(Path.cwd())
 
@@ -35,14 +35,11 @@ def is_pydantic_model(type_):
 
 
 def field_to_ansible_option(field: FieldInfo, field_name: str, model_name: str):
-    # if field.description == "List of public keys for the user":
-    # if field.description == "The list of subtypes for the import protocol.":
-    #     from IPython import embed; embed()
     option = {
         "description": [field.description],
         "required": field.is_required(),
         "default": None,
-        "type": None # "str", #None,  # default type is None, will be overwritten as needed
+        "type": None,  # "str", #None,  # default type is None, will be overwritten as needed
     }
     if not field.is_required():
         if safe_issubclass(field.default, str) or safe_issubclass(field.default, str):
@@ -53,7 +50,7 @@ def field_to_ansible_option(field: FieldInfo, field_name: str, model_name: str):
             option["default"] = field.default
         elif safe_issubclass(type(field.default), list):
             option["default"] = field.default
-        elif type(field.default) == DeviceVariable:
+        elif type(field.default) is DeviceVariable:
             option["default"] = field.default.name
 
     field_type = get_origin(field.annotation) or field.annotation
@@ -62,7 +59,7 @@ def field_to_ansible_option(field: FieldInfo, field_name: str, model_name: str):
 
     if field_type == bool:
         option["type"] = "bool"
-    
+
     elif field_type == int:
         option["type"] = "int"
 
@@ -149,12 +146,9 @@ def field_to_ansible_option(field: FieldInfo, field_name: str, model_name: str):
         option["choices"] = [item for item in args]
 
     else:
-        print(f"With model: {model_name}, field_name: {field_name} field: {field}")
         option["type"] = "str"
         if hasattr(field.default, "value"):
             option["default"] = field.default.value
-        # from IPython import embed; embed()
-        # raise TypeError(f"Cannot properly create field from model: {model_name}, field_name: {field_name} field: {field}")
 
     return option
 
@@ -188,13 +182,6 @@ def generate_ansible_docs(model: Type[BaseModel], model_name: str):
     return ansible_docs
 
 
-# from catalystwan.api.templates.models.cisco_ntp_model import CiscoNTPModel
-
-# available_models = {
-#     "cisco_ntp": CiscoNTPModel,
-# }
-
-
 # Function to parse YAML data and return the argument spec
 def generate_arg_spec(yaml_data):
     # Load the YAML data
@@ -205,9 +192,6 @@ def generate_arg_spec(yaml_data):
         arg_spec = {}
         for opt_name, opt_info in options.items():
             if "type" in opt_info:
-                # Basic fields
-                # if opt_name == "key":
-                #     from IPython import embed; embed()
                 arg_spec[opt_name] = {
                     "type": opt_info["type"],
                     "required": opt_info.get("required", False),
@@ -271,7 +255,7 @@ for model_name, model_module in available_models.items():
         # Use pformat to get a string representation of the dictionary
         file.write(pformat(arg_spec, indent=2, width=80))
         file.write("\n")
-    print(f"Argument spec saved to {output_file} under the variable {variable_name}")
+    print(f"File '{output_file}' has been written successfully.")
 
     # Part for Ansible DeviceModel docs fragment
     # Load the template file
@@ -279,9 +263,21 @@ for model_name, model_module in available_models.items():
     template = env.get_template(template_file)
 
     # Render the template with the DeviceModel enum
-    output = template.render(DeviceModel=DeviceModel)
+    output = template.render(device_models=get_args(DeviceModel))
 
     # Write the output to a file
     file_name = f"{PROJECT_ROOT_DIR}/plugins/doc_fragments/device_models_feature_template.py"
     with open(file_name, "w") as f:
         f.write(output)
+    print(f"File '{file_name}' has been written successfully.")
+
+
+print(
+    """
+    When used, note that Device Specific Variables doesn't have description and it required manual effort to fix
+    these in documentation. Example: cisco.catalystwan.feature_template_cisco_system requires updating few fields.
+    Look for '- null' fields.
+    That will be solved once we will have Device Specific Variables in SDK properly defined.
+
+    """
+)

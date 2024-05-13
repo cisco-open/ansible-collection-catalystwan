@@ -4,6 +4,7 @@
 # Copyright 2024 Cisco Systems, Inc. and its affiliates
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 
+
 DOCUMENTATION = r"""
 ---
 module: feature_templates_info
@@ -14,15 +15,83 @@ description:
 options:
   filters:
     description:
-      - A dictionary of filters used to select devices for module action.
+      - A dictionary of filters used to select Feature Templates info.
     type: dict
     required: false
-    # suboptions:
-    #   description:
-    #   - The login banner text displayed before authentication
-    #   required: false
-    #   default: null
-    #   type: str
+    suboptions:
+      template_type:
+        description:
+          - The type of template, eg. "system-vsmart
+        required: false
+        default: null
+        type: str
+      device_type:
+        description:
+          - The device type of the template
+        required: false
+        default: null
+        type: list
+        elements: str
+      name:
+        description:
+          - The name of the Feature Template.
+        required: false
+        default: null
+        type: str
+      description:
+        description:
+          - Description of the Feature Template.
+        required: false
+        default: null
+        type: str
+      version:
+        description:
+          - Version of the Feature Template.
+        required: false
+        default: null
+        type: str
+      factory_default:
+        description:
+          - If template is Factory Default template.
+        required: false
+        default: null
+        type: bool
+      template_definiton:
+        description:
+          - The definiton of Feature Template.
+        required: false
+        default: null
+        type: str
+      devices_attached:
+        description:
+          - Number of attached devices.
+        required: false
+        default: null
+        type: int
+      id:
+        description:
+          - Feature Template ID.
+        required: false
+        default: null
+        type: str
+      last_updated_on:
+        description:
+          - Last Updated on value.
+        required: false
+        default: null
+        type: int
+      last_updated_by:
+        description:
+          - Last Updated by value.
+        required: false
+        default: null
+        type: str
+      resource_group:
+        description:
+          - Resource Group value.
+        required: false
+        default: null
+        type: str
 author:
   - Arkadiusz Cichon (acichon@cisco.com)
 extends_documentation_fragment:
@@ -32,22 +101,35 @@ notes:
 """
 
 EXAMPLES = r"""
-- name: Attach default CLI template to the specified devices
+- name: Get all Non-Default Feature Templates available
   cisco.catalystwan.feature_templates_info:
     filters:
-      name: "trial-template"
+      factory_default: false
+    manager_credentials:
+      ...
+    register: feature_templates
 """
 
 RETURN = r"""
 template_info:
-  description: A dictionary of templates with the key as template name and value as device hostname.
-  type: dict
+  description: A list of dictionaries of templates info
+  type: list
   returned: on success
   sample: |
-    {
-      "Default_device1": "device1",
-      "Default_device2": "device2"
-    }
+    templates_info:
+    - deviceType:
+      - vedge-C8000V
+      devicesAttached: 0
+      factoryDefault: false
+      lastUpdatedBy: example_user
+      lastUpdatedOn: 111111111
+      resourceGroup: example_groupo
+      templateDefinition: null
+      templateDescription: AAA Template with both TACACS+ and RADIUS servers
+      templateId: xxxx-xxxx-xxxx-xxxx
+      templateMinVersion: X.X.X.X
+      templateName: example_name
+      templateType: cedge_aaa
 msg:
   description: Messages that indicate actions taken or any errors that have occurred.
   type: str
@@ -85,9 +167,11 @@ def run_module():
 
     module = AnsibleCatalystwanModule(argument_spec=module_args)
 
-    filters = module.params.get('filters')
+    filters = module.params.get("filters")
 
-    all_templates: DataSequence[FeatureTemplateInfo] = module.get_response_safely(module.session.api.templates.get, template=FeatureTemplate)
+    all_templates: DataSequence[FeatureTemplateInfo] = module.get_response_safely(
+        module.session.api.templates.get, template=FeatureTemplate
+    )
 
     if filters:
         filtered_templates = all_templates.filter(**filters)

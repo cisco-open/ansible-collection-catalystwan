@@ -28,6 +28,8 @@ mock_modules:
   - cisco.catalystwan.devices_controllers
   - cisco.catalystwan.devices_info
   - cisco.catalystwan.devices_wan_edges
+  - cisco.catalystwan.feature_templates
+  - cisco.catalystwan.feature_templates_info
   - cisco.catalystwan.health_checks
   - cisco.catalystwan.server_info
   - cisco.catalystwan.software_repository

@@ -20,7 +20,7 @@ options:
         default: []
         elements: str
         choices:
-{% for model in DeviceModel %}
-        - "{{ model.value }}"
+{% for model in device_models %}
+        - "{{ model }}"
 {% endfor %}
     '''

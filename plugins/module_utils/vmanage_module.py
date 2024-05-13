@@ -93,7 +93,7 @@ class AnsibleCatalystwanModule:
         return self.module.params
 
     @property
-    def params_without_none_values(self):
+    def params_without_none_values(self) -> Dict:
         """
         When passing values to catalystwan endpoints, we don't want to modify state by providing any None values.
         """

@@ -7,15 +7,11 @@
 DOCUMENTATION = r"""
 ---
 module: vmanage_feature_template
-
 short_description: Manage feature templates for Cisco vManage SD-WAN
-
-version_added: "1.0.0"
-
+version_added: "0.1.0"
 description:
   - This module can be used to create, modify, and delete feature templates in Cisco vManage SD-WAN.
   - The feature template configuration is defined via Python Pydantic models.
-
 options:
   state:
     description:
@@ -56,8 +52,8 @@ extends_documentation_fragment:
   - cisco.catalystwan.feature_template_cisco_secure_internet_gateway
   - cisco.catalystwan.feature_template_cisco_snmp
   - cisco.catalystwan.feature_template_cisco_system
-  - cisco.catalystwan.feature_template_cisco_vpn_interface
   - cisco.catalystwan.feature_template_cisco_vpn
+  - cisco.catalystwan.feature_template_cisco_vpn_interface
   - cisco.catalystwan.feature_template_omp_vsmart
   - cisco.catalystwan.feature_template_security_vsmart
   - cisco.catalystwan.feature_template_system_vsmart
@@ -68,14 +64,13 @@ author:
 """
 
 
-from enum import Enum
 from pydantic import BaseModel, Field, ConfigDict
-from typing import Optional, Dict, Final
+from typing import Optional, Dict, Final, get_args, Literal
 
 from catalystwan.api.template_api import FeatureTemplate
 from catalystwan.dataclasses import FeatureTemplateInfo
 from catalystwan.typed_list import DataSequence
-from catalystwan.utils.device_model import DeviceModel
+from catalystwan.models.common import DeviceModel
 from catalystwan.session import ManagerHTTPError
 from catalystwan.api.templates.models.supported import available_models
 
@@ -101,30 +96,27 @@ from ..module_utils.feature_templates.system_vsmart import system_vsmart_definit
 ALLOW: Final[str] = "allow"
 
 
+class Values(BaseModel):
+    model_config = ConfigDict(extra=ALLOW, populate_by_name=True)
+
+
 class ExtendedModuleResult(ModuleResult):
     templates_info: Optional[Dict] = Field(default={})
 
 
-class State(str, Enum):
-    PRESENT = "present"
-    MODIFIED = "modified"
-    ABSENT = "absent"
-
-
-class Values(BaseModel):
-    model_config = ConfigDict(extra=ALLOW, populate_by_name=True)
+State = Literal["present", "modified", "absent"]
 
 
 def run_module():
     module_args = dict(
         state=dict(
             type=str,
-            choices=[State.PRESENT, State.ABSENT, State.MODIFIED],
-            default=State.PRESENT.value,
+            choices=list(get_args(State)),
+            default="present",
         ),
         template_name=dict(type="str", required=True),
         template_description=dict(type="str", default=None),
-        device_models=dict(type="list", choices=[device_model.value for device_model in DeviceModel], default=[]),
+        device_models=dict(type="list", choices=list(get_args(DeviceModel)), default=[]),
         debug=dict(type="bool", default=False),
         device_specific_variables=dict(type="raw", default={}),
         device=dict(type="str", default=None),  # For this we need to think how to pass devices
@@ -154,7 +146,7 @@ def run_module():
         required_if=[
             (
                 "state",
-                State.PRESENT.value,
+                "present",
                 (
                     "template_name",
                     "template_description",
@@ -164,7 +156,7 @@ def run_module():
             ),
             (
                 "modified",
-                State.MODIFIED.value,
+                "modified",
                 (
                     "template_name",
                     "template_description",
@@ -172,12 +164,12 @@ def run_module():
                 ),
                 True,
             ),
-            ("state", State.ABSENT.value, ("template_name",), True),
+            ("state", "absent", ("template_name",), True),
         ],
     )
     # Verify if we are dealing with one or more templates
     template_name = module.params.get("template_name")
-    device_specific_variables = module.params.get("device_specific_variables")
+    device_specific_variables: Dict = module.params.get("device_specific_variables")
     module.logger.info(f"Module input: \n{module.params}\n")
 
     all_templates: DataSequence[FeatureTemplateInfo] = module.get_response_safely(
@@ -185,9 +177,9 @@ def run_module():
     )
     target_template: FeatureTemplateInfo = all_templates.filter(name=template_name)
 
-    # Code for checking if template name exists already
-    # if yes, do we need some force method or we just inform user and exit?
     if module.params.get("state") == "present":
+        # Code for checking if template name exists already
+        # if yes, do we need some force method or we just inform user and exit?
         if target_template:
             module.logger.debug(f"Detected existing template:\n{target_template}\n")
             result.msg = (
@@ -199,23 +191,19 @@ def run_module():
                     if module.params[model_name] is not None:
                         module.logger.debug(f"Template input:\n{module.params_without_none_values[model_name]}\n")
                         # Perform action with template
-                        
-                        module.logger.debug(f"device_specific_variables:\n{device_specific_variables}\n")
-                        # only temporary part for debugging
-                        configuration = module.params_without_none_values[model_name]
-                        # Check if any device_specific_variables defined
+
+                        configuration: Dict = module.params_without_none_values[model_name]
+
+                        # Check if any device_specific_variables defined and use them in template
                         if device_specific_variables:
                             _dsv = Values()
                             for key, value in device_specific_variables.items():
                                 dev_value = DeviceVariable(name=value)
                                 setattr(_dsv, key, dev_value)
-                                module.logger.debug(f"{_dsv}")
-                        
+
                             for field, value in configuration.items():
                                 if value == "device_specific_variable":
-                                    module.logger.debug(f"{field}: {value}")
                                     configuration[field] = _dsv.model_extra[field]
-                                    module.logger.debug(f"configuration[field]:\n{configuration[field]}\n")
 
                         template = model_module(
                             template_name=template_name,
@@ -231,7 +219,7 @@ def run_module():
                             module.session.api.templates.create(template=template, debug=module.params.get("debug"))
                         except ManagerHTTPError as ex:
                             module.fail_json(
-                                msg=f"Could not perform create Feature Template {template_name}.\nManager error: {ex.info}"
+                                msg=f"Could not perform add Feature Template {template_name}.\nManager error: {ex.info}"
                             )
                         result.changed = True
                         result.msg += f"Created template {model_name}: {template}"
@@ -241,18 +229,8 @@ def run_module():
         result.changed = True
         result.msg = f"Deleted template {template_name}"
 
-    # if filters:
-    #     filtered_templates = all_templates.filter(**filters)
-    #     if filtered_templates:
-    #         module.logger.info(f"All Feature Templates filtered with filters: {filters}:\n{filtered_templates}")
-    #         result.msg = "Succesfully got all requested Feature Templates Info from vManage"
-    #         result.templates_info = [asdict(template) for template in filtered_templates]
-    #     else:
-    #         module.logger.warning(msg=f"Feature templates filtered with `{filters}` not present.")
-    #         result.msg = f"Feature templates filtered with `{filters}` not present on vManage."
-    # else:
-    #     result.msg = "Succesfully got all Feature Templates Info from vManage"
-    #     result.templates_info = [asdict(template) for template in all_templates]
+    if module.params.get("state") == "modified":
+        module.fail_json(msg="Module parameter 'modified' not implemented yet!")
 
     module.exit_json(**result.model_dump(mode="json"))
 

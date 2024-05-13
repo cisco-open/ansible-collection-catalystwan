@@ -11,7 +11,7 @@ from __future__ import annotations
 
 
 class ModuleDocFragment(object):
-    DOCUMENTATION = r'''
+    DOCUMENTATION = r"""
 options:
     cisco_system:
         description: Cisco System configuration settings for SD-WAN devices.
@@ -455,7 +455,7 @@ options:
                 suboptions:
                     name:
                         description:
-                        - null
+                        - Device Specific Variables names
                         required: true
                         default: null
                         type: str
@@ -533,7 +533,7 @@ options:
                 suboptions:
                     name:
                         description:
-                        - null
+                        - Device Specific Variables names
                         required: true
                         default: null
                         type: str
@@ -662,7 +662,7 @@ options:
                 suboptions:
                     name:
                         description:
-                        - null
+                        - Name for the Tracker
                         required: true
                         default: null
                         type: str
@@ -940,4 +940,4 @@ options:
                 - aggressive
                 - moderate
                 - conservative
-    '''
+    """

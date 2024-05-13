@@ -74,7 +74,6 @@ from pydantic import Field
 
 from catalystwan.api.template_api import CLITemplate
 from catalystwan.session import ManagerHTTPError
-from catalystwan.utils.device_model import DeviceModel
 from catalystwan.utils.personality import Personality
 
 from ..module_utils.result import ModuleResult
@@ -114,9 +113,9 @@ def run_module():
         device = devices.filter(hostname=hostname).single_or_default()
         try:
             template_name = f"Default_{hostname}"
-            device_model = DeviceModel(device.model)
+            device_model = device.model
             if device.personality is Personality.VBOND:
-                device_model = DeviceModel.VBOND
+                device_model = "vedge-cloud"
 
             cli_template = CLITemplate(
                 template_name=template_name,

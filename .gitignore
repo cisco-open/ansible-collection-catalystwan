@@ -16,3 +16,5 @@ playbooks/tests/configuration_file_dev_vars.yml
 playbooks/tests/ansible_catalystwan.log
 playbooks/tests/ansible_catalystwan_module.log
 playbooks/tests/catalystwan.log
+playbooks/tests/payload*
+playbooks/tests/response*

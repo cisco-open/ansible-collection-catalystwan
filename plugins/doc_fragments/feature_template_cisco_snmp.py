@@ -11,7 +11,7 @@ from __future__ import annotations
 
 
 class ModuleDocFragment(object):
-    DOCUMENTATION = r'''
+    DOCUMENTATION = r"""
 options:
     cisco_snmp:
         description: Cisco SNMP Feature Template configuration
@@ -161,11 +161,12 @@ options:
                     priv:
                         description:
                         - The privacy (encryption) protocol used
-                        required: true
+                        required: false
                         default: null
                         type: str
                         choices:
                         - aes-cfb-128
+                        - aes-256-cfb-128
                     priv_password:
                         description:
                         - The password for privacy
@@ -222,4 +223,4 @@ options:
                         required: false
                         default: null
                         type: str
-    '''
+    """
