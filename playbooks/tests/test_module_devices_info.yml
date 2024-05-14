@@ -16,17 +16,33 @@
   gather_facts: false
   vars_files:
     - configuration_file_dev_vars.yml
+  vars:
+    manager_authentication: &manager_authentication
+      url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+      username: "{{ (vmanage_instances | first).admin_username }}"
+      password: "{{ (vmanage_instances | first).admin_password }}"
   tasks:
     - name: 1. Get list of Edge devices
       cisco.catalystwan.devices_info:
         device_category: vedges
-        manager_authentication:
-          url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
-          username: "{{ (vmanage_instances | first).admin_username }}"
-          password: "{{ (vmanage_instances | first).admin_password }}"
+        manager_credentials:
+          <<: *manager_authentication
       register: edge_devices
 
-    - name: 2. Check if all controller devices are discoverable via system ip
+    - name: 2. Backup running-config from vManage with default backup dir (in CWD)
+      cisco.catalystwan.devices_info:
+        backup: true
+        manager_credentials:
+          <<: *manager_authentication
+
+    - name: 3. Backup running-config from vManage to specified directory
+      cisco.catalystwan.devices_info:
+        backup: true
+        backup_dir_path: "/tmp/backups"
+        manager_credentials:
+          <<: *manager_authentication
+
+    - name: 4. Check if all controller devices are discoverable via system ip
       cisco.catalystwan.devices_info:
         device_category: controllers
         filters:

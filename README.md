@@ -164,6 +164,13 @@ And then you can use the module:
 All of the modules will produce 2 log files: `ansible_catalystwan_module.log` and `ansible_catalystwan.log`.
 Currently base dir destination of these log files will be current working directory of playbooks.
 
+### Feature Templates
+
+Feature Templates operations (`add` and `delete`) are supported via `cisco.catalystwan.feature_templates` module.
+
+Available models are dependent on Catalystwan SDK, and they can be seen [here](https://github.com/cisco-open/cisco-catalyst-wan-sdk/blob/main/catalystwan/api/templates/models/supported.py).
+
+For more information about adding new models see [Feature Templates generation](./plugins/README.md#feature-templates).
 
 ---
 

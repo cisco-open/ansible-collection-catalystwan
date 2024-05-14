@@ -66,6 +66,22 @@ Proposed common Return Values:
 
 ---
 
+## Feature Templates contribution
+
+Module [feature_templaes](../plugins/modules/feature_templates.py) provide option to add Feature Templates.
+This module is highly relaying on existing models of Feature Templates in Catalystwan SDK. If there is a missing
+template that you want to use, you can contribute, and first add that model in Catalystwan SDK (important node: available_models dictionary is still used to determine which templates are supported)
+
+When required model is already there, you can reuse [script for generating documentation and module args](../utils/ft_generator.py) (simply by running it as python script). If your model was correctly added in Catalystwan SDK, script should create 2 files:
+
+* first one in `plugins/doc_fragments/` directory with .yml extension -> this one contains all documentation for that template in Ansible module
+
+* second one in `plugins/module_utils/feature_templates` directory with .py extension -> this one contains all module args that can be reuse later in Ansible module
+
+With these 2 files, you can extend `feature_templates` module by using `extends_documentation_fragment` fragment in DOCUMENTATION block, and also by using `module_args` dictionary extended by unpacked dictionary coming from `plugins/module_utils/feature_templates` file.
+
+---
+
 ## Providing credentials to catalystwan Ansible modules
 
 There are 3 ways to provide information to module about vManage you want to work with.
