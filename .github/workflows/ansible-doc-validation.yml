@@ -1,0 +1,44 @@
+# .github/workflows/ansible-doc-validation.yml
+name: Ansible Doc Validation
+
+on: [pull_request, push]
+
+env:
+  COLLECTION_NAMESPACE: xd
+  COLLECTION_NAME: dddd
+
+jobs:
+  documentation-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install Ansible
+        run: pip install ansible==9.4.0
+
+      - name: Build and install the collection
+        run: |
+          ansible-galaxy collection build $GITHUB_WORKSPACE --force
+          ansible-galaxy collection install $GITHUB_WORKSPACE/*.tar.gz
+
+      - name: List modules in the collection
+        shell: bash
+        run: |
+          MODULES_PATH="$GITHUB_WORKSPACE/plugins/modules/"
+          MODULES=$(find "$MODULES_PATH" -name '*.py' -exec basename {} .py \; | xargs)
+          echo "Modules found: $MODULES"
+          echo "MODULES=$MODULES" >> $GITHUB_ENV
+
+
+      - name: Check documentation for each module
+        shell: bash
+        run: |
+          for MODULE in $MODULES; do
+            ansible-doc --type=module --json "${{ env.COLLECTION_NAMESPACE }}.${{ env.COLLECTION_NAME }}.$MODULE" || exit 1
+          done
