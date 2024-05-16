@@ -2,6 +2,14 @@
 
 Thank you for investing your time in contributing to our project!
 
+First, we recommended reading these if you are not familair with developing modules/collections yet:
+
+[Developing Modules General](https://docs.ansible.com/ansible/latest/dev_guide/developing_modules_general.html)
+
+[Developing Modules Best Practices](https://docs.ansible.com/ansible/latest/dev_guide/developing_modules_best_practices.html)
+
+[Ansible module architecture](https://docs.ansible.com/ansible/latest/dev_guide/developing_program_flow_modules.html)
+
 ---
 
 ## Issues

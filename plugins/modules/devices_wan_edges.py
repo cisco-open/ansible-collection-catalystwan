@@ -98,7 +98,7 @@ EXAMPLES = r"""
     state: "present"
     sync_devices_from_smart_account: true
     username: "smartaccount_user"
-    password: "smartaccount_password"
+    password: "smartaccount_password"  # pragma: allowlist secret
 
 # Example of using the module to upload a WAN Edge list
 - name: Upload WAN Edge list
@@ -121,16 +121,15 @@ EXAMPLES = r"""
 """
 
 import traceback
-
 from enum import Enum
-from typing import Optional, List
-from pydantic import Field
+from typing import List, Optional
 
 from catalystwan.endpoints.configuration_device_inventory import (
     DeviceDetailsResponse,
     SerialFilePayload,
     SmartAccountSyncParams,
 )
+from pydantic import Field
 
 from ..module_utils.filters import get_target_device
 from ..module_utils.result import ModuleResult

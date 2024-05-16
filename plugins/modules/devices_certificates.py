@@ -120,8 +120,8 @@ EXAMPLES = r"""
 
 from catalystwan.endpoints.certificate_management_device import TargetDevice, Validity, VedgeListValidityPayload
 
-from ..module_utils.result import ModuleResult
 from ..module_utils.filters import get_target_device
+from ..module_utils.result import ModuleResult
 from ..module_utils.vmanage_module import AnsibleCatalystwanModule
 
 

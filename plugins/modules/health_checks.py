@@ -11,12 +11,7 @@ short_description: Performs health checks on network devices managed by vManage
 version_added: "0.1.0"
 description:
   - This module performs various health checks on devices managed by vManage.
-  - It can check for the status of:
-    - control connections
-    - orchestrator connections
-    - device system status
-    - BFD sessions
-    - OMP sessions.
+  - Available health chesk are choosen by C(check_type)
 options:
   check_type:
     description:
@@ -50,7 +45,7 @@ data:
   returned: always
   type: list
   sample:
-    [{"cpu_state": "normal", "mem_state": "normal", "memUsage": 75, "status": "normal", "reachability": "reachable"}]
+    {"cpu_state": "normal", "mem_state": "normal", "memUsage": 75, "status": "normal", "reachability": "reachable"}
 health_check_msg:
   description: Descriptive messages about each health check performed.
   returned: always
@@ -83,13 +78,13 @@ EXAMPLES = r"""
 """
 
 from enum import Enum
-from typing import Optional, List
-from pydantic import Field
+from typing import List, Optional
 
-from catalystwan.utils.creation_tools import asdict
 from catalystwan.dataclasses import Personality
-from catalystwan.typed_list import DataSequence
 from catalystwan.endpoints.configuration_device_inventory import DeviceDetailsResponse
+from catalystwan.typed_list import DataSequence
+from catalystwan.utils.creation_tools import asdict
+from pydantic import Field
 
 from ..module_utils.filters import get_devices_details
 from ..module_utils.result import ModuleResult

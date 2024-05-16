@@ -53,7 +53,7 @@ EXAMPLES = r"""
     manager_credentials:
       url: "https://vmanage.example.com"
       username: "admin"
-      password: "securepassword123"
+      password: "securepassword123"  # pragma: allowlist secret
       port: "8443"
 """
 
@@ -66,7 +66,7 @@ active_sessions:
   sample: |
     [
         {
-            "uuid": "abcdef1234567890",
+            "uuid": "abcdef1234567890",  # pragma: allowlist secret
             "source_ip": "192.0.2.1",
             "remote_host": "host.example.com",
             "raw_username": "admin",
@@ -87,7 +87,8 @@ changed:
 """
 
 
-from typing import Optional, List
+from typing import List, Optional
+
 from pydantic import Field
 
 from ..module_utils.result import ModuleResult

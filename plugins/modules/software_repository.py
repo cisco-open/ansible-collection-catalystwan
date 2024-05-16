@@ -195,7 +195,7 @@ EXAMPLES = r"""
       remote_server_url: "ftp://example.com"
       remote_server_vpn: 10
       remote_server_user: "admin"
-      remote_server_password: "password"
+      remote_server_password: "password"  # pragma: allowlist secret
 
 # Example to remove remote server by ID
 - name: Remove remote server
@@ -226,15 +226,15 @@ from enum import Enum
 from pathlib import Path
 from uuid import UUID
 
-from catalystwan.utils.upgrades_helper import SoftwarePackageUploadPayload
-from catalystwan.typed_list import DataSequence
 from catalystwan.endpoints.configuration.software_actions import (
-    RemoteServerProtocol,
     RemoteServer,
     RemoteServerInfo,
-    SoftwareRemoteServer,
+    RemoteServerProtocol,
     SoftwareImageDetails,
+    SoftwareRemoteServer,
 )
+from catalystwan.typed_list import DataSequence
+from catalystwan.utils.upgrades_helper import SoftwarePackageUploadPayload
 
 from ..module_utils.result import ModuleResult
 from ..module_utils.vmanage_module import AnsibleCatalystwanModule

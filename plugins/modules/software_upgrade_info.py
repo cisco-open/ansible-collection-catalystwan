@@ -24,7 +24,6 @@ options:
     required: False
     choices: ['vedge', 'controller', 'vmanage']
     default: 'controller'
-
   filters:
     description:
       - Optional filters to apply on the list of installed devices.
@@ -83,14 +82,14 @@ installed_devices:
       type: str
       returned: when device is present
       sample: "installed"
-    ... # Other fields returned by the InstalledDeviceData model_dump method
+    # Other fields returned by the InstalledDeviceData model_dump method
 """
 
-from typing import Optional, List
-from pydantic import Field
+from typing import List, Optional
 
-from catalystwan.typed_list import DataSequence
 from catalystwan.endpoints.configuration_device_actions import InstalledDeviceData
+from catalystwan.typed_list import DataSequence
+from pydantic import Field
 
 from ..module_utils.result import ModuleResult
 from ..module_utils.vmanage_module import AnsibleCatalystwanModule

@@ -1,11 +1,16 @@
 # .github/workflows/ansible-doc-validation.yml
 name: Ansible Doc Validation
 
-on: [pull_request, push]
+on:
+  pull_request:
+
+  push:
+    branches:
+      - master
 
 env:
-  COLLECTION_NAMESPACE: xd
-  COLLECTION_NAME: dddd
+  COLLECTION_NAMESPACE: cisco
+  COLLECTION_NAME: catalystwan
 
 jobs:
   documentation-check:
@@ -35,10 +40,13 @@ jobs:
           echo "Modules found: $MODULES"
           echo "MODULES=$MODULES" >> $GITHUB_ENV
 
-
       - name: Check documentation for each module
         shell: bash
         run: |
           for MODULE in $MODULES; do
-            ansible-doc --type=module --json "${{ env.COLLECTION_NAMESPACE }}.${{ env.COLLECTION_NAME }}.$MODULE" || exit 1
+            echo "Checking module: $MODULE documentation"
+            if ! ansible-doc --type=module --json "${{ env.COLLECTION_NAMESPACE }}.${{ env.COLLECTION_NAME }}.$MODULE" > /dev/null; then
+              echo "Error in documentation for module $MODULE"
+              exit 1
+            fi
           done

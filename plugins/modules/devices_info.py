@@ -74,14 +74,14 @@ EXAMPLES = r"""
 """
 
 from typing import List, Optional
+
+from catalystwan.endpoints.configuration_device_inventory import DeviceDetailsResponse
+from catalystwan.typed_list import DataSequence
 from pydantic import Field
 
 from ..module_utils.filters import get_target_device
 from ..module_utils.result import ModuleResult
 from ..module_utils.vmanage_module import AnsibleCatalystwanModule
-
-from catalystwan.endpoints.configuration_device_inventory import DeviceDetailsResponse
-from catalystwan.typed_list import DataSequence
 
 
 class ExtendedModuleResult(ModuleResult):

@@ -1,0 +1,50 @@
+# .github/workflows/ansible-lint.yml
+name: Static Code Analyzer
+
+on:
+  pull_request:
+
+  push:
+    branches:
+      - master
+
+jobs:
+  analyze-code:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.10']
+    defaults:
+      run:
+        shell: sh
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - uses: isort/isort-action@master
+        with:
+          requirementsFiles: "requirements.txt"
+
+      - name: Install pycln
+        run: pip install pycln==2.4.0
+
+      - name: Run pycln
+        run: pycln --all .
+
+      - name: Run check-yaml, end-of-file-fixer, trailing-whitespace
+        uses: pre-commit/action@v3.0.0
+
+      - name: Run ansible-lint
+        uses: ansible/ansible-lint@main # or version tag instead of 'main'
+
+      - name: Install detect-secrets
+        run: pip install detect-secrets==1.4.0
+
+      - name: Run detect-secrets
+        run: detect-secrets scan

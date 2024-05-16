@@ -1,0 +1,19 @@
+# .github/workflows/galaxy-importer.yml
+
+# Its role is to performe the same checks that would be performed when publishing to galaxy
+# Running them earlier helps to detect issues locally
+
+name: galaxy-importer
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  galaxy_importer:
+    uses: ansible-network/github_actions/.github/workflows/galaxy_importer.yml@main

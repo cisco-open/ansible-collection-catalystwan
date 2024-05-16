@@ -14,6 +14,8 @@ description:
   - Manages various administration settings on a vManage instance, including
     validator (vBond), certificates, smart account credentials, PnP Connect Sync,
     and organization settings.
+  - More settings can be enhanced by reusing
+    https://github.com/cisco-open/cisco-catalyst-wan-sdk/blob/main/catalystwan/api/administration.py
 options:
   certificates:
     description: Configuration for controller certificate authorization.
@@ -109,7 +111,7 @@ EXAMPLES = r"""
     manager_credentials:
       url: "https://vmanage.example.com"
       username: "admin"
-      password: "securepassword123"
+      password: "securepassword123"  # pragma: allowlist secret
       port: "8443"
 
 # Example of using the module to configure certificates
@@ -129,7 +131,7 @@ EXAMPLES = r"""
   cisco.catalystwan.administration_settings:
     smart_account_credentials:
       username: "smartuser"
-      password: "smartpass"
+      password: "smartpass"  # pragma: allowlist secret
     manager_credentials: ...
 
 # Example of using the module to configure PnP Connect Sync
@@ -196,10 +198,10 @@ from typing import get_args
 from catalystwan.endpoints.configuration_settings import (
     Certificate,
     Device,
-    Organization,
-    SmartAccountCredentials,
-    PnPConnectSync,
     OnOffMode,
+    Organization,
+    PnPConnectSync,
+    SmartAccountCredentials,
     SoftwareInstallTimeout,
 )
 
@@ -229,9 +231,7 @@ def run_module():
                 validity_period=dict(type="str", choices=["1Y", "2Y"], default="1Y"),
                 retrieve_interval=dict(
                     type="str",
-                    choices=[
-                        str(i) for i in range(1, 61)
-                    ],
+                    choices=[str(i) for i in range(1, 61)],
                     default="5",
                 ),
                 first_name=dict(type="str"),
