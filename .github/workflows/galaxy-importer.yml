@@ -26,24 +26,19 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: 3.11
+          python-version: '3.10'
 
-      - name: Set up venv
+      - name: Install Ansible and importer
         run: |
-          python -m pip install --upgrade pip
-          pip install virtualenv
-          mkdir venv
-          virtualenv venv/venv-2.16
-
-      - name: Install dependencies
-        run: |
-          source venv/venv-2.16/bin/activate
-          python -m pip install --upgrade pip
-          pip install ansible
+          pip install ansible==9.4.0
           pip install ansible-importer
           pip install galaxy-importer
 
+      - name: Build and install the collection
+        run: |
+          ansible-galaxy collection build $GITHUB_WORKSPACE --force
+          ansible-galaxy collection install $GITHUB_WORKSPACE/*.tar.gz
+
       - name: Run ac-galaxy-importer
         run: |
-          source venv/venv-2.16/bin/activate
-          ./ac --ac-galaxy-importer
+          python -m galaxy_importer.main $GITHUB_WORKSPACE/*.tar.gz
