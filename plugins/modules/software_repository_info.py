@@ -57,14 +57,11 @@ EXAMPLES = r"""
       version: "20.3.2"
 """
 
-from typing import Any, Optional, List, Union
-from pydantic import Field
+from typing import Any, List, Optional, Union
 
+from catalystwan.endpoints.configuration.software_actions import RemoteServerInfo, SoftwareImageDetails
 from catalystwan.typed_list import DataSequence
-from catalystwan.endpoints.configuration.software_actions import (
-    RemoteServerInfo,
-    SoftwareImageDetails,
-)
+from pydantic import Field
 
 from ..module_utils.result import ModuleResult
 from ..module_utils.vmanage_module import AnsibleCatalystwanModule

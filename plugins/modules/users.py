@@ -67,7 +67,7 @@ EXAMPLES = r"""
   cisco.catalystwan.users:
     mode: create
     username: 'johndoe'
-    password: 'securepassword'
+    password: 'securepassword'  # pragma: allowlist secret
     description: 'John Doe user'
     group:
       - 'admin'
@@ -110,17 +110,14 @@ changed:
   sample: true
 """
 import traceback
-
-from typing import Optional, List
-from pydantic import Field
+from typing import List, Optional
 
 from catalystwan.endpoints.administration_user_and_group import User
 from catalystwan.session import ManagerHTTPError
+from pydantic import Field
 
 from ..module_utils.result import ModuleResult
-from ..module_utils.vmanage_module import (
-    AnsibleCatalystwanModule,
-)
+from ..module_utils.vmanage_module import AnsibleCatalystwanModule
 
 
 class ExtendedModuleResult(ModuleResult):

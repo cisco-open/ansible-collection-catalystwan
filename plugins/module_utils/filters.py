@@ -4,11 +4,10 @@
 import traceback
 
 from catalystwan.endpoints.configuration_device_inventory import DeviceCategory, DeviceDetailsResponse
-from catalystwan.typed_list import DataSequence
 from catalystwan.session import ManagerHTTPError
-from ..module_utils.vmanage_module import (
-    AnsibleCatalystwanModule,
-)
+from catalystwan.typed_list import DataSequence
+
+from ..module_utils.vmanage_module import AnsibleCatalystwanModule
 
 
 def get_target_device(
