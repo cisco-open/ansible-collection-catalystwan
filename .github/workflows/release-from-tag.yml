@@ -7,6 +7,9 @@ on:
     tags:
       - 'v*.*.*'
 
+env:
+  WRONG_API_KEY: "just-wrong-key-trial-only"
+
 jobs:
   publish-release:
     runs-on:
@@ -24,37 +27,53 @@ jobs:
       - name: Get collection version from galaxy.yml
         id: collection-version
         run: |
+          NAMESPACE=$(grep '^namespace:' galaxy.yml | awk '{print $2}' | tr -d "'\"")
+          NAME=$(grep '^name:' galaxy.yml | awk '{print $2}' | tr -d "'\"")
           VERSION=$(grep '^version:' galaxy.yml | awk '{print $2}' | tr -d "'\"")
+          if [[ -z "$NAMESPACE" || -z "$NAME" || -z "$VERSION" ]]; then
+            echo "Error: Unable to find or parse namespace, name, or version in galaxy.yml"
+            exit 1
+          fi
+          echo "Collection namespace is $NAMESPACE"
+          echo "Collection name is $NAME"
           echo "Collection version is $VERSION"
-          echo "::set-output name=collection_version::$VERSION"
+          echo "AC_NAMESPACE=$NAMESPACE" >> "$GITHUB_ENV"
+          echo "AC_NAME=$NAME" >> "$GITHUB_ENV"
+          echo "AC_VERSION=$VERSION" >> "$GITHUB_ENV"
 
       - name: Get Git tag
         id: git-tag
         run: |
-          TAG=${GITHUB_REF#refs/tags/v}
+          TAG=${GITHUB_REF#refs/tags/}
           echo "Git tag is $TAG"
-          echo "::set-output name=git_tag::$TAG"
+          echo "GIT_TAG=$TAG" >> "$GITHUB_ENV"
 
       - name: Compare collection version and Git tag
+        shell: bash
         run: |
-          COLLECTION_VERSION="${{ steps.collection-version.outputs.collection_version }}"
-          GIT_TAG="${{ steps.git-tag.outputs.git_tag }}"
-          if [[ "v$COLLECTION_VERSION" == "$GIT_TAG" ]]; then
+          if [[ "v$AC_VERSION" == "$GIT_TAG" ]]; then
             echo "The collection version matches the Git tag."
           else
-            echo "Error: The collection version ($COLLECTION_VERSION) does not match the Git tag ($GIT_TAG)."
+            echo "Error: The collection version ($AC_VERSION) does not match the Git tag ($GIT_TAG)."
             exit 1
           fi
 
-      # - name: Install Ansible and importer
-      #   run: |
-      #     pip install ansible==9.4.0
+      - name: Install Ansible and importer
+        run: |
+          pip install ansible==9.4.0
 
-      # - name: Build and install the collection
-      #   run: |
-      #     ansible-galaxy collection build $GITHUB_WORKSPACE --force
-      #     ansible-galaxy collection install $GITHUB_WORKSPACE/*.tar.gz
+      - name: Build collection
+        run: |
+          ansible-galaxy collection build $GITHUB_WORKSPACE --force
 
-      # - name: Run ac-galaxy-importer
+      - name: Check collection install
+        run: |
+          ansible-galaxy collection install $GITHUB_WORKSPACE/$AC_NAMESPACE-$AC_NAME-$AC_VERSION.tar.gz
+
+      - name: Publish Collection to Ansible-Galaxy
+        run: |
+           ansible-galaxy collection publish $GITHUB_WORKSPACE/$AC_NAMESPACE-$AC_NAME-$AC_VERSION.tar.gz --api-key "${{ env.WRONG_API_KEY }}"
+
+      # - name: Publish Collection to Ansible-Galaxy
       #   run: |
-      #     python -m galaxy_importer.main $GITHUB_WORKSPACE/*.tar.gz
+      #      ansible-galaxy collection publish $GITHUB_WORKSPACE/$AC_NAMESPACE-$AC_NAME-$AC_VERSION.tar.gz --api-key "${{ secrets.ANSIBLE_GALAXY_API_KEY }}"

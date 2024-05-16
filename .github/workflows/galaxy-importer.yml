@@ -28,6 +28,23 @@ jobs:
         with:
           python-version: '3.10'
 
+      - name: Get collection namespace and name from galaxy.yml
+        id: collection-name
+        run: |
+          NAMESPACE=$(grep '^namespace:' galaxy.yml | awk '{print $2}' | tr -d "'\"")
+          NAME=$(grep '^name:' galaxy.yml | awk '{print $2}' | tr -d "'\"")
+          VERSION=$(grep '^version:' galaxy.yml | awk '{print $2}' | tr -d "'\"")
+          if [[ -z "$NAMESPACE" || -z "$NAME" || -z "$VERSION" ]]; then
+            echo "Error: Unable to find or parse namespace, name, or version in galaxy.yml"
+            exit 1
+          fi
+          echo "Collection namespace is $NAMESPACE"
+          echo "Collection name is $NAME"
+          echo "Collection version is $VERSION"
+          echo "COLLECTION_NAMESPACE=$NAMESPACE" >> $GITHUB_ENV
+          echo "COLLECTION_NAME=$NAME" >> $GITHUB_ENV
+          echo "COLLECTION_VERSION=$VERSION" >> $GITHUB_ENV
+
       - name: Install Ansible and importer
         run: |
           pip install ansible==9.4.0
@@ -37,8 +54,8 @@ jobs:
       - name: Build and install the collection
         run: |
           ansible-galaxy collection build $GITHUB_WORKSPACE --force
-          ansible-galaxy collection install $GITHUB_WORKSPACE/*.tar.gz
+          ansible-galaxy collection install $GITHUB_WORKSPACE/$COLLECTION_NAMESPACE-$COLLECTION_NAME-$COLLECTION_VERSION.tar.gz
 
       - name: Run ac-galaxy-importer
         run: |
-          python -m galaxy_importer.main $GITHUB_WORKSPACE/*.tar.gz
+          python -m galaxy_importer.main $GITHUB_WORKSPACE/$COLLECTION_NAMESPACE-$COLLECTION_NAME-$COLLECTION_VERSION.tar.gz
