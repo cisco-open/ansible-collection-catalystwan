@@ -1,13 +1,13 @@
 namespace: cisco
 name: catalystwan
-version: 0.1.0
+version: 0.1.1
 readme: README.md
 authors:
   - Arkadiusz Cichon <acichon@cisco.com>
   - Kamil Górski <kagorski@cisco.com>
 description: Ansible collection to interact with Cisco SD-WAN vManage via catalystwan
 
-repository: git@github.com:cisco-open/ansible-collection-catalystwan.git
+repository: https://github.com/cisco-open/ansible-collection-catalystwan
 documentation: https://github.com/cisco-open/ansible-collection-catalystwan/blob/main/README.md
 homepage: https://github.com/cisco-open/ansible-collection-catalystwan
 issues: https://github.com/cisco-open/ansible-collection-catalystwan/issues
