@@ -1,5 +1,3 @@
-# .github/workflows/galaxy-importer.yml
-
 name: Release to ansible-galaxy from tag
 
 on:
