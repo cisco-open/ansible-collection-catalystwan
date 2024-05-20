@@ -64,9 +64,9 @@ Including an example of how to use your role (with variables passed in as parame
         remote_server_user: 'remote_user'
         remote_server_password: 'remote_password'
         remote_server_image_location_prefix: '/images'
-        vmanage_remote_software_filename: 'vmanage-software.20.3.1.img'
-        viptela_remote_software_filename: 'viptela-software.20.3.1.img'
-        cedge_remote_software_filename: 'cedge-software.20.3.1.img'
+        vmanage_remote_software_filename: 'viptela-vmanage-genericx86-64.zip'
+        viptela_remote_software_filename: 'viptela-edge-genericx86-64.zip'
+        cedge_remote_software_filename: 'c8000v-universalk9.17.XX.XX.X.XXX_V17_XX_X.SSA.bin'
         controller_software_version_to_activate: '20.3.1'
         edge_software_version_to_activate: '20.3.1'
         remove_available_software_from_device: true
