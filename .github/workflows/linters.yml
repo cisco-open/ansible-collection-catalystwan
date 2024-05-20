@@ -1,4 +1,3 @@
-# .github/workflows/ansible-lint.yml
 name: Static Code Analyzer
 
 on:

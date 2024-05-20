@@ -1,4 +1,3 @@
-# .github/workflows/ansible-doc-validation.yml
 name: Ansible Doc Validation
 
 on:

@@ -24,12 +24,12 @@
   cisco.catalystwan.administration_settings:
     validator:
       domain_ip: "{{ vbond_transport_public_ip }}"
-      port: "12346"  # should be customizable
+      port: "{{ validator_port }}"
     organization: "{{ organization_name }}"
     certificates:
       retrieve_interval: "2"
     pnp_connect_sync: "on"
-    smart_account_credentials:  # GET the info about how Shivram's config failed because of the missing PnP controller profile
+    smart_account_credentials:
       username: "{{ pnp_username }}"
       password: "{{ pnp_password }}"
     manager_authentication:

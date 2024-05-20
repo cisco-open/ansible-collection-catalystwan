@@ -19,7 +19,7 @@
     - "{{ vmanage_instances }}"
     - "{{ vbond_instances }}"
     - "{{ organization_name }}"
-    - "{{ vbond_instances[0].transport_public_ip }}"
+    - "{{ (vbond_instances | first).transport_public_ip }}"
   loop_control:
     loop_var: required_var
 

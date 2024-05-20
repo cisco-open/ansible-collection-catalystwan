@@ -21,7 +21,7 @@ options:
     description: Configuration for controller certificate authorization.
     type: dict
     aliases: [cca, controller_certificate_authorization]
-    options:
+    suboptions:
       certificate_signing:
         description: Defines the certificate signing authority.
         type: str
@@ -60,7 +60,7 @@ options:
     description: Smart Account credentials for authentication.
     type: dict
     aliases: [smart_account]
-    options:
+    suboptions:
       password:
         description: Password for Smart Account.
         type: str
@@ -74,7 +74,7 @@ options:
     description: Configuration for vBond validator.
     type: dict
     aliases: [vbond]
-    options:
+    suboptions:
       domain_ip:
         description: Domain IP of the vBond validator.
         type: str
@@ -84,7 +84,7 @@ options:
   software_install_timeout:
     description: Configuration for upgrades timeout.
     type: dict
-    options:
+    suboptions:
       download_timeout:
         description: Download Timeout in minutes, should be in range 60-360.
         type: int
