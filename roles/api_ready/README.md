@@ -26,8 +26,8 @@ Example of `vmanage_instances`:
 ```yaml
 vmanage_instances:
     - mgmt_public_ip: '198.51.100.10'
-    admin_username: 'admin'
-    admin_password: 'password'
+      admin_username: 'admin'
+      admin_password: 'password'
 ```
 
 ## Example Playbook
