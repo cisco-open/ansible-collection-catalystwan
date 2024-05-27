@@ -1,0 +1,65 @@
+name: Ansible Doc Validation
+
+on:
+  pull_request:
+
+  push:
+    branches:
+      - master
+
+env:
+  COLLECTION_NAMESPACE: cisco
+  COLLECTION_NAME: catalystwan
+
+jobs:
+  documentation-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Get collection namespace and name from galaxy.yml
+        id: collection-name
+        run: |
+          NAMESPACE=$(grep '^namespace:' galaxy.yml | awk '{print $2}' | tr -d "'\"")
+          NAME=$(grep '^name:' galaxy.yml | awk '{print $2}' | tr -d "'\"")
+          if [[ -z "$NAMESPACE" || -z "$NAME" ]]; then
+            echo "Error: Unable to find or parse namespace, and name in galaxy.yml"
+            exit 1
+          fi
+          echo "Collection namespace is $NAMESPACE"
+          echo "Collection name is $NAME"
+          echo "COLLECTION_NAMESPACE=$NAMESPACE" >> $GITHUB_ENV
+          echo "COLLECTION_NAME=$NAME" >> $GITHUB_ENV
+
+      - name: Install Ansible
+        run: pip install ansible==9.4.0
+
+      - name: Build and install the collection
+        run: |
+          ansible-galaxy collection build $GITHUB_WORKSPACE --force
+          ansible-galaxy collection install $GITHUB_WORKSPACE/*.tar.gz
+
+      - name: List modules in the collection
+        shell: bash
+        run: |
+          MODULES_PATH="$GITHUB_WORKSPACE/plugins/modules/"
+          MODULES=$(find "$MODULES_PATH" -name '*.py' -exec basename {} .py \; | xargs)
+          echo "Modules found: $MODULES"
+          echo "MODULES=$MODULES" >> $GITHUB_ENV
+
+      - name: Check documentation for each module
+        shell: bash
+        run: |
+          for MODULE in $MODULES; do
+            echo "Checking module: $MODULE documentation"
+            if ! ansible-doc --type=module --json "$COLLECTION_NAMESPACE.COLLECTION_NAME.$MODULE" > /dev/null; then
+              echo "Error in documentation for module $MODULE"
+              exit 1
+            fi
+          done

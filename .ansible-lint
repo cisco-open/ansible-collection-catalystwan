@@ -36,6 +36,7 @@ mock_modules:
   - cisco.catalystwan.software_repository_info
   - cisco.catalystwan.software_upgrade
   - cisco.catalystwan.software_upgrade_info
+  - cisco.catalystwan.device_templates_info
   - cisco.catalystwan.users
   - cisco.catalystwan.vmanage_mode
   - cisco.catalystwan.wait_for_api_server

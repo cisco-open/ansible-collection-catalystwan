@@ -2,8 +2,8 @@
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 from typing import Dict, Final, Optional
-from pydantic import BaseModel, Field
-from pydantic import ConfigDict
+
+from pydantic import BaseModel, ConfigDict, Field
 
 ALLOW: Final[str] = "allow"
 

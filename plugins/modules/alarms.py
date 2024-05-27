@@ -102,18 +102,15 @@ EXAMPLES = r"""
 
 import json
 import traceback
-
-from typing import Optional, List
-from pydantic import Field
+from typing import List, Optional
 
 from catalystwan.session import ManagerHTTPError
-from catalystwan.utils.creation_tools import asdict
 from catalystwan.utils.alarm_status import Severity
+from catalystwan.utils.creation_tools import asdict
+from pydantic import Field
 
 from ..module_utils.result import ModuleResult
-from ..module_utils.vmanage_module import (
-    AnsibleCatalystwanModule,
-)
+from ..module_utils.vmanage_module import AnsibleCatalystwanModule
 
 
 class ExtendedModuleResult(ModuleResult):

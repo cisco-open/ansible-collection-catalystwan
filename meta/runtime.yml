@@ -1,5 +1,3 @@
 ---
 
-# Collections must specify a minimum required ansible version to upload
-# to galaxy
-requires_ansible: '>=2.13.13'
+requires_ansible: '>=2.16.6'

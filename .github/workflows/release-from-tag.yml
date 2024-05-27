@@ -1,0 +1,70 @@
+name: Release to ansible-galaxy from tag
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  publish-release:
+    runs-on:
+      - ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Get collection version from galaxy.yml
+        id: collection-version
+        run: |
+          NAMESPACE=$(grep '^namespace:' galaxy.yml | awk '{print $2}' | tr -d "'\"")
+          NAME=$(grep '^name:' galaxy.yml | awk '{print $2}' | tr -d "'\"")
+          VERSION=$(grep '^version:' galaxy.yml | awk '{print $2}' | tr -d "'\"")
+          if [[ -z "$NAMESPACE" || -z "$NAME" || -z "$VERSION" ]]; then
+            echo "Error: Unable to find or parse namespace, name, or version in galaxy.yml"
+            exit 1
+          fi
+          echo "Collection namespace is $NAMESPACE"
+          echo "Collection name is $NAME"
+          echo "Collection version is $VERSION"
+          echo "AC_NAMESPACE=$NAMESPACE" >> "$GITHUB_ENV"
+          echo "AC_NAME=$NAME" >> "$GITHUB_ENV"
+          echo "AC_VERSION=$VERSION" >> "$GITHUB_ENV"
+
+      - name: Get Git tag
+        id: git-tag
+        run: |
+          TAG=${GITHUB_REF#refs/tags/}
+          echo "Git tag is $TAG"
+          echo "GIT_TAG=$TAG" >> "$GITHUB_ENV"
+
+      - name: Compare collection version and Git tag
+        shell: bash
+        run: |
+          if [[ "v$AC_VERSION" == "$GIT_TAG" ]]; then
+            echo "The collection version matches the Git tag."
+          else
+            echo "Error: The collection version ($AC_VERSION) does not match the Git tag ($GIT_TAG)."
+            exit 1
+          fi
+
+      - name: Install Ansible
+        run: |
+          pip install ansible==9.4.0
+
+      - name: Build collection
+        run: |
+          ansible-galaxy collection build $GITHUB_WORKSPACE --force
+
+      - name: Check collection install locally to verify tar.gz correctness
+        run: |
+          ansible-galaxy collection install $GITHUB_WORKSPACE/$AC_NAMESPACE-$AC_NAME-$AC_VERSION.tar.gz
+
+      - name: Publish Collection to Ansible-Galaxy
+        run: |
+           ansible-galaxy collection publish $GITHUB_WORKSPACE/$AC_NAMESPACE-$AC_NAME-$AC_VERSION.tar.gz --api-key "${{ secrets.ANSIBLE_GALAXY_API_KEY }}"

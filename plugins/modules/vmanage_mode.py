@@ -68,17 +68,15 @@ changed:
   sample: true
 """
 import traceback
-
-from typing import get_args, Literal, Optional, Dict
-from pydantic import Field
+from typing import Dict, Literal, Optional, get_args
 
 from catalystwan.api.template_api import CLITemplate
 from catalystwan.session import ManagerHTTPError
 from catalystwan.utils.personality import Personality
+from pydantic import Field
 
 from ..module_utils.result import ModuleResult
 from ..module_utils.vmanage_module import AnsibleCatalystwanModule
-
 
 State = Literal["present"]
 
