@@ -8,14 +8,14 @@ DOCUMENTATION = r"""
 ---
 module: vmanage_feature_template
 short_description: Manage feature templates for Cisco vManage SD-WAN
-version_added: "0.1.0"
+version_added: "0.1.1"
 description:
   - This module can be used to create, modify, and delete feature templates in Cisco vManage SD-WAN.
   - The feature template configuration is defined via Python Pydantic models.
 options:
   state:
     description:
-      - Desired state of for the template.
+      - Desired state for the template.
       - 0(state=present) is equivalent of create template in GUI
     type: str
     choices: ["absent", "present", "modified"]
@@ -29,7 +29,7 @@ options:
     description:
       - Description for the Feature Template.
     type: str
-    required: true
+    required: false
   device_specific_variables:
     description:
       - Dictionary containing device specific variables names to be defined in template.
@@ -64,19 +64,17 @@ author:
 """
 
 
-from pydantic import BaseModel, Field, ConfigDict
-from typing import Optional, Dict, Final, get_args, Literal
+from typing import Dict, Final, Literal, Optional, get_args
 
 from catalystwan.api.template_api import FeatureTemplate
+from catalystwan.api.templates.device_variable import DeviceVariable
+from catalystwan.api.templates.models.supported import available_models
 from catalystwan.dataclasses import FeatureTemplateInfo
-from catalystwan.typed_list import DataSequence
 from catalystwan.models.common import DeviceModel
 from catalystwan.session import ManagerHTTPError
-from catalystwan.api.templates.models.supported import available_models
+from catalystwan.typed_list import DataSequence
+from pydantic import BaseModel, ConfigDict, Field
 
-from ..module_utils.result import ModuleResult
-from ..module_utils.vmanage_module import AnsibleCatalystwanModule
-from catalystwan.api.templates.device_variable import DeviceVariable
 from ..module_utils.feature_templates.cisco_aaa import cisco_aaa_definition
 from ..module_utils.feature_templates.cisco_banner import cisco_banner_definition
 from ..module_utils.feature_templates.cisco_bfd import cisco_bfd_definition
@@ -87,11 +85,13 @@ from ..module_utils.feature_templates.cisco_ospf import cisco_ospf_definition
 from ..module_utils.feature_templates.cisco_secure_internet_gateway import cisco_secure_internet_gateway_definition
 from ..module_utils.feature_templates.cisco_snmp import cisco_snmp_definition
 from ..module_utils.feature_templates.cisco_system import cisco_system_definition
-from ..module_utils.feature_templates.cisco_vpn_interface import cisco_vpn_interface_definition
 from ..module_utils.feature_templates.cisco_vpn import cisco_vpn_definition
+from ..module_utils.feature_templates.cisco_vpn_interface import cisco_vpn_interface_definition
 from ..module_utils.feature_templates.omp_vsmart import omp_vsmart_definition
 from ..module_utils.feature_templates.security_vsmart import security_vsmart_definition
 from ..module_utils.feature_templates.system_vsmart import system_vsmart_definition
+from ..module_utils.result import ModuleResult
+from ..module_utils.vmanage_module import AnsibleCatalystwanModule
 
 ALLOW: Final[str] = "allow"
 
@@ -119,7 +119,7 @@ def run_module():
         device_models=dict(type="list", choices=list(get_args(DeviceModel)), default=[]),
         debug=dict(type="bool", default=False),
         device_specific_variables=dict(type="raw", default={}),
-        device=dict(type="str", default=None),  # For this we need to think how to pass devices
+        # device=dict(type="str", default=None),  # For this we need to think how to pass devices
         **cisco_aaa_definition,
         **cisco_banner_definition,
         **cisco_bfd_definition,
@@ -152,7 +152,6 @@ def run_module():
                     "template_description",
                     "device_models",
                 ),
-                True,
             ),
             (
                 "modified",
@@ -162,9 +161,12 @@ def run_module():
                     "template_description",
                     "device_models",
                 ),
-                True,
             ),
-            ("state", "absent", ("template_name",), True),
+            (
+                "state",
+                "absent",
+                ("template_name",),
+            ),
         ],
     )
     # Verify if we are dealing with one or more templates
@@ -225,9 +227,23 @@ def run_module():
                         result.msg += f"Created template {model_name}: {template}"
 
     if module.params.get("state") == "absent":
-        module.session.api.templates.delete(template=FeatureTemplate, name=template_name)
-        result.changed = True
-        result.msg = f"Deleted template {template_name}"
+        if target_template:
+            module.send_request_safely(
+                result,
+                action_name="Delete Template",
+                send_func=module.session.api.templates.delete,
+                template=FeatureTemplate,
+                name=template_name,
+            )
+            # module.session.api.templates.delete(template=FeatureTemplate, name=template_name)
+            result.changed = True
+            result.msg = f"Deleted template {template_name}"
+        else:
+            module.logger.debug(f"Template '{target_template}' not presend in list of Feature Templates on vManage.")
+            result.msg = (
+                f"Template {template_name} not presend in list of Feature Templates on vManage, "
+                "skipping delete template operation."
+            )
 
     if module.params.get("state") == "modified":
         module.fail_json(msg="Module parameter 'modified' not implemented yet!")

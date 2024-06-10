@@ -1,6 +1,7 @@
 poetry.lock
 .vscode*
 .venv*
+run*
 .dev_dir/playground.yml
 .dev_dir/dev_vars.yml
 .dev_dir/ansible_catalystwan_module.log

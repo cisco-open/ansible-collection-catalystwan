@@ -177,7 +177,7 @@ class AnsibleCatalystwanModule:
 
         except ManagerHTTPError as ex:
             self.fail_json(
-                msg=f"Could not perform '{action_name}' action.\nManager error: {str(ex)} {ex.info}",
+                msg=f"Could not perform '{action_name}' action.\nManager error: {ex.info}",
                 exception=traceback.format_exc(),
             )
 
