@@ -1,5 +1,5 @@
 annotated-types==0.6.0
-ansible==9.4.0
+ansible==9.5.1
 ansible-compat==4.1.11
 ansible-core==2.16.6
 ansible-lint==6.22.2
