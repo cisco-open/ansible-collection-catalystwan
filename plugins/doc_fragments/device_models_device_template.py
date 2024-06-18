@@ -18,7 +18,7 @@ options:
           - Defines the SD-WAN device type for template application.
         type: str
         required: false
-        aliases: [device_models]
+        aliases: [device_model]
         choices:
         - "vsmart"
         - "vedge-cloud"

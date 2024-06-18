@@ -138,8 +138,6 @@ def run_module():
     )
 
     result = ExtendedModuleResult()
-    result.state = None
-    result.response = None
 
     module = AnsibleCatalystwanModule(
         argument_spec=module_args,

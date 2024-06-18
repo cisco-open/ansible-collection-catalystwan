@@ -33,7 +33,7 @@ options:
   backup:
     description:
       - This argument triggers the module to back up the filtered device's current running-config.
-        Without specified backup_options, it saves to the playbook's root "backup" folder
+        Without specified backup_dir_path, it saves to the playbook's root "backup" folder
         or the role's root if within an Ansible role. The folder is created if it doesn't exist.
     type: bool
     default: false
@@ -96,17 +96,25 @@ from datetime import datetime
 from pathlib import Path, PurePath
 from typing import List, Optional
 
+from catalystwan.dataclasses import Device
 from catalystwan.endpoints.configuration_device_inventory import DeviceDetailsResponse
 from catalystwan.typed_list import DataSequence
-from pydantic import Field
+from pydantic import BaseModel, Field
 
 from ..module_utils.filters import get_target_device
 from ..module_utils.result import ModuleResult
 from ..module_utils.vmanage_module import AnsibleCatalystwanModule
 
 
+class BackupPathModel(BaseModel):
+    hostname: str
+    filename: str
+    backup_path: str
+
+
 class ExtendedModuleResult(ModuleResult):
     devices: Optional[List] = Field(default=[])
+    backup_paths: Optional[List[BackupPathModel]] = Field(default=[])
 
 
 def run_module():
@@ -122,7 +130,13 @@ def run_module():
         backup_dir_path=dict(type="path", default=PurePath(Path.cwd() / "backup")),
     )
 
-    module = AnsibleCatalystwanModule(argument_spec=module_args)
+    module = AnsibleCatalystwanModule(
+        argument_spec=module_args,
+        mutually_exclusive=[
+            ("details", "backup"),
+            ("details", "backup_dir_path"),
+        ],
+    )
     result = ExtendedModuleResult()
 
     details = module.params.get("details")
@@ -130,19 +144,22 @@ def run_module():
     backup = module.params.get("backup")
     backup_dir_path: Path = Path(module.params.get("backup_dir_path"))
 
-    devices = get_target_device(module, device_category=module.params.get("device_category"), all_from_category=True)
+    devices: DataSequence[DeviceDetailsResponse] = get_target_device(
+        module, device_category=module.params.get("device_category"), all_from_category=True
+    )
 
     if not devices:
+        module.module.warn("No devices found")
         module.exit_json(**result.model_dump(mode="json"))
 
-    if details:
+    if details and not backup:
         if filters:
             filtered_devices: DataSequence[DeviceDetailsResponse] = devices.filter(**filters)
             if filtered_devices:
                 module.logger.debug(f"All filtered_devices: {filtered_devices}")
                 result.devices = [dev.model_dump(mode="json") for dev in filtered_devices]
             else:
-                result.msg = f"No devices found based on filters: {filters}"
+                module.module.warn(f"No devices found based on filters: {filters}")
         else:
             result.devices = [dev.model_dump(mode="json") for dev in devices]
 
@@ -154,20 +171,23 @@ def run_module():
             module.fail_json(msg=f"Cannot create or find directory: {backup_dir_path}, exception: {ex.strerror}")
 
         if filters:
-            devices = module.get_response_safely(module.session.api.devices.get).filter(**filters)
+            devices: DataSequence[Device] = module.get_response_safely(module.session.api.devices.get).filter(**filters)
         else:
-            devices = module.get_response_safely(module.session.api.devices.get)
+            devices: DataSequence[Device] = module.get_response_safely(module.session.api.devices.get)
 
         if devices:
             for device in devices:
                 rcfg = module.get_response_safely(module.session.api.templates.load_running, device=device)
                 timestamp = datetime.now().strftime("%d-%m-%Y-%H-%M")
-                rcfg.save_as(f"{backup_dir_path}/{device.hostname}_{timestamp}")
-                result.msg = (
-                    f"Succesfully saved running configuration to file: {backup_dir_path}/{device.hostname}_{timestamp}"
+                filename = f"{device.hostname}_{timestamp}.txt"
+                backup_path = f"{backup_dir_path}/{filename}"
+                rcfg.save_as(backup_path)
+                result.backup_paths.append(
+                    BackupPathModel(hostname=device.hostname, backup_path=backup_path, filename=filename)
                 )
+                result.msg = f"Succesfully saved running configuration to file: {backup_path}"
         else:
-            result.msg = f"No devices found based on filters: {filters}"
+            module.module.warn(f"No devices found based on filters: {filters}")
 
     module.exit_json(**result.model_dump(mode="json"))
 

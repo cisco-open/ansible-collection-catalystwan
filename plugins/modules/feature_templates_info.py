@@ -141,13 +141,14 @@ changed:
   returned: always
   sample: false
 """
-from typing import Optional, Dict
-from pydantic import Field
+
+from typing import Dict, Optional
 
 from catalystwan.api.template_api import FeatureTemplate
 from catalystwan.dataclasses import FeatureTemplateInfo
 from catalystwan.typed_list import DataSequence
 from catalystwan.utils.creation_tools import asdict
+from pydantic import Field
 
 from ..module_utils.result import ModuleResult
 from ..module_utils.vmanage_module import AnsibleCatalystwanModule
@@ -162,8 +163,6 @@ def run_module():
         filters=dict(type="dict", default=None, required=False),
     )
     result = ExtendedModuleResult()
-    result.state = None
-    result.response = None
 
     module = AnsibleCatalystwanModule(argument_spec=module_args)
 

@@ -48,7 +48,6 @@
         device_type: vedge-C8000V
         device_role: sdwan-edge
         general_templates:
-          - "cisco_aaa"
           - "Factory_Default_Cisco_BFD_Template"
           - "Factory_Default_Cisco_OMP_ipv46_Template"
           - "Factory_Default_Cisco_Security_Template"

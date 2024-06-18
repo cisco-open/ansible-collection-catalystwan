@@ -24,6 +24,7 @@ mock_modules:
   - cisco.catalystwan.active_sessions_info
   - cisco.catalystwan.administration_settings
   - cisco.catalystwan.alarms
+  - cisco.catalystwan.cli_templates
   - cisco.catalystwan.device_templates
   - cisco.catalystwan.devices_certificates
   - cisco.catalystwan.devices_controllers

@@ -8,7 +8,6 @@ from typing import Any, Callable, Dict, Protocol, TypeVar
 
 import urllib3
 from ansible.module_utils.basic import AnsibleModule, env_fallback, missing_required_lib
-from catalystwan.typed_list import DataSequence
 from urllib3.exceptions import NewConnectionError, TimeoutError
 
 from ..module_utils.logger_config import configure_logger
@@ -23,6 +22,7 @@ LIB_IMP_ERR = None
 try:
     from catalystwan.api.task_status_api import Task
     from catalystwan.session import ManagerHTTPError, ManagerRequestException, ManagerSession, create_manager_session
+    from catalystwan.typed_list import DataSequence
     from catalystwan.vmanage_auth import UnauthorizedAccessError
 
     HAS_LIB = True

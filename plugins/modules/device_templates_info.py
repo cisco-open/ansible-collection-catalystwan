@@ -177,8 +177,6 @@ def run_module():
         filters=dict(type="dict", default=None, required=False),
     )
     result = ExtendedModuleResult()
-    result.state = None
-    result.response = None
 
     module = AnsibleCatalystwanModule(argument_spec=module_args)
 

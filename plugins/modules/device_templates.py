@@ -9,7 +9,7 @@ DOCUMENTATION = r"""
 ---
 module: Device_templates
 short_description: Manage Device Templates on vManage.
-version_added: "0.1.1"
+version_added: "0.2.0"
 description:
   - This module allows you to create, delete, attach and detach Device Templates
   - Device Templates can be filtered by Device Templates Info key:values.
@@ -19,7 +19,7 @@ options:
       - Desired state for the template.
       - 0(state=present) is equivalent of create template in GUI
     type: str
-    choices: ["absent", "present", "attached", "detached"]
+    choices: ["absent", "present", "attached"]
     default: "present"
   template_name:
     description:
@@ -44,6 +44,10 @@ options:
       type: list
       elements: str
       required: false
+  hostname:
+    description:
+      - Hostname of the device to attach template. Available only for 0(state=attached).
+    type: str
 author:
   - Arkadiusz Cichon (acichon@cisco.com)
 extends_documentation_fragment:
@@ -54,52 +58,66 @@ notes:
 """
 
 EXAMPLES = r"""
-- name: Get all Non-Default Device Templates available
-  cisco.catalystwan.device_templates_info:
-    filters:
-      factory_default: false
-    manager_credentials:
-      ...
-    register: device_templates
+- name: Ensure a device template is present on vManage
+  cisco.catalystwan.device_templates:
+    state: present
+    template_name: "MyDeviceTemplate"
+    template_description: "This is a device template for device configuration"
+    device_type: "ISR4451"
+    device_role: "sdwan-edge"
+    general_templates:
+      - "Template1"
+      - "Template2"
+    manager_credentials: ...
+
+- name: Attach a device template to a device with a specific hostname
+  cisco.catalystwan.device_templates:
+    state: attached
+    template_name: "MyDeviceTemplate"
+    hostname: "device-hostname"
+    timeout_seconds: 600
+    manager_credentials: ...
+
+- name: Remove a device template from vManage
+  cisco.catalystwan.device_templates:
+    state: absent
+    template_name: "MyDeviceTemplate"
+    manager_credentials: ...
 """
 
 RETURN = r"""
-template_info:
-  description: A list of dictionaries of templates info
-  type: list
-  returned: on success
-  sample: |
-    templates_info:
-    - configType: template
-      deviceRole: sdwan-edge
-      deviceType: vedge-C8000V
-      devicesAttached: 0
-      draftMode: Disabled
-      factoryDefault: false
-      lastUpdatedBy: example_admin
-      lastUpdatedOn: 1715270833776
-      resourceGroup: global
-      templateAttached: 11
-      templateClass: cedge
-      templateDescription: xd
-      templateId: xxx-xxx-xxx
-      templateName: xd
 msg:
-  description: Messages that indicate actions taken or any errors that have occurred.
+  description: A message describing the result of the operation.
+  returned: always
   type: str
-  returned: always
-  sample: "Successfully fetched information about template: trial-template"
+  sample: "Created template MyDeviceTemplate: MyDeviceTemplate"
+
 changed:
-  description: Indicates whether any change was made.
-  type: bool
+  description: A boolean flag indicating if any changes were made.
   returned: always
-  sample: false
+  type: bool
+  sample: true
+
+templates_info:
+  description: Detailed information about the templates.
+  returned: when templates are queried
+  type: dict
+  sample: {
+    "MyDeviceTemplate": {
+      "template_id": "abc123",
+      "template_name": "MyDeviceTemplate",
+      "template_description": "This is a device template for device configuration",
+      "device_type": "ISR4451",
+      "device_role": "sdwan-edge",
+      "general_templates": ["Template1", "Template2"]
+    }
+  }
 """
 
 from typing import Dict, Literal, Optional, get_args
 
 from catalystwan.api.template_api import DeviceTemplate
-from catalystwan.dataclasses import DeviceTemplateInfo
+from catalystwan.dataclasses import Device, DeviceTemplateInfo
 from catalystwan.models.common import DeviceModel
 from catalystwan.session import ManagerHTTPError
 from catalystwan.typed_list import DataSequence
@@ -108,7 +126,7 @@ from pydantic import Field
 from ..module_utils.result import ModuleResult
 from ..module_utils.vmanage_module import AnsibleCatalystwanModule
 
-State = Literal["present", "absent"]
+State = Literal["present", "absent", "attached"]
 
 
 class ExtendedModuleResult(ModuleResult):
@@ -124,13 +142,13 @@ def run_module():
         ),
         template_name=dict(type="str", required=True),
         template_description=dict(type="str", default=None),
-        device_type=dict(type="str", choices=list(get_args(DeviceModel)), default=None),
+        device_type=dict(type="str", aliases=["device_model"], choices=list(get_args(DeviceModel)), default=None),
         device_role=dict(type="str", choices=["sdwan-edge", "service-node"], default=None),
         general_templates=dict(type="list", elements="str", default=[]),
+        timeout_seconds=dict(type="int", default=300),
+        hostname=dict(type="str"),
     )
     result = ExtendedModuleResult()
-    result.state = None
-    result.response = None
 
     module = AnsibleCatalystwanModule(
         argument_spec=module_args,
@@ -148,6 +166,14 @@ def run_module():
                 "state",
                 "absent",
                 ("template_name",),
+            ),
+            (
+                "state",
+                "attached",
+                (
+                    "template_name",
+                    "hostname",
+                ),
             ),
         ],
     )
@@ -187,17 +213,22 @@ def run_module():
             result.changed = True
             result.msg += f"Created template {template_name}: {device_template}"
 
-        # Way to attach the template, to be implemented
-        # response = provider_session.api.templates.attach(
-        #     name=name,
-        #     template=device_template,
-        #     device=device,
-        #     device_specific_vars={
-        #         "//system/site-id": mt_edge.get_site_id(),
-        #         "//system/host-name": mt_edge.name,
-        #         "//system/system-ip": mt_edge.get_system_ip_no_mask(),
-        #     },
-        # )
+    if module.params.get("state") == "attached":
+        hostname = module.params.get("hostname")
+        device: DataSequence[Device] = (
+            module.get_response_safely(module.session.api.devices.get).filter(hostname=hostname).single_or_default()
+        )
+
+        if not device:
+            module.fail_json(f"No devices with hostname found, hostname provided: {hostname}")
+        try:
+            module.session.api.templates.attach(
+                name=template_name, device=device, timeout_seconds=module.params.get("timeout_seconds")
+            )
+            result.changed = True
+            result.msg = f"Attached template {template_name} to device: {hostname}"
+        except ManagerHTTPError as ex:
+            module.fail_json(msg=f"Could not perform attach Template {template_name}.\nManager error: {ex.info}")
 
     if module.params.get("state") == "absent":
         if target_template:

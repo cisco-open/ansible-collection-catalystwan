@@ -19,8 +19,8 @@ options:
     description:
       - The state of vManage mode to enforce on the specified devices.
     type: str
-    choices: ['present']
-    default: 'present'
+    choices: ["present"]
+    default: "present"
   hostnames:
     description:
       - A list of hostnames of devices to which the vManage mode will be applied.
@@ -67,6 +67,7 @@ changed:
   returned: always
   sample: true
 """
+
 import traceback
 from typing import Dict, Literal, Optional, get_args
 
@@ -110,7 +111,7 @@ def run_module():
     for hostname in module.params["hostnames"]:
         device = devices.filter(hostname=hostname).single_or_default()
         try:
-            template_name = f"Default_{hostname}"
+            template_name = f"Default-{hostname}"
             device_model = device.model
             if device.personality is Personality.VBOND:
                 device_model = "vedge-cloud"
