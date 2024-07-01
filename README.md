@@ -73,7 +73,7 @@ Currently development of the tool was set with:
 
 - Python = 3.10.0
 - Ansible = 2.16.6
-- catalystwan = "^0.33.3"
+- catalystwan = "^0.33.6post0"
 
 ## Installing this collection
 
@@ -167,6 +167,14 @@ All of the modules are currently developed and tested with help of .dev_dir play
 These playbooks offer initial config, onboarding and health checks.
 If you want to run example playbook, supply your variables in `.dev_dir/dev_vars.yml`
 and execute playbooks from `.dev_dir/` directory.
+
+### Feature Templates
+
+Feature Templates operations (`add` and `delete`) are supported via `cisco.catalystwan.feature_templates` module.
+
+Available models are dependent on Catalystwan SDK, and they can be seen [here](https://github.com/cisco-open/cisco-catalyst-wan-sdk/blob/main/catalystwan/api/templates/models/supported.py).
+
+For more information about adding new models see [Feature Templates generation](./plugins/README.md#feature-templates).
 
 ---
 

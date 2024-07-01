@@ -19,8 +19,8 @@ options:
     description:
       - The state of vManage mode to enforce on the specified devices.
     type: str
-    choices: ['present']
-    default: 'present'
+    choices: ["present"]
+    default: "present"
   hostnames:
     description:
       - A list of hostnames of devices to which the vManage mode will be applied.
@@ -67,12 +67,12 @@ changed:
   returned: always
   sample: true
 """
+
 import traceback
 from typing import Dict, Literal, Optional, get_args
 
 from catalystwan.api.template_api import CLITemplate
 from catalystwan.session import ManagerHTTPError
-from catalystwan.utils.device_model import DeviceModel
 from catalystwan.utils.personality import Personality
 from pydantic import Field
 
@@ -111,10 +111,10 @@ def run_module():
     for hostname in module.params["hostnames"]:
         device = devices.filter(hostname=hostname).single_or_default()
         try:
-            template_name = f"Default_{hostname}"
-            device_model = DeviceModel(device.model)
+            template_name = f"Default-{hostname}"
+            device_model = device.model
             if device.personality is Personality.VBOND:
-                device_model = DeviceModel.VBOND
+                device_model = "vedge-cloud"
 
             cli_template = CLITemplate(
                 template_name=template_name,

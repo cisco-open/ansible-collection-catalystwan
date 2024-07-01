@@ -51,3 +51,11 @@ Preferred way to setup environment for development:
 
 You can also refer to [Ansible modules dev guide](https://docs.ansible.com/ansible/latest/dev_guide/developing_modules_general.html#verifying-your-module-code) to look for more convenient way of
 testing your code.
+
+### Dependencies in requirements.txt
+
+Dependencies defined for development are later used to generate `requirements.txt` file with command:
+
+```bash
+poetry export --without-hashes --format=requirements.txt > requirements.txt
+```
