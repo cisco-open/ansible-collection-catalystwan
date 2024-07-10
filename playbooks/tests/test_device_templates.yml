@@ -33,23 +33,24 @@
       ansible.builtin.debug:
         msg: "{{ device_templates }}"
 
-    - name: Delete selected Device Template from vManage
-      cisco.catalystwan.device_templates:
-        state: absent
-        template_name: "vc8000-device-template"
-        manager_credentials:
-          <<: *manager_authentication
+    # - name: Delete selected Device Template from vManage
+    #   cisco.catalystwan.device_templates:
+    #     state: absent
+    #     template_name: "vc8000-device-template"
+    #     manager_credentials:
+    #       <<: *manager_authentication
 
-    - name: Create example Device Template with default templates
-      cisco.catalystwan.device_templates:
-        state: present
-        template_name: "vc8000-device-template"
-        template_description: "vc8000-device-template"
-        device_type: vedge-C8000V
-        device_role: sdwan-edge
-        general_templates:
-          - "Factory_Default_Cisco_BFD_Template"
-          - "Factory_Default_Cisco_OMP_ipv46_Template"
-          - "Factory_Default_Cisco_Security_Template"
-        manager_credentials:
-          <<: *manager_authentication
+    # - name: Create example Device Template with default templates
+    #   cisco.catalystwan.device_templates:
+    #     state: present
+    #     template_name: "vc8000-device-template"
+    #     template_description: "vc8000-device-template"
+    #     device_type: vedge-C8000V
+    #     device_role: sdwan-edge
+    #     general_templates:
+    #       - name: "Factory_Default_Cisco_BFD_Template"
+    #         subtemplates: "Factory_Default_Cisco_Logging_Template"
+    #       - name: "Factory_Default_Cisco_OMP_ipv46_Template"
+    #       - name: "Factory_Default_Cisco_Security_Template"
+    #     manager_credentials:
+    #       <<: *manager_authentication

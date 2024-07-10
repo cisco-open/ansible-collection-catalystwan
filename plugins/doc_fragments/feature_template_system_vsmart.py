@@ -11,7 +11,7 @@ from __future__ import annotations
 
 
 class ModuleDocFragment(object):
-    DOCUMENTATION = r'''
+    DOCUMENTATION = r"""
 options:
     system_vsmart:
         description: Security settings for vSmart controller
@@ -21,7 +21,7 @@ options:
                 description:
                 - The timezone setting for the vSmart controller
                 required: false
-                default: null
+                default: UTC
                 type: str
                 choices:
                 - Europe/Andorra
@@ -444,14 +444,24 @@ options:
                 description:
                 - The hostname for the vSmart controller
                 required: false
-                default: null
-                type: str
+                type: raw
+                suboptions:
+                    name:
+                        default: system_host_name
+                        required: true
+                        type: str
+                        description: Device Specific Variables name
             dual_stack_ipv6:
                 description:
                 - Enable Dual Stack IPv6 Default
                 required: false
-                default: null
-                type: bool
+                type: raw
+                suboptions:
+                    name:
+                        default: system_ipv6-strict-control
+                        required: true
+                        type: str
+                        description: Device Specific Variables name
             description:
                 description:
                 - Set a text description of the device
@@ -469,7 +479,7 @@ options:
                 - MTU size for system tunnels
                 required: false
                 default: null
-                type: str
+                type: int
             latitude:
                 description:
                 - Geographical latitude of the vSmart controller
@@ -487,19 +497,30 @@ options:
                 - Device group names for the vSmart controller
                 required: false
                 default: null
-                type: str
+                type: list
+                elements: str
             system_ip:
                 description:
                 - System IP address for the vSmart controller
                 required: false
-                default: null
-                type: str
+                type: raw
+                suboptions:
+                    name:
+                        default: system_system_ip
+                        required: true
+                        type: str
+                        description: Device Specific Variables name
             site_id:
                 description:
                 - Site ID for the vSmart controller
                 required: false
-                default: null
-                type: int
+                type: raw
+                suboptions:
+                    name:
+                        default: system_site_id
+                        required: true
+                        type: str
+                        description: Device Specific Variables name
             overlay_id:
                 description:
                 - Overlay ID for the vSmart controller
@@ -511,9 +532,10 @@ options:
                 - Set the topology
                 required: false
                 default: null
-                type: str
+                type: list
+                elements: str
                 choices:
-                - Hub and Spoke
+                - hub-and-spoke
             port_offset:
                 description:
                 - Port offset for port hopping
@@ -542,25 +564,25 @@ options:
                 description:
                 - Enable or disable tracking of transport connections
                 required: false
-                default: null
+                default: true
                 type: bool
             track_default_gateway:
                 description:
                 - Enable or disable tracking of the default gateway
                 required: false
-                default: null
+                default: true
                 type: bool
             iptables_enable:
                 description:
                 - Enable or disable iptables for security
                 required: false
-                default: null
+                default: true
                 type: bool
             admin_tech_on_failure:
                 description:
                 - Enable automatic generation of tech-support file on failure
                 required: false
-                default: null
+                default: true
                 type: bool
             idle_timeout:
                 description:
@@ -591,7 +613,7 @@ options:
                 - Configure compatible TLOC color
                 required: false
                 default: null
-                type: dict
+                type: list
                 elements: dict
                 suboptions:
                     color_1:
@@ -657,7 +679,7 @@ options:
                 - Configure incompatible TLOC color
                 required: false
                 default: null
-                type: dict
+                type: list
                 elements: dict
                 suboptions:
                     color_1:
@@ -718,4 +740,4 @@ options:
                         - private4
                         - private5
                         - private6
-    '''
+    """

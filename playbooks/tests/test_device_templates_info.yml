@@ -32,3 +32,12 @@
     - name: Debug Templates Info
       ansible.builtin.debug:
         msg: "{{ device_templates }}"
+
+    - name: Backup all Non-Default Device Templates available
+      cisco.catalystwan.device_templates_info:
+        filters:
+          factory_default: false
+        backup: true
+        manager_credentials:
+          <<: *manager_authentication
+      register: device_templates

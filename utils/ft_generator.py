@@ -3,19 +3,18 @@
 
 from __future__ import annotations
 
-import yaml
-
 from enum import Enum
-from typing import Annotated, Type, Union, get_args, get_origin, Literal
 from pathlib import Path, PurePath
 from pprint import pformat
+from typing import Annotated, Literal, Type, Union, get_args, get_origin
+
+import yaml
+from catalystwan.api.templates.device_variable import DeviceVariable
+from catalystwan.api.templates.models.supported import available_models
+from catalystwan.models.common import DeviceModel
 from jinja2 import Environment, FileSystemLoader
 from pydantic import BaseModel
 from pydantic.fields import FieldInfo
-
-from catalystwan.api.templates.models.supported import available_models
-from catalystwan.api.templates.device_variable import DeviceVariable
-from catalystwan.models.common import DeviceModel
 
 PROJECT_ROOT_DIR = PurePath(Path.cwd())
 
@@ -63,6 +62,30 @@ def field_to_ansible_option(field: FieldInfo, field_name: str, model_name: str):
     elif field_type == int:
         option["type"] = "int"
 
+    elif field_type == DeviceVariable:
+        option["type"] = "raw"
+        option["suboptions"] = {
+            "name": {
+                "default": option["default"],
+                "required": True,
+                "type": "str",
+                "description": "Device Specific Variables name",
+            }
+        }
+        del option["default"]
+
+    elif field_type == Union and DeviceVariable in args:
+        option["type"] = "raw"
+        option["suboptions"] = {
+            "name": {
+                "default": option["default"],
+                "required": True,
+                "type": "str",
+                "description": "Device Specific Variables name",
+            }
+        }
+        del option["default"]
+
     elif is_pydantic_model(field_type):
         option["type"] = "dict"
         option["suboptions"] = model_to_ansible_options(field_type, model_name)
@@ -70,7 +93,6 @@ def field_to_ansible_option(field: FieldInfo, field_name: str, model_name: str):
     elif field_type == list or (field_type == Union and list in subargs_base_types):
         elements_type = next((arg for arg in args if arg is not None), None)
         if is_pydantic_model(elements_type):
-            # from IPython import embed; embed()
             option["type"] = "list"
             option["elements"] = "dict"
             option["suboptions"] = model_to_ansible_options(elements_type, model_name)

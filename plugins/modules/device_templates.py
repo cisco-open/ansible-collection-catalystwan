@@ -41,13 +41,33 @@ options:
   general_templates:
     description:
       - List of names of Feature Templates to be included in Device Template
-      type: list
-      elements: str
-      required: false
+    required: false
+    default: null
+    type: list
+    elements: dict
+    suboptions:
+      name:
+        description:
+        - The name of the template
+        required: true
+        type: str
+      subtemplates:
+        description:
+          - List of names of the subtemplates to be attached to General template
+        required: false
+        default: null
+        type: list
+        elements: str
   hostname:
     description:
       - Hostname of the device to attach template. Available only for 0(state=attached).
     type: str
+  device_specific_vars:
+    description:
+      - For parameters in a feature template that you configure as device-specific,
+        when you attach a device template to a device, Cisco vManage prompts you for the values to use
+        for these parameters.
+    type: raw
 author:
   - Arkadiusz Cichon (acichon@cisco.com)
 extends_documentation_fragment:
@@ -116,7 +136,7 @@ templates_info:
 
 from typing import Dict, Literal, Optional, get_args
 
-from catalystwan.api.template_api import DeviceTemplate
+from catalystwan.api.template_api import DeviceTemplate, GeneralTemplate
 from catalystwan.dataclasses import Device, DeviceTemplateInfo
 from catalystwan.models.common import DeviceModel
 from catalystwan.session import ManagerHTTPError
@@ -143,10 +163,19 @@ def run_module():
         template_name=dict(type="str", required=True),
         template_description=dict(type="str", default=None),
         device_type=dict(type="str", aliases=["device_model"], choices=list(get_args(DeviceModel)), default=None),
-        device_role=dict(type="str", choices=["sdwan-edge", "service-node"], default=None),
-        general_templates=dict(type="list", elements="str", default=[]),
+        device_role=dict(type="str", choices=["sdwan-edge", "service-node"], default="sdwan-edge"),
+        general_templates=dict(
+            type="list",
+            elements="dict",
+            options=dict(
+                name=dict(type="str", required=True),
+                subtemplates=dict(type="list", elements="str", default=[]),
+            ),
+            default=[],
+        ),
         timeout_seconds=dict(type="int", default=300),
         hostname=dict(type="str"),
+        device_specific_vars=dict(type="list", elements="dict"),
     )
     result = ExtendedModuleResult()
 
@@ -193,12 +222,17 @@ def run_module():
                 f"Template with name {template_name} already present on vManage, skipping create template operation."
             )
         else:
+            general_templates = []
+            for template in module.params.get("general_templates"):
+                sub_templates = [GeneralTemplate(name=sub) for sub in template.get("subtemplates", [])]
+                general_templates.append(GeneralTemplate(name=template["name"], subTemplates=sub_templates))
+
             device_template = DeviceTemplate(
                 template_name=template_name,
                 template_description=module.params.get("template_description"),
                 device_type=module.params.get("device_type"),
                 device_role=module.params.get("device_role"),
-                general_templates=module.params.get("general_templates"),
+                general_templates=general_templates,
             )
 
             module.logger.debug(
@@ -222,13 +256,21 @@ def run_module():
         if not device:
             module.fail_json(f"No devices with hostname found, hostname provided: {hostname}")
         try:
-            module.session.api.templates.attach(
-                name=template_name, device=device, timeout_seconds=module.params.get("timeout_seconds")
+            device_specific_vars = {k: v for d in module.params.get("device_specific_vars") for k, v in d.items()}
+            response = module.session.api.templates.attach(
+                name=template_name,
+                device=device,
+                device_specific_vars=device_specific_vars,
+                timeout_seconds=module.params.get("timeout_seconds"),
             )
+            if not response:
+                module.fail_json(f"Failed to attach device template: {template_name}")
             result.changed = True
             result.msg = f"Attached template {template_name} to device: {hostname}"
         except ManagerHTTPError as ex:
             module.fail_json(msg=f"Could not perform attach Template {template_name}.\nManager error: {ex.info}")
+        except TypeError as ex:
+            module.fail_json(msg=f"{ex}")
 
     if module.params.get("state") == "absent":
         if target_template:

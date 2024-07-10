@@ -450,15 +450,13 @@ options:
                 description:
                 - The hostname for the device.
                 required: false
-                default: system_host_name
-                type: dict
+                type: raw
                 suboptions:
                     name:
-                        description:
-                        - Device Specific Variables names
+                        default: system_host_name
                         required: true
-                        default: null
                         type: str
+                        description: Device Specific Variables name
             location:
                 description:
                 - The physical location of the device.
@@ -528,15 +526,13 @@ options:
                 description:
                 - The system IP address of the device.
                 required: false
-                default: system_system_ip
-                type: dict
+                type: raw
                 suboptions:
                     name:
-                        description:
-                        - Device Specific Variables names
+                        default: system_system_ip
                         required: true
-                        default: null
                         type: str
+                        description: Device Specific Variables name
             overlay_id:
                 description:
                 - The overlay ID of the device.

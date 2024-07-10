@@ -42,6 +42,7 @@ options:
     type: bool
     default: false
 extends_documentation_fragment:
+  - cisco.catalystwan.feature_template_aaa
   - cisco.catalystwan.feature_template_cisco_aaa
   - cisco.catalystwan.feature_template_cisco_banner
   - cisco.catalystwan.feature_template_cisco_bfd
@@ -57,6 +58,8 @@ extends_documentation_fragment:
   - cisco.catalystwan.feature_template_omp_vsmart
   - cisco.catalystwan.feature_template_security_vsmart
   - cisco.catalystwan.feature_template_system_vsmart
+  - cisco.catalystwan.feature_template_vpn_vsmart_interface
+  - cisco.catalystwan.feature_template_vpn_vsmart
   - cisco.catalystwan.device_models_feature_template
   - cisco.catalystwan.manager_authentication
 author:
@@ -75,6 +78,7 @@ from catalystwan.session import ManagerHTTPError
 from catalystwan.typed_list import DataSequence
 from pydantic import BaseModel, ConfigDict, Field
 
+from ..module_utils.feature_templates.aaa import aaa_definition
 from ..module_utils.feature_templates.cisco_aaa import cisco_aaa_definition
 from ..module_utils.feature_templates.cisco_banner import cisco_banner_definition
 from ..module_utils.feature_templates.cisco_bfd import cisco_bfd_definition
@@ -90,6 +94,8 @@ from ..module_utils.feature_templates.cisco_vpn_interface import cisco_vpn_inter
 from ..module_utils.feature_templates.omp_vsmart import omp_vsmart_definition
 from ..module_utils.feature_templates.security_vsmart import security_vsmart_definition
 from ..module_utils.feature_templates.system_vsmart import system_vsmart_definition
+from ..module_utils.feature_templates.vpn_vsmart import vpn_vsmart_definition
+from ..module_utils.feature_templates.vpn_vsmart_interface import vpn_vsmart_interface_definition
 from ..module_utils.result import ModuleResult
 from ..module_utils.vmanage_module import AnsibleCatalystwanModule
 
@@ -120,6 +126,7 @@ def run_module():
         debug=dict(type="bool", default=False),
         device_specific_variables=dict(type="raw", default={}),
         # device=dict(type="str", default=None),  # For this we need to think how to pass devices
+        **aaa_definition,
         **cisco_aaa_definition,
         **cisco_banner_definition,
         **cisco_bfd_definition,
@@ -135,6 +142,8 @@ def run_module():
         **omp_vsmart_definition,
         **security_vsmart_definition,
         **system_vsmart_definition,
+        **vpn_vsmart_definition,
+        **vpn_vsmart_interface_definition,
     )
 
     result = ExtendedModuleResult()
@@ -179,7 +188,6 @@ def run_module():
 
     if module.params.get("state") == "present":
         # Code for checking if template name exists already
-        # if yes, do we need some force method or we just inform user and exit?
         if target_template:
             module.logger.debug(f"Detected existing template:\n{target_template}\n")
             result.msg = (

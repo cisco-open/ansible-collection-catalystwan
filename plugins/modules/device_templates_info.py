@@ -105,6 +105,18 @@ options:
         required: false
         default: null
         type: str
+  backup:
+    description:
+      - This argument triggers the module to back up the filtered Device Templates.
+        Device Template backup is dumped json payload with template definition.
+        Without specified backup_dir_path, it saves to the playbook's root "backup" folder
+        or the role's root if within an Ansible role. The folder is created if it doesn't exist.
+    type: bool
+    default: false
+  backup_dir_path:
+    description:
+      - Directory to store the backup. It's created if missing. Defaults to a 'backup' folder in the current directory.
+    type: path
 author:
   - Arkadiusz Cichon (acichon@cisco.com)
 extends_documentation_fragment:
@@ -155,32 +167,45 @@ changed:
   returned: always
   sample: false
 """
-
-from typing import Dict, Optional
+import json
+import traceback
+from pathlib import Path, PurePath
+from typing import Dict, List, Optional
 
 from catalystwan.api.template_api import DeviceTemplate
 from catalystwan.dataclasses import DeviceTemplateInfo
+from catalystwan.session import ManagerHTTPError
 from catalystwan.typed_list import DataSequence
 from catalystwan.utils.creation_tools import asdict
-from pydantic import Field
+from pydantic import BaseModel, Field
 
 from ..module_utils.result import ModuleResult
 from ..module_utils.vmanage_module import AnsibleCatalystwanModule
 
 
+class BackupPathModel(BaseModel):
+    hostname: str
+    filename: str
+    backup_path: str
+
+
 class ExtendedModuleResult(ModuleResult):
     templates_info: Optional[Dict] = Field(default={})
+    backup_paths: Optional[List[BackupPathModel]] = Field(default=[])
 
 
 def run_module():
     module_args = dict(
         filters=dict(type="dict", default=None, required=False),
+        backup=dict(type=bool, default=False),
+        backup_dir_path=dict(type="path", default=PurePath(Path.cwd() / "backup")),
     )
     result = ExtendedModuleResult()
 
     module = AnsibleCatalystwanModule(argument_spec=module_args)
 
     filters = module.params.get("filters")
+    filtered_templates = DataSequence(DeviceTemplate)
 
     all_templates: DataSequence[DeviceTemplateInfo] = module.get_response_safely(
         module.session.api.templates.get, template=DeviceTemplate
@@ -198,6 +223,38 @@ def run_module():
     else:
         result.msg = "Succesfully got all Device Templates Info from vManage"
         result.templates_info = [asdict(template) for template in all_templates]
+
+    if module.params.get("backup"):
+        backup_dir_path: Path = Path(module.params.get("backup_dir_path"))
+        module.logger.info(f"{backup_dir_path}")
+        try:
+            backup_dir_path.mkdir(parents=True, exist_ok=True)
+        except OSError as ex:
+            module.fail_json(msg=f"Cannot create or find directory: {backup_dir_path}, exception: {ex.strerror}")
+
+        templates_to_backup = filtered_templates if filtered_templates else all_templates
+        if templates_to_backup:
+            for template in templates_to_backup:
+                try:
+                    template_payload = module.session.get(f"dataservice/template/device/object/{template.id}").json()
+                except ManagerHTTPError as ex:
+                    module.fail_json(
+                        msg=(
+                            f"Could not call get DeviceTemplate payload for template with name: {template.name}. "
+                            f"\nManager error: {ex.info}"
+                        ),
+                        exception=traceback.format_exc(),
+                    )
+                filename = f"{template.name}.json"
+                backup_path = f"{backup_dir_path}/{filename}"
+                with open(backup_path, "w", encoding="utf-8") as file:
+                    json.dump(template_payload, file, ensure_ascii=False, indent=4)
+                result.backup_paths.append(
+                    BackupPathModel(hostname=template.name, backup_path=backup_path, filename=filename)
+                )
+                result.msg = f"Succesfully saved Device Template payload to file: {backup_path}"
+        else:
+            module.module.warn(f"No Device Templates found based on filters: {filters}")
 
     module.exit_json(**result.model_dump(mode="json"))
 
