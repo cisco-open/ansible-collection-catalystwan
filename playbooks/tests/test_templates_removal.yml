@@ -19,7 +19,7 @@
       username: "{{ (vmanage_instances | first).admin_username }}"
       password: "{{ (vmanage_instances | first).admin_password }}"
   tasks:
-    - name: Get all Device Templates that are not attached to any device
+    - name: 1. Get all Device Templates that are not attached to any device
       cisco.catalystwan.device_templates_info:
         filters:
           devices_attached: 0
@@ -28,10 +28,10 @@
           <<: *manager_authentication
       register: device_templates
 
-    - name: Delete selected Device Templates from vManage
+    - name: 2. Delete selected Device Templates from vManage
       cisco.catalystwan.device_templates:
         state: absent
-        template_name: "{{ device_template.templateName }}"
+        template_name: "{{ device_template.name }}"
         manager_credentials:
           <<: *manager_authentication
       loop: "{{ device_templates.templates_info | default([], True) }}"
@@ -39,7 +39,7 @@
         loop_var: device_template
       when: device_templates.templates_info | length > 0
 
-    - name: Get all Non-Default Feature Templates available
+    - name: 3. Get all Non-Default Feature Templates available
       cisco.catalystwan.feature_templates_info:
         filters:
           factory_default: false
@@ -48,13 +48,13 @@
           <<: *manager_authentication
       register: feature_templates
 
-    - name: Delete all Non-Default Feature templates
+    - name: 4. Delete all Non-Default Feature templates
       cisco.catalystwan.feature_templates:
         state: absent
-        template_name: "{{ template.templateName }}"
+        template_name: "{{ template.name }}"
         manager_credentials:
           <<: *manager_authentication
       loop: "{{ feature_templates.templates_info | default([], true) }}"
       loop_control:
         loop_var: template
-        label: "template: {{ template.templateName }}"
+        label: "template: {{ template.name }}"

@@ -1,12 +1,16 @@
 # Ansible Collection - cisco.catalystwan
 
-Initial repository for Ansible Collection using catalystwan library.
+## Overview
 
-***NOTE: this repository is still in pre-release dev version**
+Reusable Ansible modules and roles that will help to automate Cisco
+SD-WAN management (post bringup operations, day0, day1).
+
+All modules are based on [catalystwan](https://github.com/CiscoDevNet/catalystwan).
+
+Collection available on Ansible Galaxy: [cisco.catalystwan](https://galaxy.ansible.com/ui/repo/published/cisco/catalystwan/)
 
 ## Table of Contents
 
-- [Overview](#overview)
 - [Roadmap](#roadmap)
 - [Requirements](#requirements)
 - [Installing this collection](#installing-this-collection)
@@ -14,18 +18,6 @@ Initial repository for Ansible Collection using catalystwan library.
 - [Contributing](#contributing)
 - [Useful links and Getting Started](#useful-links-and-getting-started)
 - [License](#license)
-
----
-
-## Overview
-
-Reusable Ansible modules and roles that will help to automate Cisco
-SD-WAN management (post bringup operations, day0, day1).
-
-All modules are based on [catalystwan](https://github.com/CiscoDevNet/catalystwan). Current installation available
-via local Ansible Galaxy collection.
-
-Once finished, repository will be migrated to Cisco Open, and modules will be available via Ansible Galaxy.
 
 ---
 

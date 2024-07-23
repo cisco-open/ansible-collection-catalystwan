@@ -243,7 +243,9 @@ for model_name, model_module in available_models.items():
         return yaml.dump(data, allow_unicode=True, default_flow_style=False, indent=4, sort_keys=False)
 
     template_dir = PROJECT_ROOT_DIR / "utils"
-    env = Environment(loader=FileSystemLoader(template_dir), trim_blocks=True, lstrip_blocks=True)
+    env = Environment(
+        loader=FileSystemLoader(template_dir), trim_blocks=True, lstrip_blocks=True, keep_trailing_newline=True
+    )
     env.filters["to_nice_yaml"] = to_nice_yaml
 
     template_file = PurePath("docs_fragments_template.j2")

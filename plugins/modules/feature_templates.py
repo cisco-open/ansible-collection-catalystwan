@@ -72,8 +72,8 @@ from typing import Dict, Final, Literal, Optional, get_args
 from catalystwan.api.template_api import FeatureTemplate
 from catalystwan.api.templates.device_variable import DeviceVariable
 from catalystwan.api.templates.models.supported import available_models
-from catalystwan.dataclasses import FeatureTemplateInfo
 from catalystwan.models.common import DeviceModel
+from catalystwan.models.templates import FeatureTemplateInformation
 from catalystwan.session import ManagerHTTPError
 from catalystwan.typed_list import DataSequence
 from pydantic import BaseModel, ConfigDict, Field
@@ -181,10 +181,10 @@ def run_module():
     device_specific_variables: Dict = module.params.get("device_specific_variables")
     module.logger.info(f"Module input: \n{module.params}\n")
 
-    all_templates: DataSequence[FeatureTemplateInfo] = module.get_response_safely(
+    all_templates: DataSequence[FeatureTemplateInformation] = module.get_response_safely(
         module.session.api.templates.get, template=FeatureTemplate
     )
-    target_template: FeatureTemplateInfo = all_templates.filter(name=template_name)
+    target_template: Optional[FeatureTemplateInformation] = all_templates.filter(name=template_name)
 
     if module.params.get("state") == "present":
         # Code for checking if template name exists already
@@ -241,7 +241,6 @@ def run_module():
                 template=FeatureTemplate,
                 name=template_name,
             )
-            # module.session.api.templates.delete(template=FeatureTemplate, name=template_name)
             result.changed = True
             result.msg = f"Deleted template {template_name}"
         else:

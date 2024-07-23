@@ -9,6 +9,11 @@
 
 # --- Backup & Restore --- #
 
+# 1. Backup running-config for all c8000V devices with default backup dir
+# 2. Using backup files, create CLI templates for each Edge device
+# 3. Attach backup templates to the Edge devices
+# 4. Post-test - Set vManage mode for cEdge devices - in order to use previous templates
+
 
 - name: Testing playbook to verify backup & restore operations
   hosts: localhost
@@ -56,7 +61,7 @@
         loop_var: device_item
       when: backup_info.backup_paths | length > 0
 
-    - name: 4. Post-test - Set vManage mode for cEdge devices - not required
+    - name: 4. Post-test - Set vManage mode for cEdge devices - in order to use previous templates
       cisco.catalystwan.vmanage_mode:
         state: present
         hostnames:

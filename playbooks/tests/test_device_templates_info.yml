@@ -5,8 +5,6 @@
 
 # Helper playbooks to test modules and flows while developing them
 
-# Tested operations:
-
 # --- Device Templates Info --- #
 
 
@@ -21,7 +19,7 @@
       username: "{{ (vmanage_instances | first).admin_username }}"
       password: "{{ (vmanage_instances | first).admin_password }}"
   tasks:
-    - name: Get all Non-Default Device Templates available
+    - name: 1. Get all Non-Default Device Templates available
       cisco.catalystwan.device_templates_info:
         filters:
           factory_default: false
@@ -29,11 +27,11 @@
           <<: *manager_authentication
       register: device_templates
 
-    - name: Debug Templates Info
+    - name: 2. Debug Templates Info
       ansible.builtin.debug:
         msg: "{{ device_templates }}"
 
-    - name: Backup all Non-Default Device Templates available
+    - name: 3. Backup all Non-Default Device Templates available
       cisco.catalystwan.device_templates_info:
         filters:
           factory_default: false

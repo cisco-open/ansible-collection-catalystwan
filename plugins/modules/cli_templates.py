@@ -84,8 +84,8 @@ template_id:
 from typing import Literal, get_args
 
 from catalystwan.api.template_api import CLITemplate
-from catalystwan.dataclasses import DeviceTemplateInfo
 from catalystwan.models.common import DeviceModel
+from catalystwan.models.templates import DeviceTemplateInformation
 from catalystwan.session import ManagerHTTPError
 from catalystwan.typed_list import DataSequence
 
@@ -131,10 +131,10 @@ def run_module():
 
     template_name = module.params.get("template_name")
 
-    all_templates: DataSequence[DeviceTemplateInfo] = module.get_response_safely(
+    all_templates: DataSequence[DeviceTemplateInformation] = module.get_response_safely(
         module.session.api.templates.get, template=CLITemplate
     )
-    target_template: DeviceTemplateInfo = all_templates.filter(name=template_name)
+    target_template: DeviceTemplateInformation = all_templates.filter(name=template_name)
 
     if module.params.get("state") == "present":
         # Code for checking if template name exists already

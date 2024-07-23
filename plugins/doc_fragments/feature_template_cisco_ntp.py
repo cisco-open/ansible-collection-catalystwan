@@ -11,7 +11,7 @@ from __future__ import annotations
 
 
 class ModuleDocFragment(object):
-    DOCUMENTATION = r'''
+    DOCUMENTATION = r"""
 options:
     cisco_ntp:
         description: Cisco NTP Feature Template configuration
@@ -106,4 +106,4 @@ options:
                 required: false
                 default: null
                 type: str
-    '''
+    """

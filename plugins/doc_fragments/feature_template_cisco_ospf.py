@@ -11,7 +11,7 @@ from __future__ import annotations
 
 
 class ModuleDocFragment(object):
-    DOCUMENTATION = r'''
+    DOCUMENTATION = r"""
 options:
     cisco_ospf:
         description: Cisco OSPF (Open Shortest Path First) configuration
@@ -322,4 +322,4 @@ options:
                                 required: false
                                 default: false
                                 type: bool
-    '''
+    """

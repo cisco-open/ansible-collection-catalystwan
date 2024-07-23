@@ -21,7 +21,7 @@
       username: "{{ (vmanage_instances | first).admin_username }}"
       password: "{{ (vmanage_instances | first).admin_password }}"
   tasks:
-    - name: Get all Non-Default Feature Templates available
+    - name: 1. Get all Non-Default Feature Templates available
       cisco.catalystwan.feature_templates_info:
         filters:
           factory_default: false
@@ -29,25 +29,24 @@
           <<: *manager_authentication
       register: feature_templates
 
-    - name: Delete all Non-Default Feature templates
+    - name: 2. Delete all Non-Default Feature templates
       cisco.catalystwan.feature_templates:
         state: absent
-        template_name: "{{ template.templateName }}"
+        template_name: "{{ template.name }}"
         manager_credentials:
           <<: *manager_authentication
       loop: "{{ feature_templates.templates_info | default([], true) }}"
       loop_control:
         loop_var: template
-        label: "template: {{ template.templateName }}"
+        label: "template: {{ template.name }}"
 
     # vedge-C8000V templates
 
-    - name: "Create Comprehensive AAA Template with TACACS+ and RADIUS"
+    - name: 2. Create Comprehensive AAA Template with TACACS+ and RADIUS
       cisco.catalystwan.feature_templates:
         state: present
         template_name: "ComprehensiveAAATemplate"
         template_description: "AAA Template with both TACACS+ and RADIUS servers"
-        debug: true
         device_models:
           - vedge-C8000V
         cisco_aaa:
@@ -114,12 +113,11 @@
         manager_credentials:
           <<: *manager_authentication
 
-    - name: Create Cisco Banner Feature Template
+    - name: 3. Create Cisco Banner Feature Template
       cisco.catalystwan.feature_templates:
         state: present
         template_name: "CiscoBannerConfigTemplate"
         template_description: "Banner configuration for login and MOTD"
-        debug: true
         device_models:
           - "vedge-C8000V"
         cisco_banner:
@@ -142,12 +140,11 @@
         manager_credentials:
           <<: *manager_authentication
 
-    - name: Create Cisco BFD Feature Template
+    - name: 4. Create Cisco BFD Feature Template
       cisco.catalystwan.feature_templates:
         state: present
         template_name: "CiscoBFDFeatureTemplate"
         template_description: "Comprehensive BFD configuration"
-        debug: true
         device_models:
           - "vedge-C8000V"
         cisco_bfd:
@@ -178,12 +175,11 @@
         manager_credentials:
           <<: *manager_authentication
 
-    - name: Configure Cisco Logging Feature Template
+    - name: 5. Configure Cisco Logging Feature Template
       cisco.catalystwan.feature_templates:
         state: present
         template_name: "CiscoLoggingFeatureTemplate"
         template_description: "Comprehensive Logging Configuration"
-        debug: true
         device_models:
           - "vedge-C8000V"
         cisco_logging:
@@ -232,12 +228,11 @@
         manager_credentials:
           <<: *manager_authentication
 
-    - name: Configure Cisco NTP Feature Template
+    - name: 6. Configure Cisco NTP Feature Template
       cisco.catalystwan.feature_templates:
         state: present
         template_name: "CiscoNTPFeatureTemplate"
         template_description: "Comprehensive NTP Configuration"
-        debug: true
         device_models:
           - "vedge-C8000V"
         cisco_ntp:
@@ -268,12 +263,11 @@
         manager_credentials:
           <<: *manager_authentication
 
-    - name: Configure Cisco OMP Feature Template
+    - name: 7. Configure Cisco OMP Feature Template
       cisco.catalystwan.feature_templates:
         state: present
         template_name: "CiscoOMPFeatureTemplate"
         template_description: "Comprehensive OMP Configuration"
-        debug: true
         device_models:
           - "vsmart"
         cisco_omp:
@@ -313,12 +307,11 @@
         manager_credentials:
           <<: *manager_authentication
 
-    - name: Configure Cisco OSPF Feature Template
+    - name: 8. Configure Cisco OSPF Feature Template
       cisco.catalystwan.feature_templates:
         state: present
         template_name: "CiscoOSPFeatureTemplate"
         template_description: "Comprehensive OSPF Configuration"
-        debug: true
         device_models:
           - "vedge-C8000V"
         cisco_ospf:
@@ -371,12 +364,11 @@
         manager_credentials:
           <<: *manager_authentication
 
-    - name: "Configure Secure Internet Gateway feature template"
+    - name: 9. Configure Secure Internet Gateway feature template
       cisco.catalystwan.feature_templates:
         state: present
         template_name: "CiscoSecureInternetGatewayFeatureTemplate"
         template_description: "Comprehensive CiscoSecureInternetGateway Configuration"
-        debug: true
         device_models:
           - "vedge-C8000V"
         cisco_secure_internet_gateway:
@@ -451,11 +443,10 @@
         manager_credentials:
           <<: *manager_authentication
 
-    - name: "Configure Cisco SNMP feature template"
+    - name: 10. Configure Cisco SNMP feature template
       cisco.catalystwan.feature_templates:
         state: present
         template_name: "CiscoSNMPFeatureTemplate"
-        debug: true
         template_description: "Comprehensive Cisco SNMP Configuration"
         cisco_snmp:
           shutdown: false
@@ -500,12 +491,11 @@
         manager_credentials:
           <<: *manager_authentication
 
-    - name: "Create Comprehensive Cisco System Template"
+    - name: 11. Create Comprehensive Cisco System Template
       cisco.catalystwan.feature_templates:
         state: present
         template_name: "ComprehensiveCiscoSystemTemplate"
         template_description: "Cisco System template"
-        debug: true
         device_models:
           - "vedge-C8000V"
         cisco_system:
@@ -616,12 +606,11 @@
         manager_credentials:
           <<: *manager_authentication
 
-    - name: "Create Comprehensive Cisco VPN Interface Template"
+    - name: 12. Create Comprehensive Cisco VPN Interface Template
       cisco.catalystwan.feature_templates:
         state: present
         template_name: "ComprehensiveCiscoVPNInterfaceTemplate"
         template_description: "Cisco VPN Interface template"
-        debug: true
         device_models:
           - "vedge-C8000V"
         cisco_vpn_interface:
@@ -803,12 +792,11 @@
         manager_credentials:
           <<: *manager_authentication
 
-    - name: "Create Comprehensive Cisco VPN Template"
+    - name: 13. Create Comprehensive Cisco VPN Template
       cisco.catalystwan.feature_templates:
         state: present
         template_name: "ComprehensiveCiscoVPNTemplate"
         template_description: "Cisco VPN template"
-        debug: true
         device_models:
           - "vedge-C8000V"
         cisco_vpn:
@@ -964,12 +952,11 @@
         manager_credentials:
           <<: *manager_authentication
 
-    - name: "Create Comprehensive OMP vSmart Template"
+    - name: 14. Create Comprehensive OMP vSmart Template
       cisco.catalystwan.feature_templates:
         state: present
         template_name: "OMPvSmartConfigTemplate"
         template_description: "Apply OMP settings for vSmart controller"
-        debug: true
         device_models: "vsmart"
         omp_vsmart:
           graceful_restart: true
@@ -986,12 +973,11 @@
         manager_credentials:
           <<: *manager_authentication
 
-    - name: "Create Comprehensive Security vSmart Template"
+    - name: 15. Create Comprehensive Security vSmart Template
       cisco.catalystwan.feature_templates:
         state: present
         template_name: "SecurityvSmartConfigTemplate"
         template_description: "Apply Security settings for vSmart controller"
-        debug: true
         device_models: vsmart
         security_vsmart:
           protocol: dtls
@@ -999,14 +985,20 @@
         manager_credentials:
           <<: *manager_authentication
 
-    - name: "Create Comprehensive System vSmart Template"
+    - name: 16. Create Comprehensive System vSmart Template
       cisco.catalystwan.feature_templates:
         state: present
         template_name: "SystemvSmartConfigTemplate"
         template_description: "Apply System settings for vSmart controller"
-        debug: true
         device_models: vsmart
+        device_specific_variables:
+          site_id: "side_id_variable"
+          host_name: "host_name_variable"
+          system_ip: "system_ip_variable"
         system_vsmart:
+          host_name: device_specific_variable
+          site_id: device_specific_variable
+          system_ip: device_specific_variable
           timezone: UTC
           idle_timeout: 100
           admin_tech_on_failure: true
@@ -1019,25 +1011,23 @@
           port_hop: true
           port_offset: 5
           overlay_id: 44
-          site_id: 500
-          system_ip: "192.168.1.1"
           device_groups: "example1,example2"
           latitude: "37"
           longitude: "-122"
-          system_tunnel_mtu: "example_mtu_size"
+          system_tunnel_mtu: 1024
           location: "Location"
-          host_name: "myhostname"
           dual_stack_ipv6: true
           description: "Example description"
-          topology: "Hub and Spoke"
+          topology:
+            - "hub-and-spoke"
           region_list_id: 12
           management_region: true
           compatible:
-            color_1: mpls
-            color_2: metro-ethernet
+            - color_1: mpls
+              color_2: metro-ethernet
           incompatible:
-            color_1: biz-internet
-            color_2: public-internet
+            - color_1: biz-internet
+              color_2: public-internet
         manager_credentials:
           <<: *manager_authentication
 
@@ -1047,7 +1037,6 @@
         state: present
         template_name: "CiscoBannerConfigTemplateDSV"
         template_description: "Banner configuration for login and MOTD with DSV"
-        debug: true
         device_specific_variables:
           login_banner: "var_name_1"
           motd_banner: "var_name_2"

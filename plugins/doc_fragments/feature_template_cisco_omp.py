@@ -11,7 +11,7 @@ from __future__ import annotations
 
 
 class ModuleDocFragment(object):
-    DOCUMENTATION = r'''
+    DOCUMENTATION = r"""
 options:
     cisco_omp:
         description: Configuration settings for the Cisco Overlay Management Protocol
@@ -177,4 +177,4 @@ options:
                 required: false
                 default: false
                 type: bool
-    '''
+    """

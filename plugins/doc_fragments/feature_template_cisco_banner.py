@@ -11,7 +11,7 @@ from __future__ import annotations
 
 
 class ModuleDocFragment(object):
-    DOCUMENTATION = r'''
+    DOCUMENTATION = r"""
 options:
     cisco_banner:
         description: Cisco Banner configuration for login and message of the day (MOTD)
@@ -30,4 +30,4 @@ options:
                 required: false
                 default: null
                 type: str
-    '''
+    """

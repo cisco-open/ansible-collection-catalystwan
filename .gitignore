@@ -19,4 +19,4 @@ playbooks/tests/ansible_catalystwan_module.log
 playbooks/tests/catalystwan.log
 playbooks/tests/payload*
 playbooks/tests/response*
-playbooks/tests/backup/*
+playbooks/tests/backup

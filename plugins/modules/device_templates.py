@@ -137,8 +137,10 @@ templates_info:
 from typing import Dict, Literal, Optional, get_args
 
 from catalystwan.api.template_api import DeviceTemplate, GeneralTemplate
-from catalystwan.dataclasses import Device, DeviceTemplateInfo
+from catalystwan.dataclasses import Device
+from catalystwan.exceptions import TemplateNotFoundError
 from catalystwan.models.common import DeviceModel
+from catalystwan.models.templates import DeviceTemplateInformation
 from catalystwan.session import ManagerHTTPError
 from catalystwan.typed_list import DataSequence
 from pydantic import Field
@@ -209,10 +211,10 @@ def run_module():
 
     template_name = module.params.get("template_name")
 
-    all_templates: DataSequence[DeviceTemplateInfo] = module.get_response_safely(
+    all_templates: DataSequence[DeviceTemplateInformation] = module.get_response_safely(
         module.session.api.templates.get, template=DeviceTemplate
     )
-    target_template: DeviceTemplateInfo = all_templates.filter(name=template_name)
+    target_template: Optional[DeviceTemplateInformation] = all_templates.filter(name=template_name)
 
     if module.params.get("state") == "present":
         # Code for checking if template name exists already
@@ -256,19 +258,29 @@ def run_module():
         if not device:
             module.fail_json(f"No devices with hostname found, hostname provided: {hostname}")
         try:
-            device_specific_vars = {k: v for d in module.params.get("device_specific_vars") for k, v in d.items()}
-            response = module.session.api.templates.attach(
-                name=template_name,
-                device=device,
-                device_specific_vars=device_specific_vars,
-                timeout_seconds=module.params.get("timeout_seconds"),
-            )
+            response = None
+            if module.params.get("device_specific_vars"):
+                device_specific_vars = {k: v for d in module.params.get("device_specific_vars") for k, v in d.items()}
+                response = module.session.api.templates.attach(
+                    name=template_name,
+                    device=device,
+                    device_specific_vars=device_specific_vars,
+                    timeout_seconds=module.params.get("timeout_seconds"),
+                )
+            else:
+                response = module.session.api.templates.attach(
+                    name=template_name,
+                    device=device,
+                    timeout_seconds=module.params.get("timeout_seconds"),
+                )
             if not response:
                 module.fail_json(f"Failed to attach device template: {template_name}")
             result.changed = True
             result.msg = f"Attached template {template_name} to device: {hostname}"
         except ManagerHTTPError as ex:
             module.fail_json(msg=f"Could not perform attach Template {template_name}.\nManager error: {ex.info}")
+        except TemplateNotFoundError as ex:
+            module.fail_json(msg=f"Template with name: {template_name} doesn't exist. \nOriginal error: {ex}")
         except TypeError as ex:
             module.fail_json(msg=f"{ex}")
 

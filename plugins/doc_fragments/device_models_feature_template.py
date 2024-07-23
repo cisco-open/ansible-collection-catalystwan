@@ -11,7 +11,7 @@ from __future__ import annotations
 
 
 class ModuleDocFragment(object):
-    DOCUMENTATION = r'''
+    DOCUMENTATION = r"""
 options:
     device_models:
         description:
@@ -20,6 +20,7 @@ options:
         default: []
         elements: str
         choices:
+        - "None"
         - "vsmart"
         - "vedge-cloud"
         - "vmanage"
@@ -84,4 +85,4 @@ options:
         - "vedge-C8200-1N-4T"
         - "vedge-C8200L-1N-4T"
         - "vedge-ISRv"
-    '''
+    """

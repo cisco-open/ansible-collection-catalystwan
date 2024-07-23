@@ -145,9 +145,8 @@ changed:
 from typing import Dict, Optional
 
 from catalystwan.api.template_api import FeatureTemplate
-from catalystwan.dataclasses import FeatureTemplateInfo
+from catalystwan.models.templates import FeatureTemplateInformation
 from catalystwan.typed_list import DataSequence
-from catalystwan.utils.creation_tools import asdict
 from pydantic import Field
 
 from ..module_utils.result import ModuleResult
@@ -168,7 +167,7 @@ def run_module():
 
     filters = module.params.get("filters")
 
-    all_templates: DataSequence[FeatureTemplateInfo] = module.get_response_safely(
+    all_templates: DataSequence[FeatureTemplateInformation] = module.get_response_safely(
         module.session.api.templates.get, template=FeatureTemplate
     )
 
@@ -177,13 +176,13 @@ def run_module():
         if filtered_templates:
             module.logger.info(f"All Feature Templates filtered with filters: {filters}:\n{filtered_templates}")
             result.msg = "Succesfully got all requested Feature Templates Info from vManage"
-            result.templates_info = [asdict(template) for template in filtered_templates]
+            result.templates_info = [template for template in filtered_templates]
         else:
             module.logger.warning(msg=f"Feature templates filtered with `{filters}` not present.")
             result.msg = f"Feature templates filtered with `{filters}` not present on vManage."
     else:
         result.msg = "Succesfully got all Feature Templates Info from vManage"
-        result.templates_info = [asdict(template) for template in all_templates]
+        result.templates_info = [template for template in all_templates]
 
     module.exit_json(**result.model_dump(mode="json"))
 

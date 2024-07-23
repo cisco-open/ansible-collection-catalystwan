@@ -3,7 +3,7 @@
 
 import traceback
 
-from catalystwan.endpoints.configuration_device_inventory import DeviceCategory, DeviceDetailsResponse
+from catalystwan.endpoints.configuration_device_inventory import DeviceDetailsResponse
 from catalystwan.session import ManagerHTTPError
 from catalystwan.typed_list import DataSequence
 
@@ -12,7 +12,7 @@ from ..module_utils.vmanage_module import AnsibleCatalystwanModule
 
 def get_target_device(
     module: AnsibleCatalystwanModule,
-    device_category: DeviceCategory = "all",
+    device_category="all",
     all_from_category: bool = False,
 ) -> DataSequence[DeviceDetailsResponse]:
     """

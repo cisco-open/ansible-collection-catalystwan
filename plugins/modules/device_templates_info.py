@@ -173,10 +173,9 @@ from pathlib import Path, PurePath
 from typing import Dict, List, Optional
 
 from catalystwan.api.template_api import DeviceTemplate
-from catalystwan.dataclasses import DeviceTemplateInfo
+from catalystwan.models.templates import DeviceTemplateInformation
 from catalystwan.session import ManagerHTTPError
 from catalystwan.typed_list import DataSequence
-from catalystwan.utils.creation_tools import asdict
 from pydantic import BaseModel, Field
 
 from ..module_utils.result import ModuleResult
@@ -205,9 +204,9 @@ def run_module():
     module = AnsibleCatalystwanModule(argument_spec=module_args)
 
     filters = module.params.get("filters")
-    filtered_templates = DataSequence(DeviceTemplate)
+    filtered_templates = DataSequence(DeviceTemplateInformation)
 
-    all_templates: DataSequence[DeviceTemplateInfo] = module.get_response_safely(
+    all_templates: DataSequence[DeviceTemplateInformation] = module.get_response_safely(
         module.session.api.templates.get, template=DeviceTemplate
     )
 
@@ -216,13 +215,13 @@ def run_module():
         if filtered_templates:
             module.logger.info(f"All Device Templates filtered with filters: {filters}:\n{filtered_templates}")
             result.msg = "Succesfully got all requested Device Templates Info from vManage"
-            result.templates_info = [asdict(template) for template in filtered_templates]
+            result.templates_info = [template for template in filtered_templates]
         else:
             module.logger.warning(msg=f"Device templates filtered with `{filters}` not present.")
             result.msg = f"Device templates filtered with `{filters}` not present on vManage."
     else:
         result.msg = "Succesfully got all Device Templates Info from vManage"
-        result.templates_info = [asdict(template) for template in all_templates]
+        result.templates_info = [template for template in all_templates]
 
     if module.params.get("backup"):
         backup_dir_path: Path = Path(module.params.get("backup_dir_path"))
