@@ -25,6 +25,7 @@
       cisco.catalystwan.feature_templates_info:
         filters:
           factory_default: false
+          devices_attached: 0
         manager_credentials:
           <<: *manager_authentication
       register: feature_templates
