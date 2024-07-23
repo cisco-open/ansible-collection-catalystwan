@@ -9,7 +9,7 @@ DOCUMENTATION = r"""
 ---
 module: feature_templates_info
 short_description: Get information about Feature Templates on vManage.
-version_added: "0.1.0"
+version_added: "0.2.0"
 description:
   - This module allows you to get and filter Feature Templates from vManage.
 options:

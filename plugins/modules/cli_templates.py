@@ -81,7 +81,7 @@ template_id:
   sample: "abc123"
 """
 
-from typing import Literal, get_args
+from typing import Literal, Optional, get_args
 
 from catalystwan.api.template_api import CLITemplate
 from catalystwan.models.common import DeviceModel
@@ -134,7 +134,7 @@ def run_module():
     all_templates: DataSequence[DeviceTemplateInformation] = module.get_response_safely(
         module.session.api.templates.get, template=CLITemplate
     )
-    target_template: DeviceTemplateInformation = all_templates.filter(name=template_name)
+    target_template: Optional[DeviceTemplateInformation] = all_templates.filter(name=template_name)
 
     if module.params.get("state") == "present":
         # Code for checking if template name exists already

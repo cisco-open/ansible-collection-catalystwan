@@ -9,7 +9,7 @@ DOCUMENTATION = r"""
 ---
 module: Device_templates_info
 short_description: Get information about Device Templates on vManage.
-version_added: "0.1.0"
+version_added: "0.2.0"
 description:
   - This module allows you to get Device Templates Info from vManage.
   - Device Templates can be filtered by Device Templates Info key:values.
@@ -167,6 +167,7 @@ changed:
   returned: always
   sample: false
 """
+
 import json
 import traceback
 from pathlib import Path, PurePath

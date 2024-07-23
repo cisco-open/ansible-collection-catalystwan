@@ -12,7 +12,6 @@ short_description: Manage Device Templates on vManage.
 version_added: "0.2.0"
 description:
   - This module allows you to create, delete, attach and detach Device Templates
-  - Device Templates can be filtered by Device Templates Info key:values.
 options:
   state:
     description:
@@ -58,6 +57,10 @@ options:
         default: null
         type: list
         elements: str
+  timeout_seconds:
+    description:
+      - The timeout in seconds for attaching the template. Default is 300.
+    type: int
   hostname:
     description:
       - Hostname of the device to attach template. Available only for 0(state=attached).
@@ -117,24 +120,9 @@ changed:
   returned: always
   type: bool
   sample: true
-
-templates_info:
-  description: Detailed information about the templates.
-  returned: when templates are queried
-  type: dict
-  sample: {
-    "MyDeviceTemplate": {
-      "template_id": "abc123",
-      "template_name": "MyDeviceTemplate",
-      "template_description": "This is a device template for device configuration",
-      "device_type": "ISR4451",
-      "device_role": "sdwan-edge",
-      "general_templates": ["Template1", "Template2"]
-    }
-  }
 """
 
-from typing import Dict, Literal, Optional, get_args
+from typing import Literal, Optional, get_args
 
 from catalystwan.api.template_api import DeviceTemplate, GeneralTemplate
 from catalystwan.dataclasses import Device
@@ -143,16 +131,11 @@ from catalystwan.models.common import DeviceModel
 from catalystwan.models.templates import DeviceTemplateInformation
 from catalystwan.session import ManagerHTTPError
 from catalystwan.typed_list import DataSequence
-from pydantic import Field
 
 from ..module_utils.result import ModuleResult
 from ..module_utils.vmanage_module import AnsibleCatalystwanModule
 
 State = Literal["present", "absent", "attached"]
-
-
-class ExtendedModuleResult(ModuleResult):
-    templates_info: Optional[Dict] = Field(default={})
 
 
 def run_module():
@@ -179,7 +162,7 @@ def run_module():
         hostname=dict(type="str"),
         device_specific_vars=dict(type="list", elements="dict"),
     )
-    result = ExtendedModuleResult()
+    result = ModuleResult()
 
     module = AnsibleCatalystwanModule(
         argument_spec=module_args,

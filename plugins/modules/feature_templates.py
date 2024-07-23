@@ -8,7 +8,7 @@ DOCUMENTATION = r"""
 ---
 module: vmanage_feature_template
 short_description: Manage feature templates for Cisco vManage SD-WAN
-version_added: "0.1.1"
+version_added: "0.2.0"
 description:
   - This module can be used to create, modify, and delete feature templates in Cisco vManage SD-WAN.
   - The feature template configuration is defined via Python Pydantic models.
