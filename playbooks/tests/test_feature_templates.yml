@@ -1,0 +1,1050 @@
+# Copyright 2024 Cisco Systems, Inc. and its affiliates
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+---
+
+# Helper playbooks to test modules and flows while developing them
+
+# Tested operations:
+
+# --- Feature Templates creation --- #
+
+
+- name: Testing playbook to verify cisco.catalystwan.feature_template module operations
+  hosts: localhost
+  gather_facts: false
+  vars_files:
+    - configuration_file_dev_vars.yml
+  vars:
+    manager_authentication: &manager_authentication
+      url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+      username: "{{ (vmanage_instances | first).admin_username }}"
+      password: "{{ (vmanage_instances | first).admin_password }}"
+  tasks:
+    - name: 1. Get all Non-Default Feature Templates available
+      cisco.catalystwan.feature_templates_info:
+        filters:
+          factory_default: false
+          devices_attached: 0
+        manager_credentials:
+          <<: *manager_authentication
+      register: feature_templates
+
+    - name: 2. Delete all Non-Default Feature templates
+      cisco.catalystwan.feature_templates:
+        state: absent
+        template_name: "{{ template.name }}"
+        manager_credentials:
+          <<: *manager_authentication
+      loop: "{{ feature_templates.templates_info | default([], true) }}"
+      loop_control:
+        loop_var: template
+        label: "template: {{ template.name }}"
+
+    # vedge-C8000V templates
+
+    - name: 2. Create Comprehensive AAA Template with TACACS+ and RADIUS
+      cisco.catalystwan.feature_templates:
+        state: present
+        template_name: "ComprehensiveAAATemplate"
+        template_description: "AAA Template with both TACACS+ and RADIUS servers"
+        device_models:
+          - vedge-C8000V
+        cisco_aaa:
+          user:
+            - name: "local_admin"
+              password: "admin_password"
+              secret: "admin_secret"
+              privilege: "15"
+              pubkey_chain:
+                - key_string: "AAAAB3NzaC1yc2EAAAADAQABAAABAQC3myRj5L6ZFLdRnOEZdUd+4Qq0XPLW9RfO6qD7DJ2t4ZzLh6Oz+IUJg8d8bJDfxO9zGKs5uUQ9f2H5yTGX5G8Z5kKp8QDp1MkDVqwGJ4UM7JqH8s8kD7xcl8SyPc5TjzK4s4W+8LPNOPXmIKtHh1Qlvkp5N7w3M/Rm5ZVX5/3+Hk8Ib5syigQQd/5u5xJj9k3i2x3m3LZ7v5e7YlCpRdCQGf6ZCwvbVQHdJp5nlU0HxJbqjOTL4IcDj09G3Dq2C5JnohKJb7E7HVCUl7F5vYpC/4iNjges65GgdzaFJsT9qA8CgxyF+7J3PpLk5qPAQDT5OjArJj4x9Bw3j3lZdH example@example.com"  # noqa yaml[line-length]
+                  key_type: "ssh-rsa"
+          authentication_group: true
+          accounting_group: true
+          radius:
+            - group_name: "radius_group1"
+              vpn: "1"
+              source_interface: "GigabitEthernet0/0"
+              server:
+                - address: "192.0.2.1"
+                  auth_port: 1812
+                  acct_port: 1813
+                  timeout: 5
+                  retransmit: 3
+                  key: "secure_radius_server_key"
+                  secret_key: "radius_secret"
+                  key_enum: "key_enum_value"
+                  key_type: "key_type_value"
+          domain_stripping: "right-to-left"
+          port: 1234
+          authentication_type: any
+          server_auth_order: "local radius_group1 tacacs_group1"
+          server_key_password: "secure_server_key_password"
+          cts_authorization_list: "example_element"
+          radius_trustsec_group: "radius_group1"
+          radius_client:
+            - ip: 2.2.2.2
+              vpn:
+                - name: example_radius_client
+                  server_key: secure_radius_client_key
+          accounting_rules:
+            - rule_id: 0
+              method: network
+              level: "1"
+              group: "radius_group1,tacacs_group1"
+              start_stop: false
+          authorization_console: true
+          authorization_config_commands: true
+          authorization_rules:
+            - rule_id: 111
+              method: commands
+              group: "radius_group1,tacacs_group1"
+              authenticated: true
+          tacacs:
+            - group_name: "tacacs_group1"
+              vpn: 2
+              source_interface: "GigabitEthernet0/1"
+              server:
+                - address: "192.0.2.2"
+                  port: 49
+                  timeout: 10
+                  key: "tacacs_key"
+                  secret_key: "tacacs_secret"
+                  key_enum: "key_enum_value"
+        manager_credentials:
+          <<: *manager_authentication
+
+    - name: 3. Create Cisco Banner Feature Template
+      cisco.catalystwan.feature_templates:
+        state: present
+        template_name: "CiscoBannerConfigTemplate"
+        template_description: "Banner configuration for login and MOTD"
+        device_models:
+          - "vedge-C8000V"
+        cisco_banner:
+          login_banner: |
+            ****************************************************************
+            * Unauthorized access to this device is prohibited.            *
+            * You must have explicit permission to access or configure this *
+            * device. All activities performed on this device are logged and *
+            * violations of this policy may result in disciplinary action,   *
+            * and may be reported to law enforcement. There is no right to  *
+            * privacy on this device. Use of this system constitutes consent *
+            * to monitoring for these purposes.                             *
+            ****************************************************************
+          motd_banner: |
+            ****************************************************************
+            * Welcome to Company XYZ Network!                              *
+            * All connections are monitored and recorded for audit purposes. *
+            * Disconnect IMMEDIATELY if you are not an authorized user!     *
+            ****************************************************************
+        manager_credentials:
+          <<: *manager_authentication
+
+    - name: 4. Create Cisco BFD Feature Template
+      cisco.catalystwan.feature_templates:
+        state: present
+        template_name: "CiscoBFDFeatureTemplate"
+        template_description: "Comprehensive BFD configuration"
+        device_models:
+          - "vedge-C8000V"
+        cisco_bfd:
+          multiplier: "3"
+          poll_interval: "500"
+          default_dscp: "46"
+          color:
+            - color: "mpls"
+              hello_interval: "200"
+              multiplier: "4"
+              pmtu_discovery: true
+              dscp: "46"
+            - color: "biz-internet"
+              hello_interval: "300"
+              multiplier: "5"
+              pmtu_discovery: false
+              dscp: "34"
+            - color: "private1"
+              hello_interval: "250"
+              multiplier: "3"
+              pmtu_discovery: true
+              dscp: "26"
+            - color: "custom3"
+              hello_interval: "350"
+              multiplier: "6"
+              pmtu_discovery: true
+              dscp: "18"
+        manager_credentials:
+          <<: *manager_authentication
+
+    - name: 5. Configure Cisco Logging Feature Template
+      cisco.catalystwan.feature_templates:
+        state: present
+        template_name: "CiscoLoggingFeatureTemplate"
+        template_description: "Comprehensive Logging Configuration"
+        device_models:
+          - "vedge-C8000V"
+        cisco_logging:
+          enable: true
+          size: "20"
+          rotate: "5"
+          tls_profile:
+            - profile: "default_tls_profile"
+              version: "TLSv1.2"
+              auth_type: "Server"
+              ciphersuite_list:
+                - "ECDHE-ECDSA-AES256-GCM-SHA384"
+                - "ECDHE-RSA-AES256-GCM-SHA384"
+            - profile: "secure_tls_profile"
+              version: "TLSv1.2"
+              auth_type: "Mutual"
+              ciphersuite_list:
+                - "ECDHE-ECDSA-CHACHA20-POLY1305"
+                - "ECDHE-RSA-CHACHA20-POLY1305"
+          server:
+            - name: "1.1.1.1"
+              vpn: "10"
+              source_interface: "GigabitEthernet0/0"
+              priority: "debugging"
+              enable_tls: true
+              custom_profile: true
+              profile: "default_tls_profile"
+            - name: "log_server_2"
+              vpn: "20"
+              source_interface: "GigabitEthernet0/1"
+              priority: "error"
+              enable_tls: false
+          ipv6_server:
+            - name: "ipv6_log_server_1"
+              vpn: "10"
+              source_interface: "GigabitEthernet0/2"
+              priority: "critical"
+              enable_tls: true
+              custom_profile: true
+              profile: "secure_tls_profile"
+            - name: "ipv6_log_server_2"
+              vpn: "30"
+              source_interface: "GigabitEthernet0/3"
+              priority: "emergency"
+              enable_tls: false
+        manager_credentials:
+          <<: *manager_authentication
+
+    - name: 6. Configure Cisco NTP Feature Template
+      cisco.catalystwan.feature_templates:
+        state: present
+        template_name: "CiscoNTPFeatureTemplate"
+        template_description: "Comprehensive NTP Configuration"
+        device_models:
+          - "vedge-C8000V"
+        cisco_ntp:
+          server:
+            - name: "0.pool.ntp.org"
+              key: "1"
+              vpn: "10"
+              version: "4"
+              source_interface: "GigabitEthernet0/0"
+              prefer: true
+            - name: "1.pool.ntp.org"
+              key: "2"
+              vpn: "20"
+              version: "4"
+              source_interface: "GigabitEthernet0/1"
+              prefer: false
+          authentication:
+            - number: 1
+              md5: "md5key1"
+            - number: 2
+              md5: "md5key2"
+          trusted:
+            - 1
+            - 2
+          enable: true
+          stratum: "2"
+          source: "Loopback0"
+        manager_credentials:
+          <<: *manager_authentication
+
+    - name: 7. Configure Cisco OMP Feature Template
+      cisco.catalystwan.feature_templates:
+        state: present
+        template_name: "CiscoOMPFeatureTemplate"
+        template_description: "Comprehensive OMP Configuration"
+        device_models:
+          - "vsmart"
+        cisco_omp:
+          graceful_restart: true
+          overlay_as: "65000"
+          send_path_limit: "10"
+          ecmp_limit: "8"
+          shutdown: false
+          omp_admin_distance_ipv4: "110"
+          omp_admin_distance_ipv6: "115"
+          advertisement_interval: "30"
+          graceful_restart_timer: "120"
+          eor_timer: "300"
+          holdtime: "180"
+          advertise:
+            - protocol: "bgp"
+              route: "external"
+            - protocol: "ospf"
+            - protocol: "connected"
+            - protocol: "static"
+            - protocol: "eigrp"
+            - protocol: "lisp"
+          ipv6_advertise:
+            - protocol: "bgp"
+            - protocol: "ospf"
+            - protocol: "connected"
+            - protocol: "static"
+          ignore_region_path_length: true
+          transport_gateway: "prefer"
+          site_types:
+            - "type-1"
+            - "type-2"
+            - "cloud"
+            - "branch"
+            - "spoke"
+          auto_translate: true
+        manager_credentials:
+          <<: *manager_authentication
+
+    - name: 8. Configure Cisco OSPF Feature Template
+      cisco.catalystwan.feature_templates:
+        state: present
+        template_name: "CiscoOSPFeatureTemplate"
+        template_description: "Comprehensive OSPF Configuration"
+        device_models:
+          - "vedge-C8000V"
+        cisco_ospf:
+          router_id: "1.1.1.1"
+          reference_bandwidth: "10000"
+          rfc1583: false
+          originate: true
+          always: true
+          metric: "10"
+          metric_type: "type1"
+          external: "20"
+          inter_area: "30"
+          intra_area: "40"
+          delay: "5"
+          initial_hold: "10"
+          max_hold: "40"
+          redistribute:
+            - protocol: "static"
+              route_policy: "static_policy"
+              dia: true
+            - protocol: "bgp"
+              route_policy: "bgp_to_ospf_policy"
+              dia: false
+          router_lsa:
+            - ad_type: "administrative"
+              time: 10
+          route_policy:
+            - direction: "in"
+              pol_name: "ospf_in_policy"
+          area:
+            - a_num: 0
+              stub: false
+              nssa: true
+              interface:
+                - name: "GigabitEthernet0/0"
+                  hello_interval: "10"
+                  dead_interval: "40"
+                  retransmit_interval: "5"
+                  cost: "1"
+                  priority: "1"
+                  network: "broadcast"
+                  passive_interface: false
+                  type: "simple"
+                  message_digest_key: "1"
+                  md5: "md5keystring"
+              range:
+                - address: "192.168.1.0/24"
+                  cost: "100"
+                  no_advertise: true
+        manager_credentials:
+          <<: *manager_authentication
+
+    - name: 9. Configure Secure Internet Gateway feature template
+      cisco.catalystwan.feature_templates:
+        state: present
+        template_name: "CiscoSecureInternetGatewayFeatureTemplate"
+        template_description: "Comprehensive CiscoSecureInternetGateway Configuration"
+        device_models:
+          - "vedge-C8000V"
+        cisco_secure_internet_gateway:
+          vpn_id: 10
+          child_org_id: "example_org"
+          interface:
+            - if_name: "GigabitEthernet0/0"
+              auto: true
+              shutdown: false
+              description: "Main interface for SIG"
+              unnumbered: false
+              address: "192.168.1.1/24"
+              tunnel_source: "192.168.1.1"
+              tunnel_source_interface: "Loopback0"
+              tunnel_route_via: "192.168.2.1"
+              tunnel_destination: "203.0.113.1"
+              application: "sig"
+              tunnel_set: "secure-internet-gateway-umbrella"
+              tunnel_dc_preference: "primary-dc"
+              tcp_mss_adjust: "1400"
+              mtu: 1400
+              dpd_interval: "30"
+              dpd_retries: "3"
+              ike_version: 2
+              pre_shared_secret: "MyPreSharedSecret"
+              ike_rekey_interval: "3600"
+              ike_ciphersuite: "aes256-cbc-sha1"
+              ike_group: "14"
+              pre_shared_key_dynamic: false
+              ike_local_id: "local-id"
+              ike_remote_id: "remote-id"
+              ipsec_rekey_interval: "3600"
+              ipsec_replay_window: "32"
+              ipsec_ciphersuite: "aes256-gcm"
+              perfect_forward_secrecy: "group-14"
+              tracker: true
+              track_enable: true
+          service:
+            - svc_type: "sig"
+              interface_pair:
+                - active_interface: "GigabitEthernet0/0"
+                  active_interface_weight: 10
+                  backup_interface: "GigabitEthernet0/1"
+                  backup_interface_weight: 5
+              auth_required: "yes"
+              xff_forward_enabled: "yes"
+              ofw_enabled: "no"
+              ips_control: "yes"
+              caution_enabled: "no"
+              primary_data_center: "Auto"
+              secondary_data_center: "Auto"
+              ip: "yes"
+              idle_time: "30"
+              display_time_unit: "MINUTE"
+              ip_enforced_for_known_browsers: "yes"
+              refresh_time: "5"
+              refresh_time_unit: "MINUTE"
+              enabled: "yes"
+              block_internet_until_accepted: "no"
+              force_ssl_inspection: "yes"
+              timeout: "60"
+              data_center_primary: "Auto"
+              data_center_secondary: "Auto"
+          tracker_src_ip: "192.0.2.1"
+          tracker:
+            - name: "health-check-tracker"
+              endpoint_api_url: "https://api.example.com/health"
+              threshold: "5"
+              interval: "60"
+              multiplier: "2"
+              tracker_type: "SIG"
+        manager_credentials:
+          <<: *manager_authentication
+
+    - name: 10. Configure Cisco SNMP feature template
+      cisco.catalystwan.feature_templates:
+        state: present
+        template_name: "CiscoSNMPFeatureTemplate"
+        template_description: "Comprehensive Cisco SNMP Configuration"
+        cisco_snmp:
+          shutdown: false
+          contact: "SNMP Admin"
+          location: "Data Center A"
+          view:
+            - name: "SystemView"
+              oid:
+                - id: "1.3.6.1.2.1.1"
+                  exclude: false
+                - id: "1.3.6.1.2.1.2"
+                  exclude: true
+            - name: "AllView"
+              oid:
+                - id: "1.3.6.1"
+                  exclude: false
+          community:
+            - name: "public"
+              view: "SystemView"
+              authorization: "read-only"
+            - name: "private"
+              view: "AllView"
+              authorization: "read-only"
+          group:
+            - name: "v3group"
+              security_level: "auth-priv"
+              view: "AllView"
+          user:
+            - name: "snmpuser"
+              auth: "md5"
+              auth_password: "authpass"
+              priv: "aes-cfb-128"
+              priv_password: "privpass"
+              group: "v3group"
+          target:
+            - vpn_id: 10
+              ip: "192.0.2.50"
+              port: 162
+              community_name: "public"
+              user: "snmpuser"
+              source_interface: "GigabitEthernet0/0"
+        manager_credentials:
+          <<: *manager_authentication
+
+    - name: 11. Create Comprehensive Cisco System Template
+      cisco.catalystwan.feature_templates:
+        state: present
+        template_name: "ComprehensiveCiscoSystemTemplate"
+        template_description: "Cisco System template"
+        device_models:
+          - "vedge-C8000V"
+        cisco_system:
+          timezone: "UTC"
+          description: "Example desc"
+          hostname:
+            name: "sdwan-hostname"
+          location: "Data Center A"
+          latitude: "37.7749"
+          longitude: "-122.4194"
+          range: "10"
+          enable_fencing: true
+          mobile_number:
+            - number: "+12345678901"
+            - number: "+10987654321"
+          enable_sms: true
+          device_groups:
+            - "group1"
+            - "group2"
+          controller_group_list:
+            - 1
+            - 3
+          system_ip:
+            name: "192.0.2.1"
+          overlay_id: "1"
+          site_id: 1001
+          site_type:
+            - "branch"
+            - "spoke"
+          port_offset: "1000"
+          port_hop: true
+          control_session_pps: "500"
+          track_transport: true
+          track_interface_tag: "1"
+          console_baud_rate: "9600"
+          max_omp_sessions: "50"
+          multi_tenant: false
+          track_default_gateway: false
+          admin_tech_on_failure: true
+          enable_tunnel: true
+          idle_timeout: "300"
+          on_demand_idle_timeout_min: "60"
+          tracker:
+            - name: "tracker1"
+              endpoint_ip: "203.0.113.1"
+              endpoint_ip_transport_port: "8080"
+              protocol: "tcp"
+              port: "443"
+              elements:
+                - "element1, element2"
+              boolean: "and"
+              threshold: "10"
+              interval: "30"
+              multiplier: "3"
+              type: "static-route"
+          object_track:
+            - object_number: 10
+              interface: 'GigabitEthernet0/0/0'
+              sig: '100'
+              ip: '192.0.2.1'
+              mask: '255.255.255.0'
+              vpn: 1
+              object:
+                - number: 101
+              boolean: 'and'
+            - object_number: 20
+              interface: 'GigabitEthernet0/0/0'
+              sig: '100'
+              ip: '192.0.2.1'
+              mask: '255.255.255.0'
+              vpn: 1
+              object:
+                - number: 101
+              boolean: 'and'
+            - object_number: 30
+              interface: 'GigabitEthernet0/0/1'
+              sig: '200'
+              ip: '198.51.100.1'
+              mask: '255.255.255.0'
+              vpn: 2
+              object:
+                - number: 201
+              boolean: 'or'
+          preference:
+            - 1
+          preference_auto: true
+          epfr: "conservative"
+          vrf:
+            - vrf_id: 1
+              gateway_preference:
+                - 4
+                - 5
+            - vrf_id: 2
+              gateway_preference:
+                - 12
+                - 13
+          enable_management_region: true
+          migration_bgp_community: 65535
+          enable_mrf_migration: enabled
+          transport_gateway: true
+          affinity_group_number: 1
+          affinity_per_vrf:
+            - affinity_group_number: 1
+              vrf_range: "22"
+          role: "edge-router"
+          # secondary_region: 55
+          # region_id: 44
+        manager_credentials:
+          <<: *manager_authentication
+
+    - name: 12. Create Comprehensive Cisco VPN Interface Template
+      cisco.catalystwan.feature_templates:
+        state: present
+        template_name: "ComprehensiveCiscoVPNInterfaceTemplate"
+        template_description: "Cisco VPN Interface template"
+        device_models:
+          - "vedge-C8000V"
+        cisco_vpn_interface:
+          if_name: "GigabitEthernet0/0"
+          interface_description: "WAN interface"
+          poe: true
+          ipv4_address: "192.0.2.1/24"
+          secondary_ipv4_address:
+            - address: "192.0.2.2/24"
+            - address: "192.0.2.3/24"
+          dhcp_ipv4_client: false
+          dhcp_distance: "1"
+          ipv6_address: "2001:db8::1/64"
+          dhcp_ipv6_client: true
+          secondary_ipv6_address:
+            - address: "2001:db8::2/64"
+            - address: "2001:db8::3/64"
+          access_list_ipv4:
+            - direction: "in"
+              acl_name: "ACL-INBOUND"
+            - direction: "out"
+              acl_name: "ACL-OUTBOUND"
+          dhcp_helper:
+            - "192.0.2.254"
+          dhcp_helper_v6:
+            - address: "2001:db8::1"
+              vpn: "0"
+          tracker:
+            - "Tracker1"
+            - "Tracker2"
+          auto_bandwidth_detect: true
+          iperf_server: "192.0.2.100"
+          nat: true
+          nat_choice: "Interface"
+          udp_timeout: "30"
+          tcp_timeout: "60"
+          nat_range_start: "192.0.2.100"
+          nat_range_end: "192.0.2.200"
+          overload: true
+          loopback_interface: "Loopback0"
+          prefix_length: "24"
+          enable: true
+          nat64: false
+          nat66: false
+          static_nat66:
+            - source_prefix: "2001:db8:1234::/64"
+              translated_source_prefix: "2001:db8:5678::/64"
+              source_vpn_id: 10
+          static:
+            - source_ip: "192.0.2.1"
+              translate_ip: "203.0.113.1"
+              static_nat_direction: "inside"
+              source_vpn: 10
+          static_port_forward:
+            - source_ip: "192.0.2.2"
+              translate_ip: "203.0.113.2"
+              static_nat_direction: "outside"
+              source_port: 8080
+              translate_port: 9090
+              proto: "tcp"
+              source_vpn: 10
+          enable_core_region: true
+          core_region: "core"
+          secondary_region: "secondary-only"
+          tloc_encapsulation:
+            - encap: "ipsec"
+              preference: "100"
+              weight: 1
+          border: true
+          per_tunnel_qos: true
+          per_tunnel_qos_aggregator: true
+          mode: "hub"
+          tunnels_bandwidth: "1000"
+          group:
+            - "1"
+            - "2"
+          value: "mpls"
+          max_control_connections: "5"
+          control_connections: true
+          vbond_as_stun_server: true
+          exclude_controller_group_list:
+            - "3"
+            - "4"
+          vmanage_connection_preference: "100"
+          port_hop: true
+          restrict: false
+          dst_ip: "198.51.100.14"
+          carrier: "carrier1"
+          nat_refresh_interval: "30"
+          hello_interval: "10"
+          hello_tolerance: "30"
+          bind: "GigabitEthernet0/0"
+          last_resort_circuit: false
+          low_bandwidth_link: false
+          tunnel_tcp_mss_adjust: "1360"
+          clear_dont_fragment: true
+          propagate_sgt: false
+          network_broadcast: true
+          all: false
+          bgp: true
+          dhcp: false
+          dns: true
+          icmp: true
+          sshd: true
+          netconf: false
+          ntp: true
+          ospf: false
+          stun: false
+          snmp: true
+          https: true
+          media_type: "rj45"
+          intrf_mtu: "1500"
+          mtu: "1400"
+          tcp_mss_adjust: "1360"
+          tloc_extension: "100"
+          load_interval: "300"
+          src_ip: "198.51.100.1"
+          xconnect: "10"
+          mac_address: "00:0C:29:4B:55:3A"
+          speed: "1000"
+          duplex: "full"
+          shutdown: false
+          arp_timeout: "1200"
+          autonegotiate: true
+          ip_directed_broadcast: false
+          icmp_redirect_disable: true
+          qos_adaptive: true
+          period: "60"
+          bandwidth_down: "10000"
+          dmin: "5000"
+          dmax: "15000"
+          bandwidth_up: "5000"
+          umin: "2500"
+          umax: "7500"
+          shaping_rate: "5000"
+          qos_map: "default_qos_map"
+          qos_map_vpn: "vpn_qos_map"
+          service_provider: "ISP1"
+          bandwidth_upstream: "5000"
+          bandwidth_downstream: "10000"
+          block_non_source_ip: true
+          rule_name: "rewrite_rule_1"
+          access_list_ipv6:
+            - direction: "in"
+              acl_name: "ipv6_acl_1"
+          ip:
+            - addr: "192.0.2.1"
+              mac: "00:0C:29:4B:55:3A"
+          vrrp:
+            - grp_id: 1
+              priority: 110
+              timer: 100
+              track_omp: true
+              track_prefix_list: "TRACKING_LIST"
+              address: "192.0.2.254"
+              ipv4_secondary:
+                - address: "192.0.2.253"
+              tloc_change_pref: true
+              value: 20
+              tracking_object:
+                - name: 10
+                  track_action: "Decrement"
+                  decrement: 20
+          ipv6_vrrp:
+            - grp_id: 1
+              priority: 110
+              timer: 100
+              track_omp: true
+              track_prefix_list: "TRACKING_LIST_IPV6"
+              ipv6:
+                - ipv6_link_local: "FE80::1"
+                  prefix: "2001:db8::/64"
+          enable_sgt_propagation: true
+          security_group_tag: "0000"
+          trusted: true
+          enable_sgt_authorization_and_forwarding: true
+          enable_sgt_enforcement: true
+          enforcement_sgt: "010001"
+        manager_credentials:
+          <<: *manager_authentication
+
+    - name: 13. Create Comprehensive Cisco VPN Template
+      cisco.catalystwan.feature_templates:
+        state: present
+        template_name: "ComprehensiveCiscoVPNTemplate"
+        template_description: "Cisco VPN template"
+        device_models:
+          - "vedge-C8000V"
+        cisco_vpn:
+          vpn_id: 10
+          vpn_name: "CorporateVPN"
+          tenant_vpn_id: 200
+          org_name: "ACME_Corporation"
+          omp_admin_distance_ipv4: 5
+          omp_admin_distance_ipv6: 5
+          dns:
+            - dns_addr: "8.8.8.8"
+              role: "primary"
+            - dns_addr: "8.8.4.4"
+              role: "secondary"
+          dns_ipv6:
+            - dns_addr: "2001:4860:4860::8888"
+              role: "primary"
+            - dns_addr: "2001:4860:4860::8844"
+              role: "secondary"
+          layer4: true
+          host:
+            - hostname: "server1.example.com"
+              ip:
+                - "192.168.1.10"
+          service:
+            - svc_type: "FW"
+              address:
+                - "192.168.2.10"
+              interface: "GigabitEthernet0/0"
+              track_enable: true
+          service_route:
+            - prefix: "192.168.3.0/24"
+              vpn: 10
+              service: "sig"
+          route_v4:
+            - prefix: "192.168.1.0/24"
+              next_hop:
+                - address: "192.168.1.1"
+                  distance: 10
+              next_hop_with_track:
+                - address: "192.168.1.2"
+                  distance: 20
+                  tracker: "Track1"
+              route_interface:
+                interface_name: "GigabitEthernet0/0"
+                interface_next_hop:
+                  - address: "2001:db8:abcd:0012::1"
+                    distance: 1
+              null0: false
+              distance: 1
+              vpn: 10
+              dhcp: false
+          route_v6:
+            - prefix: "2001:db8:abcd:0012::/64"
+              next_hop:
+                - address: "2001:db8:abcd:0012::1"
+                  distance: 10
+              null0: false
+              vpn: 10
+              nat: "NAT64"
+          gre_route:
+            - prefix: "10.0.0.0/8"
+              vpn: 20
+              interface:
+                - "Tunnel0"
+          ipsec_route:
+            - prefix: "172.16.0.0/12"
+              vpn: 30
+              interface:
+                - "Tunnel1"
+          advertise:
+            - protocol: bgp
+              route_policy: "BGP-Export-Policy"
+              protocol_sub_type:
+                - external
+              prefix_list:
+                - prefix_entry: "192.168.50.0/24"
+                  aggregate_only: false
+                  region: core
+                - prefix_entry: "192.168.60.0/24"
+                  aggregate_only: true
+                  region: access
+          ipv6_advertise:
+            - protocol: bgp
+              route_policy: "BGP-IPv6-Export-Policy"
+              protocol_sub_type:
+                - external
+              prefix_list:
+                - prefix_entry: "2001:db8:abcd:0012::/64"
+                  aggregate_only: false
+                  region: core
+                - prefix_entry: "2001:db8:abcd:0034::/64"
+                  aggregate_only: true
+                  region: access
+          pool:
+            - name: "NAT64Pool1"
+              start_address: "203.0.113.1"
+              end_address: "203.0.113.100"
+              overload: true
+              leak_from_global: true
+              leak_from_global_protocol: static
+              leak_to_global: false
+          natpool:
+            - name: 101
+              prefix_length: 24
+              range_start: "192.0.2.1"
+              range_end: "192.0.2.100"
+              overload: 'true'
+              direction: inside
+              tracker_id: 1
+          static:
+            - pool_name: 101
+              source_ip: "198.51.100.5"
+              translate_ip: "203.0.113.5"
+              static_nat_direction: inside
+              tracker_id: 2
+          subnet_static:
+            - source_ip_subnet: "198.51.100.0/24"
+              translate_ip_subnet: "203.0.113.0/24"
+              prefix_length: 24
+              static_nat_direction: inside
+          port_forward:
+            - pool_name: 101
+              source_port: 8080
+              translate_port: 80
+              source_ip: "198.51.100.5"
+              translate_ip: "203.0.113.5"
+              proto: tcp
+          route_import:
+            - protocol: bgp
+              protocol_sub_type: ['external']
+              route_policy: 'import-bgp-routes'
+              redistribute:
+                - protocol: ospf
+                  route_policy: 'ospf-to-bgp'
+          route_import_from:
+            - source_vpn: 10
+              protocol: static
+              protocol_sub_type:
+                - external
+              route_policy: 'import-static-from-vpn10'
+              redistribute:
+                - protocol: eigrp
+                  route_policy: 'eigrp-to-vpn10'
+          route_export:
+            - protocol: bgp
+              protocol_sub_type:
+                - external
+              route_policy: 'export-bgp-routes'
+              redistribute:
+                - protocol: bgp
+                  route_policy: 'static-to-bgp'
+        manager_credentials:
+          <<: *manager_authentication
+
+    - name: 14. Create Comprehensive OMP vSmart Template
+      cisco.catalystwan.feature_templates:
+        state: present
+        template_name: "OMPvSmartConfigTemplate"
+        template_description: "Apply OMP settings for vSmart controller"
+        device_models: "vsmart"
+        omp_vsmart:
+          graceful_restart: true
+          graceful_restart_timer: 120
+          send_path_limit: 100
+          send_backup_paths: true
+          shutdown: false
+          discard_rejected: false
+          eor_timer: 50
+          holdtime: 300
+          affinity_group_preference: true
+          advertisement_interval: 30
+          tloc_color: true
+        manager_credentials:
+          <<: *manager_authentication
+
+    - name: 15. Create Comprehensive Security vSmart Template
+      cisco.catalystwan.feature_templates:
+        state: present
+        template_name: "SecurityvSmartConfigTemplate"
+        template_description: "Apply Security settings for vSmart controller"
+        device_models: vsmart
+        security_vsmart:
+          protocol: dtls
+          tls_port: 120
+        manager_credentials:
+          <<: *manager_authentication
+
+    - name: 16. Create Comprehensive System vSmart Template
+      cisco.catalystwan.feature_templates:
+        state: present
+        template_name: "SystemvSmartConfigTemplate"
+        template_description: "Apply System settings for vSmart controller"
+        device_models: vsmart
+        device_specific_variables:
+          site_id: "side_id_variable"
+          host_name: "host_name_variable"
+          system_ip: "system_ip_variable"
+        system_vsmart:
+          host_name: device_specific_variable
+          site_id: device_specific_variable
+          system_ip: device_specific_variable
+          timezone: UTC
+          idle_timeout: 100
+          admin_tech_on_failure: true
+          iptables_enable: true
+          track_default_gateway: true
+          dns_cache_timeout: 10
+          track_transport: true
+          controller_group_id: 44
+          control_session_pps: 999
+          port_hop: true
+          port_offset: 5
+          overlay_id: 44
+          device_groups: "example1,example2"
+          latitude: "37"
+          longitude: "-122"
+          system_tunnel_mtu: 1024
+          location: "Location"
+          dual_stack_ipv6: true
+          description: "Example description"
+          topology:
+            - "hub-and-spoke"
+          region_list_id: 12
+          management_region: true
+          compatible:
+            - color_1: mpls
+              color_2: metro-ethernet
+          incompatible:
+            - color_1: biz-internet
+              color_2: public-internet
+        manager_credentials:
+          <<: *manager_authentication
+
+    # Example of devices specific variables - this works in Feature Templates, need to check Device Templates
+    - name: Create Cisco Banner Feature Template
+      cisco.catalystwan.feature_templates:
+        state: present
+        template_name: "CiscoBannerConfigTemplateDSV"
+        template_description: "Banner configuration for login and MOTD with DSV"
+        device_specific_variables:
+          login_banner: "var_name_1"
+          motd_banner: "var_name_2"
+        device_models:
+          - "vedge-C8000V"
+        cisco_banner:
+          login_banner: device_specific_variable
+          motd_banner: device_specific_variable
+        manager_credentials:
+          <<: *manager_authentication

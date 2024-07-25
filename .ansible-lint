@@ -24,16 +24,22 @@ mock_modules:
   - cisco.catalystwan.active_sessions_info
   - cisco.catalystwan.administration_settings
   - cisco.catalystwan.alarms
+  - cisco.catalystwan.cli_templates
+  - cisco.catalystwan.device_templates
   - cisco.catalystwan.devices_certificates
   - cisco.catalystwan.devices_controllers
   - cisco.catalystwan.devices_info
   - cisco.catalystwan.devices_wan_edges
+  - cisco.catalystwan.device_templates_recovery
+  - cisco.catalystwan.feature_templates
+  - cisco.catalystwan.feature_templates_info
   - cisco.catalystwan.health_checks
   - cisco.catalystwan.server_info
   - cisco.catalystwan.software_repository
   - cisco.catalystwan.software_repository_info
   - cisco.catalystwan.software_upgrade
   - cisco.catalystwan.software_upgrade_info
+  - cisco.catalystwan.device_templates_info
   - cisco.catalystwan.users
   - cisco.catalystwan.vmanage_mode
   - cisco.catalystwan.wait_for_api_server

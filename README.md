@@ -1,12 +1,16 @@
 # Ansible Collection - cisco.catalystwan
 
-Initial repository for Ansible Collection using catalystwan library.
+## Overview
 
-***NOTE: this repository is still in pre-release dev version**
+Reusable Ansible modules and roles that will help to automate Cisco
+SD-WAN management (post bringup operations, day0, day1).
+
+All modules are based on [catalystwan](https://github.com/CiscoDevNet/catalystwan).
+
+Collection available on Ansible Galaxy: [cisco.catalystwan](https://galaxy.ansible.com/ui/repo/published/cisco/catalystwan/)
 
 ## Table of Contents
 
-- [Overview](#overview)
 - [Roadmap](#roadmap)
 - [Requirements](#requirements)
 - [Installing this collection](#installing-this-collection)
@@ -14,18 +18,6 @@ Initial repository for Ansible Collection using catalystwan library.
 - [Contributing](#contributing)
 - [Useful links and Getting Started](#useful-links-and-getting-started)
 - [License](#license)
-
----
-
-## Overview
-
-Reusable Ansible modules and roles that will help to automate Cisco
-SD-WAN management (post bringup operations, day0, day1).
-
-All modules are based on [catalystwan](https://github.com/CiscoDevNet/catalystwan). Current installation available
-via local Ansible Galaxy collection.
-
-Once finished, repository will be migrated to Cisco Open, and modules will be available via Ansible Galaxy.
 
 ---
 
@@ -73,7 +65,7 @@ Currently development of the tool was set with:
 
 - Python = 3.10.0
 - Ansible = 2.16.6
-- catalystwan = "^0.33.3"
+- catalystwan = "^0.33.6post0"
 
 ## Installing this collection
 
@@ -167,6 +159,14 @@ All of the modules are currently developed and tested with help of .dev_dir play
 These playbooks offer initial config, onboarding and health checks.
 If you want to run example playbook, supply your variables in `.dev_dir/dev_vars.yml`
 and execute playbooks from `.dev_dir/` directory.
+
+### Feature Templates
+
+Feature Templates operations (`add` and `delete`) are supported via `cisco.catalystwan.feature_templates` module.
+
+Available models are dependent on Catalystwan SDK, and they can be seen [here](https://github.com/cisco-open/cisco-catalyst-wan-sdk/blob/main/catalystwan/api/templates/models/supported.py).
+
+For more information about adding new models see [Feature Templates generation](./plugins/README.md#feature-templates).
 
 ---
 

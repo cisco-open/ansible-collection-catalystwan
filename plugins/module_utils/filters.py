@@ -3,7 +3,7 @@
 
 import traceback
 
-from catalystwan.endpoints.configuration_device_inventory import DeviceCategory, DeviceDetailsResponse
+from catalystwan.endpoints.configuration_device_inventory import DeviceDetailsResponse
 from catalystwan.session import ManagerHTTPError
 from catalystwan.typed_list import DataSequence
 
@@ -12,7 +12,7 @@ from ..module_utils.vmanage_module import AnsibleCatalystwanModule
 
 def get_target_device(
     module: AnsibleCatalystwanModule,
-    device_category: DeviceCategory = "controllers",
+    device_category="all",
     all_from_category: bool = False,
 ) -> DataSequence[DeviceDetailsResponse]:
     """
@@ -21,9 +21,18 @@ def get_target_device(
     """
     target_device = None
     try:
-        devices = module.session.endpoints.configuration_device_inventory.get_device_details(
-            device_category=device_category
+        controllers = module.session.endpoints.configuration_device_inventory.get_device_details(
+            device_category="controllers"
         )
+        vedges = module.session.endpoints.configuration_device_inventory.get_device_details(device_category="vedges")
+        all_devices = controllers + vedges
+
+        if device_category == "all":
+            devices = all_devices
+        elif device_category == "controllers":
+            devices = controllers
+        elif device_category == "vedges":
+            devices = vedges
     except ManagerHTTPError as ex:
         module.fail_json(
             msg=f"Could not perform get_device_details action: {str(ex)}", exception=traceback.format_exc()

@@ -1,0 +1,60 @@
+# Copyright 2024 Cisco Systems, Inc. and its affiliates
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+---
+
+# Helper playbooks to test modules and flows while developing them
+
+# Tested operations:
+
+
+- name: Testing playbook to verify cisco.catalystwan.device_templates module operations
+  hosts: localhost
+  gather_facts: false
+  vars_files:
+    - configuration_file_dev_vars.yml
+  vars:
+    manager_authentication: &manager_authentication
+      url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+      username: "{{ (vmanage_instances | first).admin_username }}"
+      password: "{{ (vmanage_instances | first).admin_password }}"
+  tasks:
+    - name: 1. Get all Device Templates that are not attached to any device
+      cisco.catalystwan.device_templates_info:
+        filters:
+          devices_attached: 0
+          factory_default: false
+        manager_credentials:
+          <<: *manager_authentication
+      register: device_templates
+
+    - name: 2. Delete selected Device Templates from vManage
+      cisco.catalystwan.device_templates:
+        state: absent
+        template_name: "{{ device_template.name }}"
+        manager_credentials:
+          <<: *manager_authentication
+      loop: "{{ device_templates.templates_info | default([], True) }}"
+      loop_control:
+        loop_var: device_template
+      when: device_templates.templates_info | length > 0
+
+    - name: 3. Get all Non-Default Feature Templates available
+      cisco.catalystwan.feature_templates_info:
+        filters:
+          factory_default: false
+          devices_attached: 0
+        manager_credentials:
+          <<: *manager_authentication
+      register: feature_templates
+
+    - name: 4. Delete all Non-Default Feature templates
+      cisco.catalystwan.feature_templates:
+        state: absent
+        template_name: "{{ template.name }}"
+        manager_credentials:
+          <<: *manager_authentication
+      loop: "{{ feature_templates.templates_info | default([], true) }}"
+      loop_control:
+        loop_var: template
+        label: "template: {{ template.name }}"

@@ -1,0 +1,76 @@
+# Copyright 2024 Cisco Systems, Inc. and its affiliates
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+---
+
+# Helper playbooks to test modules and flows while developing them
+
+# Tested operations:
+
+# --- Backup & Restore --- #
+
+# 1. Backup running-config for all c8000V devices with default backup dir
+# 2. Using backup files, create CLI templates for each Edge device
+# 3. Attach backup templates to the Edge devices
+# 4. Post-test - Set vManage mode for cEdge devices - in order to use previous templates
+
+
+- name: Testing playbook to verify backup & restore operations
+  hosts: localhost
+  gather_facts: false
+  vars_files:
+    - configuration_file_dev_vars.yml
+  vars:
+    manager_authentication: &manager_authentication
+      url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+      username: "{{ (vmanage_instances | first).admin_username }}"
+      password: "{{ (vmanage_instances | first).admin_password }}"
+  tasks:
+    - name: 1. Backup running-config for all c8000V devices with default backup dir (in CWD)
+      cisco.catalystwan.devices_info:
+        backup: true
+        filters:
+          personality: "vedge"
+        manager_credentials:
+          <<: *manager_authentication
+      register: backup_info
+
+    - name: 2. Using backup files, create CLI templates for each Edge device
+      cisco.catalystwan.cli_templates:
+        state: present
+        template_name: "backup-template-{{ device_item.filename }}"
+        template_description: "Template for {{ device_item.hostname }} created from backup file."
+        config_file: "{{ device_item.backup_path }}"
+        device_model: vedge-C8000V
+        manager_credentials:
+          <<: *manager_authentication
+      loop: "{{ backup_info.backup_paths }}"
+      loop_control:
+        loop_var: device_item
+      when: backup_info.backup_paths | length > 0
+
+    - name: 3. Attach backup templates to the Edge devices
+      cisco.catalystwan.device_templates:
+        state: attached
+        template_name: "backup-template-{{ device_item.filename }}"
+        hostname: "{{ device_item.hostname }}"
+        manager_credentials:
+          <<: *manager_authentication
+      loop: "{{ backup_info.backup_paths }}"
+      loop_control:
+        loop_var: device_item
+      when: backup_info.backup_paths | length > 0
+
+    - name: 4. Post-test - Set vManage mode for cEdge devices - in order to use previous templates
+      cisco.catalystwan.vmanage_mode:
+        state: present
+        hostnames:
+          - "{{ device_item.hostname }}"
+        manager_credentials:
+          <<: *manager_authentication
+      loop: "{{ backup_info.backup_paths }}"
+      loop_control:
+        loop_var: device_item
+      when: backup_info.backup_paths | length > 0
+
+    # Add task to remove all unused templates (not attached)
