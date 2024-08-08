@@ -21,7 +21,7 @@ options:
     suboptions:
       template_type:
         description:
-          - The type of template, eg. "system-vsmart
+          - The type of template, file == cli, template == feature
         required: false
         default: null
         type: str

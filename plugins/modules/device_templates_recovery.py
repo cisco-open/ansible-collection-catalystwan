@@ -36,9 +36,9 @@ options:
     type: dict
     required: false
     suboptions:
-      template_type:
+      config_type:
         description:
-          - The type of template, eg. "system-vsmart
+          - The type of template, file == cli, template == feature
         required: false
         default: null
         type: str

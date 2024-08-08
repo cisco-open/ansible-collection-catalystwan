@@ -21,15 +21,16 @@
     - name: 1. Perform backup of all non factory default Device Templates
       cisco.catalystwan.device_templates_recovery:
         mode: backup
-        backup_dir_path: "/Users/acichon/Work/cisco-open/ansible-collection-catalystwan/templates_export"
+        backup_dir_path: "./templates_export"
         manager_credentials:
           <<: *manager_authentication
 
-    - name: 2. Get all Device Templates that are not attached to any device
+    - name: 2. Get all Device Templates that are not attached to any device and are Feature based
       cisco.catalystwan.device_templates_info:
         filters:
           devices_attached: 0
           factory_default: false
+          config_type: template
         manager_credentials:
           <<: *manager_authentication
       register: device_templates
@@ -68,6 +69,6 @@
     - name: 6. Restore Templates from backup directory
       cisco.catalystwan.device_templates_recovery:
         mode: restore
-        backup_dir_path: "/Users/acichon/Work/cisco-open/ansible-collection-catalystwan/templates_export"
+        backup_dir_path: "./templates_export"
         manager_credentials:
           <<: *manager_authentication
