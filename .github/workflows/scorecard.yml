@@ -23,7 +23,7 @@ jobs:
     permissions:
       id-token: write
       security-events: write
-    secrets: inherit
+    secrets: inherit  # pragma: allowlist secret
     with:
       # Publish results of Scorecard analysis
       publish-results: true

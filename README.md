@@ -5,7 +5,7 @@
 Reusable Ansible modules and roles that will help to automate Cisco
 SD-WAN management (post bringup operations, day0, day1).
 
-All modules are based on [catalystwan](https://github.com/CiscoDevNet/catalystwan).
+All modules are based on [catalystwan](https://github.com/cisco-open/cisco-catalyst-wan-sdk).
 
 Collection available on Ansible Galaxy: [cisco.catalystwan](https://galaxy.ansible.com/ui/repo/published/cisco/catalystwan/)
 
