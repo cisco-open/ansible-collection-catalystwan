@@ -9,11 +9,13 @@ readme = "README.md"
 python = "^3.10"
 ansible-core = "^2.16.6"
 ansible = "^9.4.0"
-catalystwan = "v0.33.8dev7"
+catalystwan = "v0.34.0dev2"
 flake8 = "^5.0.4"
-black = "^23.12.1"
+black = "^24.3.0"
 pre-commit = "3.7"
 pydantic = "2.7"
+requests = "2.32.2"
+urllib3 = "2.2.2"
 ansible-lint = { version = "6.22.2", markers = "platform_system != 'Windows'" }
 
 [tool.poetry.group.dev.dependencies]
