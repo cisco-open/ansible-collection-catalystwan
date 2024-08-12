@@ -25,7 +25,7 @@ options:
       certificate_signing:
         description: Defines the certificate signing authority.
         type: str
-        choices: ["cisco"]
+        choices: ["cisco", "manual", "enterprise"]
         default: "cisco"
       email:
         description: Email address to use for the certificate.
@@ -46,6 +46,10 @@ options:
         type: str
         choices: ["1Y", "2Y"]
         default: "1Y"
+  enterprise_root_ca:
+    description: Configuration for enterprise root certificate.
+    type: str
+    aliases: [enterprise_root_certificate]
   org:
     description: Name of the organization.
     type: str
@@ -87,13 +91,13 @@ options:
     suboptions:
       download_timeout:
         description: Download Timeout in minutes, should be in range 60-360.
-        type: int
+        type: str
       activate_timeout:
         description: Activate Timeout in minutes, should be in range 30-180.
-        type: int
-      check_control_pps:
-        description: Check Control PPS, should be in range 300-65535.
-        type: int
+        type: str
+      control_pps:
+        description: Control PPS, should be in range 300-65535.
+        type: str
 author:
   - Arkadiusz Cichon (acichon@cisco.com)
 
@@ -124,6 +128,12 @@ EXAMPLES = r"""
       first_name: "John"
       last_name: "Doe"
       email: "john.doe@example.com"
+    manager_credentials: ...
+
+# Example of using the module to configure the certificate used for enterprise signing
+- name: Configure enterprise root CA
+  cisco.catalystwan.administration_settings:
+    enterprise_root_ca: "-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----\n"
     manager_credentials: ...
 
 # Example of using the module to configure Smart Account credentials
@@ -198,6 +208,7 @@ from typing import get_args
 from catalystwan.endpoints.configuration_settings import (
     Certificate,
     Device,
+    EnterpriseRootCA,
     OnOffMode,
     Organization,
     PnPConnectSync,
@@ -225,7 +236,7 @@ def run_module():
             options=dict(
                 certificate_signing=dict(
                     type="str",
-                    choices=["cisco"],
+                    choices=["cisco", "manual", "enterprise"],
                     default="cisco",
                 ),
                 validity_period=dict(type="str", choices=["1Y", "2Y"], default="1Y"),
@@ -239,6 +250,7 @@ def run_module():
                 email=dict(type="str"),
             ),
         ),
+        enterprise_root_ca=dict(type="str", aliases=["enterprise_root_certificate"]),
         smart_account_credentials=dict(
             type="dict",
             aliases=["smart_account"],
@@ -257,9 +269,9 @@ def run_module():
         software_install_timeout=dict(
             type="dict",
             options=dict(
-                download_timeout=dict(type="int"),
-                activate_timeout=dict(type="int"),
-                check_control_pps=dict(type="int"),
+                download_timeout=dict(type="str"),
+                activate_timeout=dict(type="str"),
+                control_pps=dict(type="str"),
             ),
         ),
     )
@@ -270,6 +282,7 @@ def run_module():
             (
                 "org",
                 "certificates",
+                "enterprise_root_ca",
                 "smart_account_credentials",
                 "pnp_connect_sync",
                 "validator",
@@ -282,6 +295,7 @@ def run_module():
     modify_vbond = False
     modify_org = False
     modify_certificates = False
+    modify_enterprise_root_ca = False
     modify_smart_account_credentials = False
     modify_pnp_sync = False
     modify_software_install_timeout = False
@@ -289,6 +303,7 @@ def run_module():
     organization_data, org_payload = None, None
     smart_account_payload = None
     certificates_data, certificates_payload = None, None
+    enterprise_ca_payload = None
     pnp_sync_payload, pnp_sync_data = None, None
     software_install_timeout_payload, software_install_timeout_data = None, None
 
@@ -320,6 +335,15 @@ def run_module():
             module.session.endpoints.configuration_settings.get_certificates
         ).single_or_default()
         modify_certificates = True if certificates_data != certificates_payload else False
+
+    if module.params.get("enterprise_root_ca"):
+        enterprise_ca_payload = EnterpriseRootCA(
+            enterprise_root_ca=module.params_without_none_values.get("enterprise_root_ca")
+        )
+        enterprise_ca_data = module.get_response_safely(
+            module.session.endpoints.configuration_settings.get_enterprise_root_ca
+        ).single_or_default()
+        modify_enterprise_root_ca = True if enterprise_ca_data != enterprise_ca_payload else False
 
     if module.params.get("smart_account_credentials"):
         # Always edit smart account credentials if username and password provided
@@ -375,6 +399,15 @@ def run_module():
             send_func=module.session.endpoints.configuration_settings.edit_certificates,
             payload=certificates_payload,
             response_key="certificates",
+        )
+
+    if modify_enterprise_root_ca:
+        module.send_request_safely(
+            result,
+            action_name="Administration Settings: Enterprise Root CA",
+            send_func=module.session.endpoints.configuration_settings.edit_enterprise_root_ca,
+            payload=enterprise_ca_payload,
+            response_key="enterprise_root_ca",
         )
 
     if modify_smart_account_credentials:

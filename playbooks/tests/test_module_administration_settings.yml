@@ -41,10 +41,12 @@
         organization: "{{ organization_name }}"
         certificates:
           retrieve_interval: 2
+          certificate_signing: "manual"
         pnp_connect_sync: "off"
         software_install_timeout:
-          download_timeout: 65
-          activate_timeout: 60
+          download_timeout: "65"
+          activate_timeout: "60"
+          control_pps: "3000"
         manager_authentication:
           url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
           username: "{{ (vmanage_instances | first).admin_username }}"
