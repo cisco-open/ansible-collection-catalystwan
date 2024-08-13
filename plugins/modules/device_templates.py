@@ -18,18 +18,18 @@ options:
       - Desired state for the template.
       - 0(state=present) is equivalent of create template in GUI
     type: str
-    choices: ["absent", "present", "attached"]
+    choices: ["absent", "present", "attached", "detached"]
     default: "present"
   template_name:
     description:
       - The name for the Feature Template.
     type: str
-    required: true
+    default: null
   template_description:
     description:
       - Description for the Feature Template.
     type: str
-    required: true
+    default: null
   device_role:
     description:
       - The device role. Applicable to all devices except 'vManage' and 'vSmart'
@@ -106,6 +106,12 @@ EXAMPLES = r"""
     state: absent
     template_name: "MyDeviceTemplate"
     manager_credentials: ...
+
+- name: Detach device - change configuration mode to CLI
+  cisco.catalystwan.device_templates:
+    state: detached
+    hostname: "device-hostname"
+    manager_credentials: ...
 """
 
 RETURN = r"""
@@ -135,7 +141,7 @@ from catalystwan.typed_list import DataSequence
 from ..module_utils.result import ModuleResult
 from ..module_utils.vmanage_module import AnsibleCatalystwanModule
 
-State = Literal["present", "absent", "attached"]
+State = Literal["present", "absent", "attached", "detached"]
 
 
 def run_module():
@@ -145,7 +151,7 @@ def run_module():
             choices=list(get_args(State)),
             default="present",
         ),
-        template_name=dict(type="str", required=True),
+        template_name=dict(type="str", default=None),
         template_description=dict(type="str", default=None),
         device_type=dict(type="str", aliases=["device_model"], choices=list(get_args(DeviceModel)), default=None),
         device_role=dict(type="str", choices=["sdwan-edge", "service-node"], default="sdwan-edge"),
@@ -188,6 +194,11 @@ def run_module():
                     "template_name",
                     "hostname",
                 ),
+            ),
+            (
+                "state",
+                "detached",
+                ("hostname",),
             ),
         ],
     )
@@ -284,6 +295,22 @@ def run_module():
                 f"Template {template_name} not presend in list of Device Templates on vManage. "
                 "skipping delete template operation."
             )
+
+    if module.params.get("state") == "detached":
+        hostname = module.params.get("hostname")
+        device: DataSequence[Device] = (
+            module.get_response_safely(module.session.api.devices.get).filter(hostname=hostname).single_or_default()
+        )
+        if not device:
+            module.fail_json(f"No devices with hostname found, hostname provided: {hostname}")
+        module.send_request_safely(
+            result,
+            action_name="Detach Template",
+            send_func=module.session.api.templates.deatach,
+            device=device,
+        )
+        result.changed = True
+        result.msg = "Changed configuration mode to CLI"
 
     module.exit_json(**result.model_dump(mode="json"))
 
