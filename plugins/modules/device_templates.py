@@ -110,7 +110,7 @@ EXAMPLES = r"""
 - name: Detach device - change configuration mode to CLI
   cisco.catalystwan.device_templates:
     state: detached
-     hostname: "device-hostname"
+    hostname: "device-hostname"
     manager_credentials: ...
 """
 
