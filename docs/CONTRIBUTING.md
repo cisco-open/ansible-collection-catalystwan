@@ -64,6 +64,6 @@ poetry export --without-hashes --format=requirements.txt > requirements.txt
 
 ## Release process
 
-According to [release workflow inside .github workflows](../.github/workflows/release-from-tag.yml) collection publication to Ansible Galaxy will happen when admin of the repository will push new tag.
+According to [release workflow inside .github workflows](https://github.com/cisco-open/ansible-collection-catalystwan/blob/main/.github/workflows/release-from-tag.yml) collection publication to Ansible Galaxy will happen when admin of the repository will push new tag.
 This tag must much version used in [galaxy.yml](../galaxy.yml) file.
 Release will happen only if desired version was not published on Ansible Galaxy yet.
