@@ -3,6 +3,7 @@
 
 
 import logging
+import time
 import traceback
 from typing import Any, Callable, Dict, Protocol, TypeVar
 
@@ -64,10 +65,11 @@ class AnsibleCatalystwanModule:
         )
     )
 
-    def __init__(self, argument_spec=None, supports_check_mode=False, **kwargs):
+    def __init__(self, argument_spec=None, supports_check_mode=False, session_reconnect_retries=0, **kwargs):
         self.argument_spec = argument_spec
         if self.argument_spec is None:
             self.argument_spec = dict()
+        self.session_reconnect_retries = session_reconnect_retries
 
         self.argument_spec.update(self.common_args)
         self.module = AnsibleModule(argument_spec=self.argument_spec, supports_check_mode=supports_check_mode, **kwargs)
@@ -103,39 +105,50 @@ class AnsibleCatalystwanModule:
 
         return strip_none_values(self.params)
 
+    @staticmethod
+    def get_exception_string(exception) -> str:
+        if hasattr(exception, "message"):
+            return exception.message
+        else:
+            return repr(exception)
+
     @property
     def session(self) -> ManagerSession:
         if self._session is None:
-            try:
-                self._session = create_manager_session(
-                    url=self.module.params["manager_credentials"]["url"],
-                    username=self.module.params["manager_credentials"]["username"],
-                    password=self.module.params["manager_credentials"]["password"],
-                    port=self.module.params["manager_credentials"]["port"],
-                    logger=self._vmanage_logger,
-                )
-            # Avoid catchall exceptions, they are not very useful unless the underlying API
-            # gives very good error messages pertaining the attempted action.
-            except (
-                NewConnectionError,
-                ConnectionError,
-                ManagerRequestException,
-                TimeoutError,
-                UnauthorizedAccessError,
-            ) as exception:
-                manager_url = self.module.params["manager_credentials"]["url"]
-                if hasattr(exception, "message"):
-                    exception_string = exception.message
-                else:
-                    exception_string = repr(exception)
+            reconnect_times = self.session_reconnect_retries
+            manager_url = self.module.params["manager_credentials"]["url"]
+            while True:
+                try:
+                    self._session = create_manager_session(
+                        url=manager_url,
+                        username=self.module.params["manager_credentials"]["username"],
+                        password=self.module.params["manager_credentials"]["password"],
+                        port=self.module.params["manager_credentials"]["port"],
+                        logger=self._vmanage_logger,
+                    )
+                    break
+                # Avoid catchall exceptions, they are not very useful unless the underlying API
+                # gives very good error messages pertaining the attempted action.
+                except (
+                    NewConnectionError,
+                    ConnectionError,
+                    ManagerRequestException,
+                    TimeoutError,
+                    UnauthorizedAccessError,
+                ) as exception:
+                    if reconnect_times:
+                        reconnect_times = reconnect_times - 1
+                        time.sleep(1)
+                        continue
+                    else:
+                        self.module.fail_json(
+                            msg=f"Cannot establish session with Manager: {manager_url}, "
+                            f"exception: {self.get_exception_string(exception)}",
+                            exception=traceback.format_exc(),
+                        )
 
-                self.module.fail_json(
-                    msg=f"Cannot establish session with Manager: {manager_url}, exception: {exception_string}",
-                    exception=traceback.format_exc(),
-                )
-
-            except Exception as exception:
-                self.module.fail_json(msg=f"Unknown exception: {exception}", exception=traceback.format_exc())
+                except Exception as exception:
+                    self.module.fail_json(msg=f"Unknown exception: {exception}", exception=traceback.format_exc())
 
         return self._session
 
@@ -157,7 +170,14 @@ class AnsibleCatalystwanModule:
             )
 
     def send_request_safely(
-        self, result: ModuleResult, action_name: str, send_func: Callable, response_key: str = None, **kwargs: Any
+        self,
+        result: ModuleResult,
+        action_name: str,
+        send_func: Callable,
+        response_key: str = None,
+        num_retries: int = 0,
+        retry_interval_seconds: int = 1,
+        **kwargs: Any,
     ) -> None:
         """
         Simplify process of sending requests to Manager safely. Handle all kind of requests.
@@ -175,11 +195,17 @@ class AnsibleCatalystwanModule:
                     result.response[f"{response_key}"] = response
             result.changed = True
 
-        except ManagerHTTPError as ex:
-            self.fail_json(
-                msg=f"Could not perform '{action_name}' action.\nManager error: {ex.info}",
-                exception=traceback.format_exc(),
-            )
+        except (ManagerHTTPError, ManagerRequestException) as ex:
+            if num_retries:
+                time.sleep(retry_interval_seconds)
+                self.send_request_safely(
+                    result, action_name, send_func, response_key, num_retries - 1, retry_interval_seconds, **kwargs
+                )
+            else:
+                self.fail_json(
+                    msg=f"Could not perform '{action_name}' action.\nManager error: {ex.info}",
+                    exception=traceback.format_exc(),
+                )
 
     def execute_action_safely(
         self,
