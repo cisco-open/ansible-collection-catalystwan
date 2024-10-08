@@ -1,7 +1,7 @@
 Role Name
 =========
 
-This Ansible role facilitates the process adding and editing controllers to cluster for Cisco SD-WAN vManage devices.
+This Ansible role facilitates the process of adding and editing controllers to the cluster for Cisco SD-WAN vManage devices.
 
 Requirements
 ------------
