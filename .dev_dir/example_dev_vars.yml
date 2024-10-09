@@ -38,6 +38,7 @@ vmanage_instances:
   mgmt_public_ip: null
   system_ip: null
   transport_public_ip: null
+  cluster_private_ip: null
 vsmart_instances:
 - admin_password: null
   admin_username: null

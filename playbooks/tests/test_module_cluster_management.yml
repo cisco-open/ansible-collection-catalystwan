@@ -1,0 +1,44 @@
+# Copyright 2024 Cisco Systems, Inc. and its affiliates
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+---
+- name: Testing playbook to verify cisco.catalystwan.cluster
+  hosts: localhost
+  gather_facts: false
+  vars_files:
+    - configuration_file_dev_vars.yml
+  tasks:
+    - name: "Edit cluster IP address for vManage {{ (vmanage_instances | first).hostname }}"
+      cisco.catalystwan.cluster_management:
+        wait_until_configured_seconds: 300
+        vmanage_id: "0"
+        device_ip: "{{ (vmanage_instances | first).cluster_private_ip }}"
+        username: "{{ (vmanage_instances | first).admin_username }}"
+        password: "{{ (vmanage_instances | first).admin_password }}"
+        persona: "{{ (vmanage_instances | first).persona }}"
+        services:
+          sd-avc:
+            server: false
+        manager_authentication:
+          url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+          username: "{{ (vmanage_instances | first).admin_username }}"
+          password: "{{ (vmanage_instances | first).admin_password }}"
+
+    - name: Add remaining instances to cluster
+      cisco.catalystwan.cluster_management:
+        wait_until_configured_seconds: 1800
+        device_ip: "{{ vmanage.cluster_private_ip }}"
+        username: "{{ vmanage.admin_username }}"
+        password: "{{ vmanage.admin_password }}"
+        gen_csr: false
+        persona: "{{ vmanage.persona }}"
+        services:
+          sd-avc:
+            server: false
+        manager_authentication:
+          url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+          username: "{{ (vmanage_instances | first).admin_username }}"
+          password: "{{ (vmanage_instances | first).admin_password }}"
+      loop: "{{ vmanage_instances[1:] }}"
+      loop_control:
+        loop_var: vmanage
