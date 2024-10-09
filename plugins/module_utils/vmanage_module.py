@@ -175,6 +175,7 @@ class AnsibleCatalystwanModule:
         action_name: str,
         send_func: Callable,
         response_key: str = None,
+        fail_on_exception: bool = True,
         num_retries: int = 0,
         retry_interval_seconds: int = 1,
         **kwargs: Any,
@@ -199,9 +200,16 @@ class AnsibleCatalystwanModule:
             if num_retries:
                 time.sleep(retry_interval_seconds)
                 self.send_request_safely(
-                    result, action_name, send_func, response_key, num_retries - 1, retry_interval_seconds, **kwargs
+                    result,
+                    action_name,
+                    send_func,
+                    response_key,
+                    fail_on_exception,
+                    num_retries - 1,
+                    retry_interval_seconds,
+                    **kwargs,
                 )
-            else:
+            elif fail_on_exception:
                 self.fail_json(
                     msg=f"Could not perform '{action_name}' action.\nManager error: {ex.info}",
                     exception=traceback.format_exc(),

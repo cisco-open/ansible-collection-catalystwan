@@ -111,12 +111,28 @@ from ..module_utils.result import ModuleResult
 from ..module_utils.vmanage_module import AnsibleCatalystwanModule
 
 
-def wait_for_connected_device(module, device_ip, timeout) -> Optional[str]:
+def get_connected_devices(module, device_ip):
+    result = ModuleResult()
+    module.send_request_safely(
+        result,
+        action_name=f"Get connected devices for {device_ip}",
+        send_func=module.session.endpoints.cluster_management.get_connected_devices,
+        vmanageIP=device_ip,
+        response_key="connected_devices",
+        fail_on_exception=False,
+    )
+    try:
+        return result.response["connected_devices"]
+    except KeyError:
+        return None
+
+
+def wait_for_connected_devices(module, device_ip, timeout) -> Optional[str]:
     start = time.time()
     while True:
         try:
-            connected_device = module.session.endpoints.cluster_management.get_connected_devices(device_ip)
-            if connected_device:
+            connected_devices = get_connected_devices(module, device_ip)
+            if connected_devices:
                 return None
             if (time.time() - start) > timeout:
                 return f"reached timeout of {timeout}s"
@@ -156,12 +172,11 @@ def run_module():
     vmanage_id = module.params.get("vmanage_id")
     device_ip = module.params.get("device_ip")
 
-    connected_device = module.session.endpoints.cluster_management.get_connected_devices(device_ip)
-    if connected_device:
+    connected_devices = get_connected_devices(module, device_ip)
+    if connected_devices:
         result.changed = False
         result.msg = f"Device {device_ip} already configured"
         module.exit_json(**result.model_dump(mode="json"))
-        return
 
     payload = VManageSetup(
         vmanage_id=vmanage_id,
@@ -195,10 +210,9 @@ def run_module():
     if result.changed:
         wait_until_configured_seconds = module.params.get("wait_until_configured_seconds")
         if wait_until_configured_seconds:
-            error_msg = wait_for_connected_device(module, device_ip, wait_until_configured_seconds)
+            error_msg = wait_for_connected_devices(module, device_ip, wait_until_configured_seconds)
             if error_msg:
                 module.fail_json(msg=f"Error during vManage configuration: {error_msg}")
-                return
         result.msg = "Successfully updated requested vManage configuration."
     else:
         result.msg = "No changes to vManage configuration applied."

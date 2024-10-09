@@ -16,5 +16,6 @@
     quiet: true
   loop:
     - "{{ vmanage_instances }}"
+    - "{{ (vmanage_instances | first).cluster_private_ip }}"
   loop_control:
     loop_var: required_var

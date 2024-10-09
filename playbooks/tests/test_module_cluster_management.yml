@@ -28,8 +28,8 @@
       cisco.catalystwan.cluster_management:
         wait_until_configured_seconds: 1800
         device_ip: "{{ vmanage.cluster_private_ip }}"
-        username: "{{ (vmanage_instances | first).admin_username }}"
-        password: "{{ (vmanage_instances | first).admin_password }}"
+        username: "{{ vmanage.admin_username }}"
+        password: "{{ vmanage.admin_password }}"
         gen_csr: false
         persona: "{{ vmanage.persona }}"
         services:
