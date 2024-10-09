@@ -14,7 +14,7 @@ flake8 = "5.0.4"
 black = "24.3.0"
 pre-commit = "3.7"
 pydantic = "2.7"
-requests = "2.32.2"
+requests = "2.32.3"
 urllib3 = "2.2.2"
 ansible-lint = { version = "6.22.2", markers = "platform_system != 'Windows'" }
 
