@@ -21,7 +21,7 @@
 
 - name: Add vSmart devices
   cisco.catalystwan.devices_controllers:
-    device_ip: "{{ device_item.transport_public_ip }}"
+    device_ip: "{{ device_item.mgmt_public_ip }}"
     username: "{{ device_item.admin_username }}"
     password: "{{ device_item.admin_password }}"
     hostname: "{{ device_item.hostname }}"
@@ -39,7 +39,7 @@
 
 - name: Add vBond devices
   cisco.catalystwan.devices_controllers:
-    device_ip: "{{ device_item.transport_public_ip }}"
+    device_ip: "{{ device_item.mgmt_public_ip }}"
     username: "{{ device_item.admin_username }}"
     password: "{{ device_item.admin_password }}"
     hostname: "{{ device_item.hostname }}"
