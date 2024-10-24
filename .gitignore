@@ -22,3 +22,4 @@ playbooks/tests/response*
 playbooks/tests/backup
 playbooks/tests/templates
 playbooks/tests/templates_export
+.idea

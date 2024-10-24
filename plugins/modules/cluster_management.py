@@ -21,9 +21,13 @@ options:
     description:
       - Optional ID of vManage to edit. Don't set when adding new vManage instances to cluster.
     type: str
-  device_ip:
+  system_ip:
     description:
-      - Added/edited device IP address.
+      - Device system IP address.
+    type: str
+  cluster_ip:
+    description:
+      - Added/edited device cluster IP address.
     type: str
   username:
     description:
@@ -79,7 +83,8 @@ EXAMPLES = r"""
   cisco.catalystwan.cluster_management:
     wait_until_configured_seconds: 300
     vmanage_id: "0"
-    device_ip: "1.1.1.1"
+    system_ip: "100.100.100.100"
+    cluster_ip: "1.1.1.1"
     username: "username"
     password: "password"  # pragma: allowlist secret
     persona: "COMPUTE_AND_DATA"
@@ -91,7 +96,8 @@ EXAMPLES = r"""
 - name: "Add vManage to cluster"
   cisco.catalystwan.cluster_management:
     wait_until_configured_seconds: 300
-    device_ip: "2.2.2.2"
+    system_ip: "100.100.100.100"
+    cluster_ip: "2.2.2.2"
     username: "username"
     password: "password"  # pragma: allowlist secret
     gen_csr: false
@@ -102,9 +108,9 @@ EXAMPLES = r"""
 """
 
 import time
-from typing import Optional
+from typing import List, Optional
 
-from catalystwan.endpoints.cluster_management import VManageSetup
+from catalystwan.endpoints.cluster_management import ConnectedDevice, VManageSetup
 from catalystwan.exceptions import ManagerRequestException
 
 from ..module_utils.result import ModuleResult
@@ -127,12 +133,19 @@ def get_connected_devices(module, device_ip):
         return None
 
 
-def wait_for_connected_devices(module, device_ip, timeout) -> Optional[str]:
+def is_device_connected_to_cluster(module, system_ip, cluster_ip):
+    connected_devices: List[ConnectedDevice] = get_connected_devices(module, cluster_ip)
+    for device in connected_devices:
+        if device["device_id"] == system_ip:
+            return True
+    return False
+
+
+def wait_for_connected_device(module, system_ip, cluster_ip, timeout) -> Optional[str]:
     start = time.time()
     while True:
         try:
-            connected_devices = get_connected_devices(module, device_ip)
-            if connected_devices:
+            if is_device_connected_to_cluster(module, system_ip, cluster_ip):
                 return None
             if (time.time() - start) > timeout:
                 return f"reached timeout of {timeout}s"
@@ -147,7 +160,8 @@ def run_module():
     module_args = dict(
         wait_until_configured_seconds=dict(type="int", default=0),
         vmanage_id=dict(type=str),
-        device_ip=dict(type=str, required=True),
+        system_ip=dict(type=str, required=True),
+        cluster_ip=dict(type=str, required=True),
         username=dict(type=str, required=True),
         password=dict(type=str, no_log=True, required=True),
         gen_csr=dict(type=bool, aliases=["genCSR"]),
@@ -167,20 +181,21 @@ def run_module():
     )
 
     module = AnsibleCatalystwanModule(argument_spec=module_args, session_reconnect_retries=180)
+    module.session.request_timeout = 60
     result = ModuleResult()
 
     vmanage_id = module.params.get("vmanage_id")
-    device_ip = module.params.get("device_ip")
+    system_ip = module.params.get("system_ip")
+    cluster_ip = module.params.get("cluster_ip")
 
-    connected_devices = get_connected_devices(module, device_ip)
-    if connected_devices:
+    if is_device_connected_to_cluster(module, system_ip, cluster_ip):
         result.changed = False
-        result.msg = f"Device {device_ip} already configured"
+        result.msg = f"Device {cluster_ip} already configured"
         module.exit_json(**result.model_dump(mode="json"))
 
     payload = VManageSetup(
         vmanage_id=vmanage_id,
-        device_ip=device_ip,
+        device_ip=cluster_ip,
         username=module.params.get("username"),
         password=module.params.get("password"),
         persona=module.params.get("persona"),
@@ -196,21 +211,18 @@ def run_module():
             response_key="edit_vmanage",
         )
     else:
-        module.session.request_timeout = 60
         module.send_request_safely(
             result,
             action_name="Cluster Management: Add vManage",
             send_func=module.session.endpoints.cluster_management.add_vmanage,
             payload=payload,
             response_key="add_vmanage",
-            num_retries=30,
-            retry_interval_seconds=10,
         )
 
     if result.changed:
         wait_until_configured_seconds = module.params.get("wait_until_configured_seconds")
         if wait_until_configured_seconds:
-            error_msg = wait_for_connected_devices(module, device_ip, wait_until_configured_seconds)
+            error_msg = wait_for_connected_device(module, system_ip, cluster_ip, wait_until_configured_seconds)
             if error_msg:
                 module.fail_json(msg=f"Error during vManage configuration: {error_msg}")
         result.msg = "Successfully updated requested vManage configuration."

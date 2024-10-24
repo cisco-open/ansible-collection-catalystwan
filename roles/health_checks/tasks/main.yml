@@ -13,6 +13,7 @@
       url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
       username: "{{ (vmanage_instances | first).admin_username }}"
       password: "{{ (vmanage_instances | first).admin_password }}"
+  retries: 20
 
 - name: "Health check: orchestrator connections - verifies if all have state up"
   cisco.catalystwan.health_checks:
