@@ -40,3 +40,5 @@
   loop_control:
     loop_var: device_item
     label: "hostname: {{ device_item.hostname }}, device_ip: {{ device_item.system_ip }}"
+  retries: 3
+  delay: 10
