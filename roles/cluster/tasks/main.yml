@@ -20,6 +20,8 @@
       url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
       username: "{{ (vmanage_instances | first).admin_username }}"
       password: "{{ (vmanage_instances | first).admin_password }}"
+  retries: 12
+  delay: 10
 
 - name: Add remaining instances to cluster
   cisco.catalystwan.cluster_management:
@@ -39,5 +41,5 @@
   loop_control:
     loop_var: vmanage
   when: vmanage.cluster_private_ip is defined
-  retries: 180
+  retries: 36
   delay: 10
