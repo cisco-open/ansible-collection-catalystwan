@@ -10,7 +10,8 @@
   cisco.catalystwan.cluster_management:
     wait_until_configured_seconds: 300
     vmanage_id: "0"
-    device_ip: "{{ (vmanage_instances | first).cluster_private_ip }}"
+    system_ip: "{{ (vmanage_instances | first).system_ip }}"
+    cluster_ip: "{{ (vmanage_instances | first).cluster_private_ip }}"
     username: "{{ (vmanage_instances | first).admin_username }}"
     password: "{{ (vmanage_instances | first).admin_password }}"
     persona: "{{ (vmanage_instances | first).persona }}"
@@ -19,11 +20,14 @@
       url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
       username: "{{ (vmanage_instances | first).admin_username }}"
       password: "{{ (vmanage_instances | first).admin_password }}"
+  retries: 12
+  delay: 10
 
 - name: Add remaining instances to cluster
   cisco.catalystwan.cluster_management:
     wait_until_configured_seconds: 1800
-    device_ip: "{{ vmanage.cluster_private_ip }}"
+    system_ip: "{{ vmanage.system_ip }}"
+    cluster_ip: "{{ vmanage.cluster_private_ip }}"
     username: "{{ vmanage.admin_username }}"
     password: "{{ vmanage.admin_password }}"
     gen_csr: false
@@ -37,3 +41,5 @@
   loop_control:
     loop_var: vmanage
   when: vmanage.cluster_private_ip is defined
+  retries: 36
+  delay: 10
