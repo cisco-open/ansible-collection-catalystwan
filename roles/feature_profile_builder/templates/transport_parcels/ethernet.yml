@@ -1,0 +1,150 @@
+config:
+  data:
+    multiRegionFabric:
+      coreRegion:
+        optionType: default
+        value: core-shared
+      enableCoreRegion:
+        optionType: default
+        value: false
+      enableSecondaryRegion:
+        optionType: default
+        value: false
+      secondaryRegion:
+        optionType: default
+        value: secondary-shared
+    shutdown:
+      optionType: global
+      value: false
+    interfaceName:
+      optionType: variable
+      value: "{{ '{{if_name}}' }}"
+    description:
+      optionType: global
+      value: Interface
+    blockNonSourceIp:
+      optionType: default
+      value: false
+    autoDetectBandwidth:
+      optionType: default
+      value: false
+    tunnelInterface:
+      optionType: global
+      value: true
+    tunnel:
+      perTunnelQos:
+        optionType: default
+        value: false
+      color:
+        optionType: global
+        value: mpls
+      restrict:
+        optionType: default
+        value: false
+      group:
+        optionType: default
+      border:
+        optionType: default
+        value: false
+      maxControlConnections:
+        optionType: default
+      vBondAsStunServer:
+        optionType: default
+        value: false
+      excludeControllerGroupList:
+        optionType: default
+      vManageConnectionPreference:
+        optionType: default
+        value: 5
+      portHop:
+        optionType: default
+        value: true
+      lowBandwidthLink:
+        optionType: default
+        value: false
+      tunnelTcpMss:
+        optionType: default
+      clearDontFragment:
+        optionType: default
+        value: false
+      ctsSgtPropagation:
+        optionType: default
+        value: false
+      networkBroadcast:
+        optionType: default
+        value: false
+    allowService:
+      all:
+        optionType: default
+        value: false
+      bgp:
+        optionType: default
+        value: false
+      dhcp:
+        optionType: default
+        value: true
+      ntp:
+        optionType: default
+        value: true
+      ssh:
+        optionType: default
+        value: true
+      dns:
+        optionType: default
+        value: true
+      icmp:
+        optionType: default
+        value: true
+      https:
+        optionType: default
+        value: true
+      ospf:
+        optionType: default
+        value: false
+      stun:
+        optionType: default
+        value: false
+      snmp:
+        optionType: default
+        value: false
+      netconf:
+        optionType: default
+        value: false
+      bfd:
+        optionType: default
+        value: false
+    nat:
+      optionType: default
+      value: false
+    intfIpAddress:
+      dynamic:
+        dynamicDhcpDistance:
+          optionType: default
+          value: 1
+    advanced:
+      ipMtu:
+        optionType: default
+        value: 1500
+      arpTimeout:
+        optionType: default
+        value: 1200
+      loadInterval:
+        optionType: default
+        value: 30
+      ipDirectedBroadcast:
+        optionType: default
+        value: false
+      icmpRedirectDisable:
+        optionType: default
+        value: true
+    encapsulation:
+      - encap:
+          optionType: global
+          value: ipsec
+        weight:
+          optionType: default
+          value: 1
+        preference:
+          optionType: default
+  name: Ethernet_Parcel
+  description: Ethernet Parcel

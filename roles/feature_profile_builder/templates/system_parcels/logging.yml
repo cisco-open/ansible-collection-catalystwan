@@ -1,0 +1,13 @@
+type: logging
+config:
+  name: Logging
+  description: Logging Description
+  data:
+    disk:
+      file:
+        diskFileSize:
+          optionType: default
+          value: 10
+        diskFileRotate:
+          optionType: default
+          value: 10

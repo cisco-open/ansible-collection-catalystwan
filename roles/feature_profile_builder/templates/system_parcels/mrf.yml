@@ -1,0 +1,8 @@
+type: mrf
+config:
+  name: MRF
+  description: Multi Region Fabric Description
+  data:
+    role:
+      optionType: global
+      value: edge-router

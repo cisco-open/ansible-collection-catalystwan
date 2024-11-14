@@ -1,0 +1,73 @@
+type: global
+config:
+  name: Global
+  description: Global Description
+  data:
+    services_global:
+      services_ip:
+        servicesGlobalServicesIpHttpServer:
+          optionType: default
+          value: false
+        servicesGlobalServicesIpHttpsServer:
+          optionType: default
+          value: false
+        servicesGlobalServicesIpFtpPassive:
+          optionType: default
+          value: false
+        servicesGlobalServicesIpDomainLookup:
+          optionType: default
+          value: false
+        servicesGlobalServicesIpArpProxy:
+          optionType: default
+          value: false
+        servicesGlobalServicesIpRcmd:
+          optionType: default
+          value: false
+        servicesGlobalServicesIpLineVty:
+          optionType: default
+          value: false
+        servicesGlobalServicesIpCdp:
+          optionType: default
+          value: true
+        servicesGlobalServicesIpLldp:
+          optionType: default
+          value: true
+        servicesGlobalServicesIpSourceIntrf:
+          optionType: default
+        globalOtherSettingsTcpKeepalivesIn:
+          optionType: default
+          value: true
+        globalOtherSettingsTcpKeepalivesOut:
+          optionType: default
+          value: true
+        globalOtherSettingsTcpSmallServers:
+          optionType: default
+          value: false
+        globalOtherSettingsUdpSmallServers:
+          optionType: default
+          value: false
+        globalOtherSettingsConsoleLogging:
+          optionType: default
+          value: true
+        globalOtherSettingsIPSourceRoute:
+          optionType: default
+          value: false
+        globalOtherSettingsVtyLineLogging:
+          optionType: default
+          value: false
+        globalOtherSettingsSnmpIfindexPersist:
+          optionType: default
+          value: true
+        globalOtherSettingsIgnoreBootp:
+          optionType: default
+          value: true
+        globalSettingsNat64UdpTimeout:
+          optionType: default
+          value: 300
+        globalSettingsNat64TcpTimeout:
+          optionType: default
+          value: 3600
+        globalSettingsHttpAuthentication:
+          optionType: default
+        globalSettingsSSHVersion:
+          optionType: default

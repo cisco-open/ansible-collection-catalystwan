@@ -1,0 +1,11 @@
+type: banner
+config:
+  name: Banner
+  description: Banner Description
+  data:
+    login:
+      optionType: default
+      value: ""
+    motd:
+      optionType: default
+      value: ""

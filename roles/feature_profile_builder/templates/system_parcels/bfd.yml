@@ -1,0 +1,14 @@
+type: bfd
+config:
+  name: BFD
+  description: BFD Description
+  data:
+    pollInterval:
+      optionType: default
+      value: 600000
+    multiplier:
+      optionType: default
+      value: 6
+    defaultDscp:
+      optionType: default
+      value: 48

@@ -1,0 +1,22 @@
+type: ntp
+config:
+  name: NTP
+  description: NTP Description
+  data:
+    server:
+      - name:
+          optionType: global
+          value: time.google.com
+        vpn:
+          optionType: default
+          value: 0
+        version:
+          optionType: default
+          value: 4
+        key:
+          optionType: default
+        sourceInterface:
+          optionType: default
+        prefer:
+          optionType: default
+          value: false

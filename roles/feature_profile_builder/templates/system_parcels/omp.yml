@@ -1,0 +1,91 @@
+type: omp
+config:
+  name: OMP
+  description: OMP Description
+  data:
+    gracefulRestart:
+      optionType: default
+      value: true
+    sendPathLimit:
+      optionType: default
+      value: 4
+    ecmpLimit:
+      optionType: default
+      value: 4
+    advertisementInterval:
+      optionType: default
+      value: 1
+    holdtime:
+      optionType: default
+      value: 60
+    eorTimer:
+      optionType: default
+      value: 300
+    overlayAs:
+      optionType: default
+    shutdown:
+      optionType: default
+      value: false
+    gracefulRestartTimer:
+      optionType: default
+      value: 43200
+    ompAdminDistanceIpv4:
+      optionType: default
+      value: 251
+    ompAdminDistanceIpv6:
+      optionType: default
+      value: 251
+    advertiseIpv4:
+      bgp:
+        optionType: default
+        value: false
+      ospf:
+        optionType: default
+        value: false
+      ospfv3:
+        optionType: default
+        value: false
+      connected:
+        optionType: default
+        value: true
+      static:
+        optionType: default
+        value: true
+      eigrp:
+        optionType: default
+        value: false
+      lisp:
+        optionType: default
+        value: false
+      isis:
+        optionType: default
+        value: false
+    advertiseIpv6:
+      bgp:
+        optionType: default
+        value: false
+      ospf:
+        optionType: default
+        value: false
+      static:
+        optionType: default
+        value: false
+      eigrp:
+        optionType: default
+        value: false
+      connected:
+        optionType: default
+        value: false
+      lisp:
+        optionType: default
+        value: false
+      isis:
+        optionType: default
+        value: false
+    ignoreRegionPathLength:
+      optionType: default
+      value: false
+    transportGateway:
+      optionType: default
+    siteTypesForTransportGateway:
+      optionType: default

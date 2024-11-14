@@ -1,0 +1,76 @@
+type: basic
+config:
+  name: Basic
+  description: Basic Setting Description
+  data:
+    affinityGroupNumber:
+      optionType: default
+    affinityGroupPreference:
+      optionType: default
+    affinityPerVrf:
+      - affinityGroupNumber:
+          optionType: default
+        vrfRange:
+          optionType: default
+    affinityPreferenceAuto:
+      optionType: default
+      value: false
+    siteType:
+      optionType: default
+    clock:
+      timezone:
+        optionType: default
+        value: UTC
+    description:
+      optionType: default
+    location:
+      optionType: default
+    gpsLocation:
+      latitude:
+        optionType: default
+      longitude:
+        optionType: default
+    deviceGroups:
+      optionType: default
+    controllerGroupList:
+      optionType: default
+    overlayId:
+      optionType: default
+      value: 1
+    portOffset:
+      optionType: default
+      value: 0
+    portHop:
+      optionType: default
+      value: true
+    controlSessionPps:
+      optionType: default
+      value: 300
+    trackTransport:
+      optionType: default
+      value: true
+    trackInterfaceTag:
+      optionType: default
+    consoleBaudRate:
+      optionType: default
+      value: '9600'
+    maxOmpSessions:
+      optionType: default
+    multiTenant:
+      optionType: default
+      value: false
+    trackDefaultGateway:
+      optionType: default
+      value: true
+    adminTechOnFailure:
+      optionType: default
+      value: true
+    idleTimeout:
+      optionType: default
+    onDemand:
+      onDemandEnable:
+        optionType: default
+        value: false
+      onDemandIdleTimeout:
+        optionType: default
+        value: 10
