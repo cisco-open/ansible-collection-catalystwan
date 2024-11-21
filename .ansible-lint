@@ -46,6 +46,7 @@ mock_modules:
   - cisco.catalystwan.wait_for_api_server
   - cisco.catalystwan.vmanage_mode
   - cisco.catalystwan.config_groups
+  - cisco.catalystwan.config_group_deployment
   - cisco.catalystwan.feature_profile_builder
 #   - zuul_return
 #   # note the foo.bar is invalid as being neither a module or a collection

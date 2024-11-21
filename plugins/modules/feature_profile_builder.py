@@ -5,6 +5,9 @@
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 import os
+from copy import copy
+from dataclasses import asdict, dataclass
+from typing import Optional
 
 import yaml
 from ansible.module_utils.basic import AnsibleModule
@@ -26,16 +29,85 @@ class TemplateCache:
                 self.module.fail_json(msg=f"File not found {file_path}")
             except IOError as e:
                 self.module.fail_json(msg=f"Error reading file {file_path}: {e}")
-        return self.cache[template]
+        return copy(self.cache[template])
 
 
-def update_template(template, config):
+@dataclass
+class SettableVars:
+    @dataclass
+    class Vars:
+        interface_names: set[str]
+        static_ip_addresses: Optional[set[str]]
+        static_subnets: Optional[set[str]]
+
+    transport: Vars
+    service: Vars
+
+    @classmethod
+    def init(cls):
+        return cls(transport=SettableVars.Vars(set(), None, None), service=SettableVars.Vars(set(), set(), set()))
+
+    def sort(self):
+        def _sort_vars(_vars: SettableVars.Vars):
+            _vars.interface_names = sorted(_vars.interface_names)
+            if _vars.static_ip_addresses:
+                _vars.static_ip_addresses = sorted(_vars.static_ip_addresses)
+            if _vars.static_subnets:
+                _vars.static_subnets = sorted(_vars.static_subnets)
+
+        _sort_vars(self.transport)
+        _sort_vars(self.service)
+        return self
+
+
+SETTABLE_VARS = SettableVars.init()
+
+
+def get_settable_vars_for_profile(profile_type: str) -> SettableVars.Vars:
+    if profile_type == "transport":
+        return SETTABLE_VARS.transport
+    if profile_type == "service":
+        return SETTABLE_VARS.service
+
+
+def update_template(template, config: dict):
     for key, value in config.items():
         if key in template:
             if isinstance(value, dict) and isinstance(template[key], dict):
                 update_template(template[key], value)
             else:
+                if isinstance(value, str) and value.startswith("{"):
+                    value = "{{ '" + value + "' }}"
                 template[key] = value
+
+
+def append_settable_vars(config: dict, profile_type: str):
+    def _helper(_key, _value, _match):
+        try:
+            if _key == _match and isinstance(_value, dict) and _value["optionType"] == "variable":
+                return _value["value"].strip("{ ' }")
+        except ValueError:
+            return None
+
+    _settable_vars = get_settable_vars_for_profile(profile_type)
+    for key, value in config.items():
+        if_name = _helper(key, value, "interfaceName")
+        if if_name:
+            _settable_vars.interface_names.add(if_name)
+            continue
+
+        ip_addr = _helper(key, value, "ipAddress")
+        if ip_addr and (_settable_vars.static_ip_addresses is not None):
+            _settable_vars.static_ip_addresses.add(ip_addr)
+            continue
+
+        subnet = _helper(key, value, "subnetMask")
+        if subnet and (_settable_vars.static_subnets is not None):
+            _settable_vars.static_subnets.add(subnet)
+            continue
+
+        if isinstance(value, dict):
+            append_settable_vars(value, profile_type)
 
 
 def generate_parcel(module: AnsibleModule, cache: TemplateCache, profile_type: str, source: dict):
@@ -45,6 +117,7 @@ def generate_parcel(module: AnsibleModule, cache: TemplateCache, profile_type: s
     template = cache.get(f"{profile_type}_parcels/{source['template']}.yml")
     if "config" in source:
         update_template(template["config"], source["config"])
+    append_settable_vars(template["config"], profile_type)
 
     sub_parcels = []
     if source["template"] == "vpn" and "sub_parcels" in source and len(source["sub_parcels"]):
@@ -93,6 +166,13 @@ def run_module():
     result["data"].update({"system_profiles": generated_system_profiles})
     result["data"].update({"transport_profiles": generated_transport_profiles})
     result["data"].update({"service_profiles": generated_service_profiles})
+    result["data"].update(
+        {
+            "settable_variables": asdict(
+                SETTABLE_VARS.sort(), dict_factory=lambda x: {k: v for (k, v) in x if v is not None}
+            )
+        }
+    )
     module.exit_json(**result)
 
 

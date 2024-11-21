@@ -1089,12 +1089,12 @@ lan_vpn_parcel_4:
 
 ### CONFIG GROUP AND FEATURE PROFILES
 
-default_config_group_name: "ansible-generated-cg"
-default_config_group_description: "Ansible Generated Config Group"
+config_group_name: "ansible-generated-cg"
+config_group_description: "Ansible Generated Config Group"
 
-default_system_profile:
-  name: "{{ default_config_group_name }}_Basic"
-  description: "{{ default_config_group_name }} Basic Profile"
+system_profile:
+  name: "{{ config_group_name }}_Basic"
+  description: "{{ config_group_name }} Basic Profile"
   parcels:
     - "{{ banner_parcel }}"
     - "{{ basic_parcel }}"
@@ -1106,24 +1106,26 @@ default_system_profile:
     - "{{ aaa_parcel }}"
     - "{{ mrf_parcel }}"
 
-default_transport_profile:
-  name: "{{ default_config_group_name }}_WAN"
-  description: "{{ default_config_group_name }} Transport Profile"
+transport_profile:
+  name: "{{ config_group_name }}_WAN"
+  description: "{{ config_group_name }} Transport Profile"
   parcels:
     - "{{ wan_vpn_parcel }}"
 
-default_service_profile:
-  name: "{{ default_config_group_name }}_LAN"
-  description: "{{ default_config_group_name }} Service Profile"
+service_profile:
+  name: "{{ config_group_name }}_LAN"
+  description: "{{ config_group_name }} Service Profile"
   parcels:
     - "{{ lan_vpn_parcel_1 }}"
     - "{{ lan_vpn_parcel_2 }}"
     - "{{ lan_vpn_parcel_3 }}"
     - "{{ lan_vpn_parcel_4 }}"
 
-default_system_profiles:
-  - "{{ default_system_profile }}"
-default_transport_profiles:
-  - "{{ default_transport_profile }}"
-default_service_profiles:
-  - "{{ default_service_profile }}"
+system_profiles:
+  - "{{ system_profile }}"
+transport_profiles:
+  - "{{ transport_profile }}"
+service_profiles:
+  - "{{ service_profile }}"
+
+pseudo_commit_timer: 300

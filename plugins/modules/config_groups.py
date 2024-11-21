@@ -164,7 +164,7 @@ def create_profile(module, profile, profile_type):
 
 def run_module():
     module_args = dict(
-        name=dict(type=str, required=True, default=None),
+        name=dict(type=str, required=True),
         description=dict(type=str),
         system_profiles=dict(type=list),
         transport_profiles=dict(type=list),

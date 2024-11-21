@@ -5,8 +5,10 @@ config:
   data:
     vpnId:
       optionType: default
+      value: 10
     name:
       optionType: default
+      value: name
     ipv4Route: []
     enableSdra:
       optionType: global
