@@ -4,6 +4,84 @@
 # Copyright 2024 Cisco Systems, Inc. and its affiliates
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 
+DOCUMENTATION = r"""
+---
+module: feature_profile_builder
+short_description: Description
+version_added: "0.3.1"
+description: Module for building feature profile data based on parcel templates.
+author:
+  - Przemyslaw Susko (sprzemys@cisco.com)
+"""
+
+RETURN = r"""
+msg:
+  description: Message detailing the outcome of the operation.
+  returned: on failure
+  type: str
+system_profiles:
+  description: Generated system feature profiles.
+  returned: on success
+  type: str
+transport_profiles:
+  description: Generated transport feature profiles.
+  returned: on success
+  type: str
+service_profiles:
+  description: Generated service feature profiles.
+  returned: on success
+  type: str
+settable_variables:
+  description: A list of settable variables for created feature profiles grouped by profile type, i.e.:
+    settable_variables:
+      service:
+        interface_names:
+        - vpn_10_if_0
+        static_ip_addresses:
+        - vpn_10_if_0_static_ipaddr
+        static_subnets:
+        - vpn_10_if_0_static_subnet
+      transport:
+        interface_names:
+        - vpn_0_transport_if
+  returned: on success
+  type: str
+"""
+
+EXAMPLES = r"""
+- name: "Generate config group data from template"
+  cisco.catalystwan.feature_profile_builder:
+    templates_path: "/path/to/parcel/templates"
+    system_profiles:
+      - name: System
+        description: Description
+        parcels:
+          - template: banner
+          - template: basic
+    transport_profiles:
+      - name: Transport
+        description: Description
+        parcels:
+          wan_vpn_parcel:
+            template: vpn
+            config:
+              name: OverridenName
+            sub_parcels:
+              - wan_interface_ethernet_parcel_1:
+                template: ethernet
+                config:
+                    data:
+                      interfaceName:
+                        optionType: default
+    service_profiles:
+      - name: Service
+        description: Description
+        parcels:
+        - template: vpn
+          sub_parcels:
+            - template: ethernet
+"""
+
 import os
 from copy import copy
 from dataclasses import asdict, dataclass

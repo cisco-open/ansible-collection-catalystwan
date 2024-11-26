@@ -4,7 +4,7 @@
 ---
 - name: "Generate config group data from template"
   cisco.catalystwan.feature_profile_builder:
-    templates_path: "{{ role_path }}/templates"
+    templates_path: "{{ templates_path }}"
     system_profiles: "{{ system_profiles }}"
     transport_profiles: "{{ transport_profiles }}"
     service_profiles: "{{ service_profiles }}"

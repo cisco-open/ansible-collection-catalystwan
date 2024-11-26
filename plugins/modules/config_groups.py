@@ -30,6 +30,11 @@ changed:
   returned: always
   type: bool
   sample: true
+id:
+  description: ID of created config group.
+  returned: on success
+  type: bool
+  sample: c90cdc29-fbc7-470a-80ad-6c81beb35848
 """
 
 EXAMPLES = r"""

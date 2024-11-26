@@ -4,6 +4,61 @@
 # Copyright 2024 Cisco Systems, Inc. and its affiliates
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 
+DOCUMENTATION = r"""
+---
+module: config_group_deployment
+short_description: Description
+version_added: "0.3.1"
+description: Module for deployment of config groups.
+author:
+  - Przemyslaw Susko (sprzemys@cisco.com)
+extends_documentation_fragment:
+  - cisco.catalystwan.manager_authentication
+"""
+
+RETURN = r"""
+msg:
+  description: Message detailing the outcome of the operation.
+  returned: always
+  type: str
+response:
+  description: Detailed response from the vManage API if applicable.
+  returned: when API call is made
+  type: dict
+changed:
+  description: Whether or not the state was changed.
+  returned: always
+  type: bool
+  sample: true
+"""
+
+EXAMPLES = r"""
+- name: "Deploy config group"
+  cisco.catalystwan.config_group_deployment:
+    config_group_id: c90cdc29-fbc7-470a-80ad-6c81beb35848
+    edge_device_variables:
+      - admin_password: password
+        hostname: cedge-1
+        pseudo_commit_timer: 300
+        site_id: '1001'
+        system_ip: 192.168.101.1
+        uuid: XXX-XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXX1
+        vpn_0_transport_if: GigabitEthernet1
+        vpn_10_if_0: GigabitEthernet2
+        vpn_10_if_0_static_ipaddr: 10.0.0.1
+        vpn_10_if_0_static_subnet: 255.255.255.0
+      - admin_password: Cisco#!@#@ViptelaxDD
+        hostname: sprzemys-cedge-2
+        pseudo_commit_timer: 300
+        site_id: '1002'
+        system_ip: 192.168.102.1
+        uuid: XXX-XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXX2
+        vpn_0_transport_if: GigabitEthernet1
+        vpn_10_if_0: GigabitEthernet2
+        vpn_10_if_0_static_ipaddr: 10.0.0.2
+        vpn_10_if_0_static_subnet: 255.255.255.0
+"""
+
 import traceback
 
 from catalystwan.endpoints.configuration_group import DeviceVariables, VariableData
@@ -64,7 +119,6 @@ def run_module():
         variables_payload.append(generate_payload_for_device(module, device, device_ids))
 
     try:
-        module.module.log(variables_payload.__str__())  # TODO remove
         module.session.api.config_group.associate(config_group_id, device_ids)
         module.session.api.config_group.update_variables(config_group_id, "sdwan", variables_payload)
         response = module.session.api.config_group.deploy(config_group_id, device_ids)

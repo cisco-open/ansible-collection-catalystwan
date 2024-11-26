@@ -6,3 +6,4 @@
 # vars/ are used by the role and not likely to be changed
 
 results_path: "{{ playbook_dir }}/results/generated_feature_profiles.yml"
+templates_path: "{{ role_path }}/templates"
