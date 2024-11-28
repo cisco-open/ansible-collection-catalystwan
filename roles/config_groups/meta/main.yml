@@ -1,0 +1,15 @@
+---
+
+galaxy_info:
+  author: Przemyslaw Susko <sprzemys@cisco.com>
+  description: Create Configuration Groups
+  license: GPL-3.0-or-later
+  min_ansible_version: "2.16.6"
+
+  galaxy_tags:
+    - cisco
+    - sdwan
+    - catalystwan
+    - networking
+
+dependencies: []

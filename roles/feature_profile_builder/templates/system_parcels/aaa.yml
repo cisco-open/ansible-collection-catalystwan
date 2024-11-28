@@ -1,0 +1,31 @@
+type: aaa
+config:
+  name: AAA
+  description: AAA Profile Feature Description
+  data:
+    authenticationGroup:
+      optionType: default
+      value: false
+    accountingGroup:
+      optionType: default
+      value: false
+    serverAuthOrder:
+      optionType: global
+      value:
+        - local
+    authorizationConsole:
+      optionType: default
+      value: false
+    authorizationConfigCommands:
+      optionType: default
+      value: false
+    user:
+      - name:
+          optionType: global
+          value: admin
+        password:
+          optionType: variable
+          value: "{{ '{{admin_password}}' }}"
+        privilege:
+          optionType: default
+          value: '15'

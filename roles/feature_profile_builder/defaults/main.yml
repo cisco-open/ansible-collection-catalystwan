@@ -1,0 +1,231 @@
+### TRANSPORT PARCELS
+
+wan_interface_ethernet_parcel_1:
+  template: ethernet
+  config:
+    data:
+      interfaceName:
+        optionType: variable
+        value: "{{ '{{vpn_0_mpls_if}}' }}"
+      description:
+        optionType: global
+        value: WAN VPN 0 Interface - MPLS
+    name: MPLS
+    description: WAN VPN 0 MPLS Feature
+
+wan_interface_ethernet_parcel_2:
+  template: ethernet
+  config:
+    data:
+      interfaceName:
+        optionType: variable
+        value: "{{ '{{vpn_0_public-internet_if}}' }}"
+      description:
+        optionType: global
+        value: WAN VPN 0 Interface - Internet
+    name: Internet
+    description: WAN VPN 0 Internet Feature
+
+wan_interface_ethernet_parcel_3:
+  template: ethernet
+  config:
+    data:
+      interfaceName:
+        optionType: variable
+        value: "{{ '{{vpn_0_lte_if}}' }}"
+      description:
+        optionType: global
+        value: WAN VPN 0 Interface - LTE
+    name: LTE
+    description: WAN VPN 0 LTE Feature
+
+wan_vpn_parcel:
+  template: vpn
+  config:
+    name: VPN0
+    description: SDWAN Transport Wan Vpn Feature config
+  sub_parcels:
+    - "{{ wan_interface_ethernet_parcel_1 }}"
+    - "{{ wan_interface_ethernet_parcel_2 }}"
+    - "{{ wan_interface_ethernet_parcel_3 }}"
+
+### SERVICE PARCELS
+
+lan_interface_ethernet_parcel_1:
+  template: ethernet
+  config:
+    name: VPN_Payment_Processing_Network_12_Interface
+    description: LAN Interface
+    data:
+      interfaceName:
+        optionType: variable
+        value: "{{ '{{vpn_12_if_0}}' }}"
+      intfIpAddress:
+        static:
+          staticIpV4AddressPrimary:
+            ipAddress:
+              optionType: variable
+              value: "{{ '{{vpn_12_if_0_static_ipaddr}}' }}"
+            subnetMask:
+              optionType: variable
+              value: "{{ '{{vpn_12_if_0_static_subnet}}' }}"
+
+lan_vpn_parcel_1:
+  template: vpn
+  config:
+    name: Payment_Processing_Network
+    description: LAN VPN
+    data:
+      vpnId:
+        optionType: global
+        value: 12
+      name:
+        optionType: global
+        value: Payment Processing Network
+  sub_parcels:
+    - "{{ lan_interface_ethernet_parcel_1 }}"
+
+lan_interface_ethernet_parcel_2:
+  template: ethernet
+  config:
+    name: VPN_Physical_Security_Devices_13_Interface
+    description: LAN Interface
+    data:
+      interfaceName:
+        optionType: variable
+        value: "{{ '{{vpn_13_if_0}}' }}"
+      intfIpAddress:
+        static:
+          staticIpV4AddressPrimary:
+            ipAddress:
+              optionType: variable
+              value: "{{ '{{vpn_13_if_0_static_ipaddr}}' }}"
+            subnetMask:
+              optionType: variable
+              value: "{{ '{{vpn_13_if_0_static_subnet}}' }}"
+
+lan_vpn_parcel_2:
+  template: vpn
+  config:
+    name: Physical_Security_Devices
+    description: LAN VPN
+    data:
+      vpnId:
+        optionType: global
+        value: 13
+      name:
+        optionType: global
+        value: Physical Security Devices
+  sub_parcels:
+    - "{{ lan_interface_ethernet_parcel_2 }}"
+
+lan_interface_ethernet_parcel_3:
+  template: ethernet
+  config:
+    name: VPN_Local_Internet_for_Guests_99_Interface
+    description: LAN Interface
+    data:
+      interfaceName:
+        optionType: variable
+        value: "{{ '{{vpn_99_if_0}}' }}"
+      intfIpAddress:
+        static:
+          staticIpV4AddressPrimary:
+            ipAddress:
+              optionType: variable
+              value: "{{ '{{vpn_99_if_0_static_ipaddr}}' }}"
+            subnetMask:
+              optionType: variable
+              value: "{{ '{{vpn_99_if_0_static_subnet}}' }}"
+
+lan_vpn_parcel_3:
+  template: vpn
+  config:
+    name: Local_Internet_for_Guests
+    description: LAN VPN
+    data:
+      vpnId:
+        optionType: global
+        value: 99
+      name:
+        optionType: global
+        value: Local Internet for Guests
+  sub_parcels:
+    - "{{ lan_interface_ethernet_parcel_3 }}"
+
+lan_interface_ethernet_parcel_4:
+  template: ethernet
+  config:
+    name: VPN_Corporate_Users_10_Interface
+    description: LAN Interface
+    data:
+      interfaceName:
+        optionType: variable
+        value: "{{ '{{vpn_10_if_0}}' }}"
+      intfIpAddress:
+        static:
+          staticIpV4AddressPrimary:
+            ipAddress:
+              optionType: variable
+              value: "{{ '{{vpn_10_if_0_static_ipaddr}}' }}"
+            subnetMask:
+              optionType: variable
+              value: "{{ '{{vpn_10_if_0_static_subnet}}' }}"
+
+lan_vpn_parcel_4:
+  template: vpn
+  config:
+    name: Corporate_Users
+    description: LAN VPN
+    data:
+      vpnId:
+        optionType: global
+        value: 10
+      name:
+        optionType: global
+        value: Corporate Users
+  sub_parcels:
+    - "{{ lan_interface_ethernet_parcel_4 }}"
+
+
+### FEATURE PROFILES
+
+name_prefix: "{{ config_group_name | default('ansible-generated') }}"
+
+system_profile:
+  name: "{{ name_prefix }}_Basic"
+  description: "{{ name_prefix }} Basic Profile"
+  parcels:
+    - template: banner
+    - template: basic
+    - template: bfd
+    - template: omp
+    - template: logging
+    - template: ntp
+    - template: global
+    - template: aaa
+    - template: mrf
+
+transport_profile:
+  name: "{{ name_prefix }}_WAN"
+  description: "{{ name_prefix }} Transport Profile"
+  parcels:
+    - "{{ wan_vpn_parcel }}"
+
+service_profile:
+  name: "{{ name_prefix }}_LAN"
+  description: "{{ name_prefix }} Service Profile"
+  parcels:
+    - "{{ lan_vpn_parcel_1 }}"
+    - "{{ lan_vpn_parcel_2 }}"
+    - "{{ lan_vpn_parcel_3 }}"
+    - "{{ lan_vpn_parcel_4 }}"
+
+system_profiles:
+  - "{{ system_profile }}"
+
+transport_profiles:
+  - "{{ transport_profile }}"
+
+service_profiles:
+  - "{{ service_profile }}"

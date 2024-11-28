@@ -1,0 +1,46 @@
+# Copyright 2024 Cisco Systems, Inc. and its affiliates
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+---
+- name: Set device_vars fact
+  ansible.builtin.set_fact:
+    device_vars: '{{ device | ansible.utils.remove_keys(target=[''admin_username'', ''mgmt_public_ip'', ''transport_public_ip'', ''service_interfaces'']) }}'
+
+- name: Set transport interface names
+  ansible.builtin.set_fact:
+    device_vars: "{{ device_vars | combine({ item: 'GigabitEthernet' ~ (index + 1) | string }) }}"
+  loop_control:
+    index_var: index
+  loop: "{{ settable_variables.transport.interface_names }}"
+
+- name: Set service interface names
+  ansible.builtin.set_fact:
+    device_vars: "{{ device_vars | combine({ item: 'GigabitEthernet' ~ device.service_interfaces[index].index }) }}"
+  loop_control:
+    index_var: index
+  loop: "{{ settable_variables.service.interface_names }}"
+
+- name: Set service static IP addresses
+  ansible.builtin.set_fact:
+    device_vars: "{{ device_vars | combine({key: device.service_interfaces[index].addr}) }}"
+  vars:
+    key: "{{ item }}"
+  loop: "{{ settable_variables.service.static_ip_addresses }}"
+  loop_control:
+    index_var: index
+
+- name: Set service static subnets
+  ansible.builtin.set_fact:
+    device_vars: "{{ device_vars | combine({key: value}) }}"
+  vars:
+    key: "{{ item }}"
+    value: "255.255.255.0"
+  loop: "{{ settable_variables.service.static_subnets }}"
+
+- name: Set remaining variables
+  ansible.builtin.set_fact:
+    device_vars: "{{ device_vars | combine({'pseudo_commit_timer': pseudo_commit_timer}) }}"
+
+- name: Append to edge_device_variables
+  ansible.builtin.set_fact:
+    edge_device_variables: "{{ edge_device_variables + [device_vars] }}"

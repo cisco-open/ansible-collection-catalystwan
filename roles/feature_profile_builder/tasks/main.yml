@@ -1,0 +1,21 @@
+# Copyright 2024 Cisco Systems, Inc. and its affiliates
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+---
+- name: "Generate config group data from template"
+  cisco.catalystwan.feature_profile_builder:
+    templates_path: "{{ templates_path }}"
+    system_profiles: "{{ system_profiles }}"
+    transport_profiles: "{{ transport_profiles }}"
+    service_profiles: "{{ service_profiles }}"
+  register: generated_feature_profiles
+
+- name: Store generated feature profiles at {{ results_path }}
+  ansible.builtin.blockinfile:
+    create: true
+    state: present
+    mode: "0644"
+    insertafter: EOF
+    dest: "{{ results_path }}"
+    marker: "# {mark} ansible generated data"
+    content: "{{ generated_feature_profiles.data | to_nice_yaml(indent=2) }}"

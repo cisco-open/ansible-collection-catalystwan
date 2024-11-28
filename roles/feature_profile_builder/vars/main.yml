@@ -1,0 +1,9 @@
+# Copyright 2024 Cisco Systems, Inc. and its affiliates
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+---
+
+# vars/ are used by the role and not likely to be changed
+
+results_path: "{{ playbook_dir }}/results/generated_feature_profiles.yml"
+templates_path: "{{ role_path }}/templates"

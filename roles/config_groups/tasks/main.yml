@@ -1,0 +1,59 @@
+# Copyright 2024 Cisco Systems, Inc. and its affiliates
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+---
+- name: Create config group
+  cisco.catalystwan.config_groups:
+    name: "{{ config_group_name }}"
+    description: "{{ config_group_description }}"
+    system_profiles: "{{ system_profiles }}"
+    transport_profiles: "{{ transport_profiles }}"
+    service_profiles: "{{ service_profiles }}"
+    manager_authentication:
+      url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+      username: "{{ (vmanage_instances | first).admin_username }}"
+      password: "{{ (vmanage_instances | first).admin_password }}"
+  register: config_group_result
+
+- name: Set Config Group ID fact
+  ansible.builtin.set_fact:
+    config_group_id: "{{ config_group_result.id }}"
+
+- name: Set facts when edge_device_variables provided
+  ansible.builtin.set_fact:
+    vars_provided: true
+  when: edge_device_variables is defined
+
+- name: Set facts when edge_device_variables not provided
+  ansible.builtin.set_fact:
+    vars_provided: false
+    edge_device_variables: []
+  when: edge_device_variables is not defined
+
+- name: Set values for Config Group Settable Variables
+  ansible.builtin.include_tasks: edge_variables.yml
+  loop: "{{ deployed_edge_instances }}"
+  loop_control:
+    loop_var: device
+  when:
+    - settable_variables is defined
+    - vars_provided is false
+
+- name: Store generated edge device variables at {{ edge_device_variables_path }}
+  ansible.builtin.blockinfile:
+    create: true
+    state: present
+    mode: "0644"
+    insertafter: EOF
+    dest: "{{ edge_device_variables_path }}"
+    marker: "# {mark} ansible generated data"
+    content: "{{ edge_device_variables | to_nice_yaml(indent=2) }}"
+
+- name: Deploy config group
+  cisco.catalystwan.config_group_deployment:
+    config_group_id: "{{ config_group_id }}"
+    edge_device_variables: "{{ edge_device_variables }}"
+    manager_authentication:
+      url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+      username: "{{ (vmanage_instances | first).admin_username }}"
+      password: "{{ (vmanage_instances | first).admin_password }}"

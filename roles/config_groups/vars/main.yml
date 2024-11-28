@@ -1,0 +1,8 @@
+# Copyright 2024 Cisco Systems, Inc. and its affiliates
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+---
+
+# vars/ are used by the role and not likely to be changed
+
+edge_device_variables_path: "{{ playbook_dir }}/results/edge_device_variables.yml"

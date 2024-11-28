@@ -1,0 +1,12 @@
+type: vpn
+config:
+  name: VPN_Parcel
+  description: VPN Parcel
+  data:
+    vpnId:
+      optionType: default
+      value: 0
+    enhanceEcmpKeying:
+      optionType: global
+      value: true
+    ipv4Route: []

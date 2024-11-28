@@ -1,0 +1,41 @@
+type: ethernet
+config:
+  name: Ethernet_Parcel
+  description: Ethernet Parcel
+  data:
+    shutdown:
+      optionType: global
+      value: false
+    interfaceName:
+      optionType: variable
+      value: "{{ '{{if_name}}' }}"
+    description:
+      optionType: default
+    intfIpAddress:
+      static:
+        staticIpV4AddressPrimary:
+          ipAddress:
+            optionType: variable
+            value: "{{ '{{static_ipaddr}}' }}"
+          subnetMask:
+            optionType: variable
+            value: "{{ '{{static_subnet}}' }}"
+    nat:
+      optionType: default
+      value: false
+    advanced:
+      ipMtu:
+        optionType: default
+        value: 1500
+      arpTimeout:
+        optionType: default
+        value: 1200
+      loadInterval:
+        optionType: default
+        value: 30
+      ipDirectedBroadcast:
+        optionType: default
+        value: false
+      icmpRedirectDisable:
+        optionType: default
+        value: true

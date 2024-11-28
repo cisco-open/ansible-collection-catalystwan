@@ -1,0 +1,15 @@
+type: vpn
+config:
+  name: VPN_Parcel
+  description: VPN Parcel
+  data:
+    vpnId:
+      optionType: default
+      value: 10
+    name:
+      optionType: default
+      value: name
+    ipv4Route: []
+    enableSdra:
+      optionType: global
+      value: false
