@@ -1,0 +1,21 @@
+# Copyright 2024 Cisco Systems, Inc. and its affiliates
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+---
+
+- name: Assert that required variables are provided
+  ansible.builtin.assert:
+    that:
+      - required_var
+      - required_var is defined
+      - required_var != None
+      - required_var != "None"
+      - required_var != ""
+      - required_var | length > 0
+    fail_msg: "Your SD-WAN initial config file missing required variable: {{ required_var }}"
+    quiet: true
+  loop:
+    - "{{ vmanage_instances }}"
+    - "{{ min_version_required }}"
+  loop_control:
+    loop_var: required_var
