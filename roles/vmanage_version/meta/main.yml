@@ -1,0 +1,15 @@
+---
+
+galaxy_info:
+  author: Przemyslaw Susko <sprzemys@cisco.com>
+  description: Check if vManage version matches requirements.
+  license: GPL-3.0-or-later
+  min_ansible_version: "0.3.2"
+
+  galaxy_tags:
+    - cisco
+    - sdwan
+    - catalystwan
+    - networking
+
+dependencies: []
