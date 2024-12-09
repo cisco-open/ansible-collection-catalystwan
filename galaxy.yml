@@ -7,10 +7,10 @@ authors:
   - Kamil Górski <kagorski@cisco.com>
 description: Ansible collection to interact with Cisco SD-WAN vManage via catalystwan
 
-repository: https://github.com/cisco-open/ansible-collection-catalystwan
-documentation: https://github.com/cisco-open/ansible-collection-catalystwan/blob/main/README.md
-homepage: https://github.com/cisco-open/ansible-collection-catalystwan
-issues: https://github.com/cisco-open/ansible-collection-catalystwan/issues
+repository: https://github.com/cisco-en-programmability/ansible-collection-catalystwan
+documentation: https://github.com/cisco-en-programmability/ansible-collection-catalystwan/blob/main/README.md
+homepage: https://github.com/cisco-en-programmability/ansible-collection-catalystwan
+issues: https://github.com/cisco-en-programmability/ansible-collection-catalystwan/issues
 
 license:
   - "GPL-3.0-only"
