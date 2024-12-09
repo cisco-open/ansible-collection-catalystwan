@@ -15,7 +15,7 @@ description:
     validator (vBond), certificates, smart account credentials, PnP Connect Sync,
     and organization settings.
   - More settings can be enhanced by reusing
-    https://github.com/cisco-open/cisco-catalyst-wan-sdk/blob/main/catalystwan/api/administration.py
+    https://github.com/cisco-en-programmability/catalystwan-sdk/blob/main/catalystwan/api/administration.py
 options:
   certificates:
     description: Configuration for controller certificate authorization.

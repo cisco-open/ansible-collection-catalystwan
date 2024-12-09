@@ -2,7 +2,7 @@
 
 ---
 
-This document outlines security procedures and general policies for the [cisco.catalystwan](git@github.com:cisco-open/ansible-collection-catalystwan.git) project.
+This document outlines security procedures and general policies for the [cisco.catalystwan](git@github.com:cisco-en-programmability/ansible-collection-catalystwan.git) project.
 
 - [Reporting a Bug](#reporting-a-bug)
 - [Disclosure Policy](#disclosure-policy)
@@ -12,7 +12,7 @@ This document outlines security procedures and general policies for the [cisco.c
 
 ---
 
-The [cisco.catalystwan](git@github.com:cisco-open/ansible-collection-catalystwan.git) team and community take all security bugs in [cisco.catalystwan](git@github.com:cisco-open/ansible-collection-catalystwan.git)seriously. Thank you for improving the security of [cisco.catalystwan](git@github.com:cisco-open/ansible-collection-catalystwan.git). We appreciate your efforts and responsible disclosure and will make every effort to acknowledge your contributions.
+The [cisco.catalystwan](git@github.com:cisco-en-programmability/ansible-collection-catalystwan.git) team and community take all security bugs in [cisco.catalystwan](git@github.com:cisco-en-programmability/ansible-collection-catalystwan.git)seriously. Thank you for improving the security of [cisco.catalystwan](git@github.com:cisco-en-programmability/ansible-collection-catalystwan.git). We appreciate your efforts and responsible disclosure and will make every effort to acknowledge your contributions.
 
 Report security bugs by emailing [ssalemar@cisco.com][Shivram Salem Arunachalam], [acichon@cisco.com][Arkadiusz Cichon] or [sprzemys@cisco.com][Przemyslaw Susko].
 

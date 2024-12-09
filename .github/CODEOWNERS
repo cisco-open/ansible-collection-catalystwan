@@ -5,4 +5,4 @@
 # the following users/teams will be requested for
 # review when someone opens a pull request.
 #
-* @cisco-open/ansible-collection-catalystwan-maintainers
+* @cisco-en-programmability/ansible-collection-catalystwan-maintainers
