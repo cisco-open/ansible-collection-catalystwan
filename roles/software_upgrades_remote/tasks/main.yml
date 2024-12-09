@@ -193,8 +193,8 @@
 - name: "Verify that activated version appears as current version and as default version"
   ansible.builtin.assert:
     that:
-      - "'{{ controller_software_version_to_activate }}' in {{ software_info_vmanage.installed_devices | first }}.current_partition"
-      - "'{{ controller_software_version_to_activate }}' in {{ software_info_vmanage.installed_devices | first }}.default_version"
+      - "controller_software_version_to_activate in (software_info_vmanage.installed_devices | first).current_partition"
+      - "controller_software_version_to_activate in (software_info_vmanage.installed_devices | first).default_version"
     fail_msg: "{{ software_info_vmanage.installed_devices | first | to_nice_yaml }}"
     success_msg: "{{ software_info_vmanage.installed_devices | first | to_nice_yaml }}"
 
@@ -260,8 +260,8 @@
 - name: "Verify that activated version appears as current version and as default version"
   ansible.builtin.assert:
     that:
-      - "'{{ controller_software_version_to_activate }}' in {{ device_item }}.current_partition"
-      - "'{{ controller_software_version_to_activate }}' in {{ device_item }}.default_version"
+      - "controller_software_version_to_activate in device_item.current_partition"
+      - "controller_software_version_to_activate in device_item.default_version"
     fail_msg: "{{ device_item | to_nice_yaml }}"
     success_msg: "{{ device_item | to_nice_yaml }}"
   loop: "{{ software_info_vbond.installed_devices }}"
@@ -329,8 +329,8 @@
 - name: "Verify that activated version appears as current version and as default version"
   ansible.builtin.assert:
     that:
-      - "'{{ controller_software_version_to_activate }}' in {{ device_item }}.current_partition"
-      - "'{{ controller_software_version_to_activate }}' in {{ device_item }}.default_version"
+      - "controller_software_version_to_activate in device_item.current_partition"
+      - "controller_software_version_to_activate in device_item.default_version"
     fail_msg: "{{ device_item | to_nice_yaml }}"
     success_msg: "{{ device_item | to_nice_yaml }}"
   loop: "{{ software_info_vsmart.installed_devices }}"
@@ -397,8 +397,8 @@
 - name: "Verify that activated version appears as current version and as default version"
   ansible.builtin.assert:
     that:
-      - "'{{ edge_software_version_to_activate }}' in {{ device_item }}.current_partition"
-      - "'{{ edge_software_version_to_activate }}' in {{ device_item }}.default_version"
+      - "edge_software_version_to_activate in device_item.current_partition"
+      - "edge_software_version_to_activate in device_item.default_version"
     fail_msg: "{{ device_item | to_nice_yaml }}"
     success_msg: "{{ device_item | to_nice_yaml }}"
   loop: "{{ software_info_cedges.installed_devices }}"
