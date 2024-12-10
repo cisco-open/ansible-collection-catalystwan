@@ -1,0 +1,33 @@
+# Copyright 2024 Cisco Systems, Inc. and its affiliates
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+---
+
+- name: Set manager_authentication fact if needed
+  ansible.builtin.set_fact:
+    manager_authentication:
+      url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+      username: "{{ (vmanage_instances | first).admin_username }}"
+      password: "{{ (vmanage_instances | first).admin_password }}"
+  when: manager_authentication is not defined
+
+- name: Get list of Edge devices
+  cisco.catalystwan.devices_info:
+    device_category: vedges
+    manager_authentication: "{{ manager_authentication }}"
+  register: vedges
+
+- name: Combine cEdge params
+  vars:
+    pair_edge: "{{ vedges.devices | selectattr('host_name', 'equalto', item.hostname) | list | first }}"
+  ansible.builtin.set_fact:
+    updated_edge_instances: "{{ (updated_edge_instances | default([])) +
+      [item | combine({'uuid': pair_edge['uuid']}) | combine({'system_ip': pair_edge['system_ip']}) | combine({'site_id': pair_edge['site_id']})] }}"
+  loop: "{{ deployment_facts.deployed_edge_instances }}"
+  loop_control:
+    loop_var: item
+
+- name: Update deployment facts
+  ansible.builtin.set_fact:
+    deployment_facts:
+      deployed_edge_instances: "{{ updated_edge_instances }}"

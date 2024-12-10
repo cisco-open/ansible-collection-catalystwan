@@ -2,6 +2,14 @@
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 ---
+- name: Set manager_authentication fact if needed
+  ansible.builtin.set_fact:
+    manager_authentication:
+      url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
+      username: "{{ (vmanage_instances | first).admin_username }}"
+      password: "{{ (vmanage_instances | first).admin_password }}"
+  when: manager_authentication is not defined
+
 - name: Create config group
   cisco.catalystwan.config_groups:
     name: "{{ config_group_name }}"
@@ -9,10 +17,7 @@
     system_profiles: "{{ system_profiles }}"
     transport_profiles: "{{ transport_profiles }}"
     service_profiles: "{{ service_profiles }}"
-    manager_authentication:
-      url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
-      username: "{{ (vmanage_instances | first).admin_username }}"
-      password: "{{ (vmanage_instances | first).admin_password }}"
+    manager_authentication: "{{ manager_authentication }}"
   register: config_group_result
 
 - name: Set Config Group ID fact
@@ -53,7 +58,4 @@
   cisco.catalystwan.config_group_deployment:
     config_group_id: "{{ config_group_id }}"
     edge_device_variables: "{{ edge_device_variables }}"
-    manager_authentication:
-      url: "{{ (vmanage_instances | first).mgmt_public_ip }}"
-      username: "{{ (vmanage_instances | first).admin_username }}"
-      password: "{{ (vmanage_instances | first).admin_password }}"
+    manager_authentication: "{{ manager_authentication }}"
