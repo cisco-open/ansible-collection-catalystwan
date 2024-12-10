@@ -16,11 +16,11 @@ First, we recommended reading these if you are not familair with developing modu
 
 ### Solve an issue
 
-See [existing issues](https://github.com/cisco-open/ansible-collection-catalystwan/issues) and feel free to work on any.
+See [existing issues](https://github.com/cisco-en-programmability/ansible-collection-catalystwan/issues) and feel free to work on any.
 
 ### Create a new issue
 
-Firstly [search if an issue already exists](https://github.com/cisco-open/ansible-collection-catalystwan/issues).
+Firstly [search if an issue already exists](https://github.com/cisco-en-programmability/ansible-collection-catalystwan/issues).
 
 If issue related to your problem/feature request doesn't exist, create new issue.
 There are 3 issue types:
@@ -29,7 +29,7 @@ There are 3 issue types:
 - Feature Request
 - Report a security vulnerability
 
-Select one from [issue form](https://github.com/cisco-open/ansible-collection-catalystwan/issues/new/choose).
+Select one from [issue form](https://github.com/cisco-en-programmability/ansible-collection-catalystwan/issues/new/choose).
 
 ### Create PR
 
@@ -64,6 +64,6 @@ poetry export --without-hashes --format=requirements.txt > requirements.txt
 
 ## Release process
 
-According to [release workflow inside .github workflows](https://github.com/cisco-open/ansible-collection-catalystwan/blob/main/.github/workflows/release-from-tag.yml) collection publication to Ansible Galaxy will happen when admin of the repository will push new tag.
+According to [release workflow inside .github workflows](https://github.com/cisco-en-programmability/ansible-collection-catalystwan/blob/main/.github/workflows/release-from-tag.yml) collection publication to Ansible Galaxy will happen when admin of the repository will push new tag.
 This tag must much version used in [galaxy.yml](../galaxy.yml) file.
 Release will happen only if desired version was not published on Ansible Galaxy yet.
