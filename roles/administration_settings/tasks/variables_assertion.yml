@@ -20,6 +20,7 @@
     - "{{ vbond_instances }}"
     - "{{ organization_name }}"
     - "{{ (vbond_instances | first).transport_public_ip }}"
+    - "{{ certificate_signing }}"
   loop_control:
     loop_var: required_var
 

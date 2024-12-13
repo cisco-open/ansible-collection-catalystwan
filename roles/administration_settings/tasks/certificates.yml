@@ -1,0 +1,42 @@
+# Copyright 2024 Cisco Systems, Inc. and its affiliates
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+---
+
+- name: Create directory for generated certificates
+  ansible.builtin.file:
+    state: directory
+    path: "{{ results_dir }}/certificates"
+    mode: "0700"
+
+- name: Generate private key
+  community.crypto.openssl_privatekey:
+    path: "{{ results_dir }}/certificates/generated-ca.pem"
+    mode: "0600"
+
+- name: Generate csr
+  community.crypto.openssl_csr:
+    path: "{{ results_dir }}/certificates/generated-ca.csr"
+    privatekey_path: "{{ results_dir }}/certificates/generated-ca.pem"
+    common_name: "SD-WAN CA"
+    basic_constraints:
+      - 'CA:TRUE'
+    key_usage:
+      - cRLSign
+      - keyCertSign
+    use_common_name_for_san: false
+    mode: "0600"
+
+- name: Generate certificate for enterprise signing
+  community.crypto.x509_certificate:
+    path: "{{ results_dir }}/certificates/generated-ca.crt"
+    privatekey_path: "{{ results_dir }}/certificates/generated-ca.pem"
+    csr_path: "{{ results_dir }}/certificates/generated-ca.csr"
+    provider: selfsigned
+    mode: "0600"
+    return_content: true
+  register: generated_ca_certificate
+
+- name: Read generated certificate
+  ansible.builtin.set_fact:
+    certificate_enterprise_root_ca: "{{ generated_ca_certificate['certificate'] }}"
