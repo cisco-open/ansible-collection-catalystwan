@@ -4,6 +4,7 @@
 import traceback
 
 from catalystwan.endpoints.configuration_device_inventory import DeviceDetailsResponse
+from catalystwan.endpoints.monitoring.device_details import DeviceData
 from catalystwan.session import ManagerHTTPError
 from catalystwan.typed_list import DataSequence
 
@@ -52,8 +53,31 @@ def get_target_device(
     return target_device
 
 
+def get_vedges_details(
+    module: AnsibleCatalystwanModule,
+    deployed_only: bool,
+) -> DataSequence[DeviceDetailsResponse]:
+    vedge_details: DataSequence[
+        DeviceDetailsResponse
+    ] = module.session.endpoints.configuration_device_inventory.get_device_details(device_category="vedges")
+    if not deployed_only:
+        return vedge_details
+
+    deployed_vedges_host_names = []
+    deployed_devices: DataSequence[DeviceData] = module.session.endpoints.monitoring_device_details.list_all_devices()
+    for vedge in deployed_devices.filter(personality="vedge"):
+        deployed_vedges_host_names.append(vedge.host_name)
+
+    deployed_vedge_details = DataSequence(DeviceDetailsResponse, [])
+    for vedge in vedge_details:
+        if vedge.host_name in deployed_vedges_host_names:
+            deployed_vedge_details.append(vedge)
+    return deployed_vedge_details
+
+
 def get_devices_details(
     module: AnsibleCatalystwanModule,
+    deployed_only: bool = False,
 ) -> DataSequence[DeviceDetailsResponse]:
     """
     Returns DataSequence of DeviceDetailsResponse.
@@ -69,7 +93,7 @@ def get_devices_details(
         controllers = module.session.endpoints.configuration_device_inventory.get_device_details(
             device_category="controllers"
         )
-        vedges = module.session.endpoints.configuration_device_inventory.get_device_details(device_category="vedges")
+        vedges = get_vedges_details(module, deployed_only)
         all_devices = controllers + vedges
 
     except ManagerHTTPError as ex:

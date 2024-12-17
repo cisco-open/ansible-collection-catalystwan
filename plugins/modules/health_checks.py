@@ -420,7 +420,7 @@ def run_module():
     module = AnsibleCatalystwanModule(argument_spec=module_args)
     result = ExtendedModuleResult()
 
-    devices: DataSequence[DeviceDetailsResponse] = get_devices_details(module=module)
+    devices: DataSequence[DeviceDetailsResponse] = get_devices_details(module=module, deployed_only=True)
     module.logger.debug(f"Devices to test: {[dev.host_name for dev in devices]}")
     if not devices:
         result.msg = f"Empty devices list based on filter: {module.params.get('filters')}"
